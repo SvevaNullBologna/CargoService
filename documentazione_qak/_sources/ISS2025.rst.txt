@@ -1,0 +1,325 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta       
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp
+
+.. _Akka: https://akka.io/
+.. _Modello computazionale ad attori: https://en.wikipedia.org/wiki/Actor_model
+.. _Akka Actors: https://doc.akka.io//docs/akka/current/typed/guide/actors-motivation.html
+.. _Domain Specific Language: https://www.jetbrains.com/mps/concepts/domain-specific-languages/
+.. _API: https://it.wikipedia.org/wiki/Application_programming_interface
+.. _Metamodellazione: https://it.wikipedia.org/wiki/Metamodellazione
+.. _Ingegneria dei requisiti: https://it.wikipedia.org/wiki/Ingegneria_dei_requisiti#:~:text=L'ingegneria%20dei%20requisiti%20%C3%A8,e%20nell'ingegneria%20del%20software
+
+.. _AWS Lambda: https://aws.amazon.com/it/getting-started/hands-on/run-serverless-code/?pg=gs&sec=lyfa
+.. _FasS: https://it.wikipedia.org/wiki/Function_as_a_service
+.. _AWS Services: https://it.wikipedia.org/wiki/Amazon_Web_Services
+.. _Sito Web del corso : https://www.unibo.it/it/didattica/insegnamenti/insegnamento/2023/468003
+
+.. _Conway Life: https://it.wikipedia.org/wiki/Gioco_della_vita
+.. _Conway Life play: https://playgameoflife.com/
+.. _robot reali: _static/devsDdr.html
+.. _Lectures2025: ../LectureBologna2025.html
+.. _Sprint review : https://www.agileway.it/sprint-review-meeting/
+
+.. _servicemath24Asynch-1.0: ./_static/code/servicemath24Asynch-1.0.zip  
+.. _servicemathAsynch.yaml:  ./_static/code/servicemathAsynch.yaml 
+.. _template: _static/templateToFill.html
+.. _Eclipse IDE for Java and DSL Developers: https://www.eclipse.org/downloads/packages/
+
+.. _Edge computing: https://it.wikipedia.org/wiki/Edge_computing
+.. _Distributed ledger: https://en.wikipedia.org/wiki/Distributed_ledger
+.. _Ingegneria neuromorfica: https://it.wikipedia.org/wiki/Ingegneria_neuromorfica
+
+====================================
+ISS2025
+====================================
+
+
+#. :ref:`Introduzione 2025`
+#. :ref:`Il corso 2025<CorsoISS2025>`
+ 
+
+-------------------------------------------
+Introduzione 2025
+-------------------------------------------
+
+.. vorrei avere una idea nella evoluzione nel processo di produzione del software nel campo informatico  nelle varie 'ere'  che si sono succedute dal 1950 in avanti
+.. vorrei avere una idea nella evoluzione nelle archietture del software nelle varie 'ere informatcihe'  che si sono succedute dal 1950 in avanti
+.. vorrei avere una idea nella evoluzione dei modelli di business nel campo informatico nelle varie 'ere' quali ad esempio era dei :blue:`Mainframe`, era del cloud, era dei sistemi distribuiti, era dell'IOT , era dell'IA, etc
+.. vorrei avere una idea nella evoluzione del concetto di componente software nelle varie 'ere informatcihe'  che si sono succedute dal 1950 in avanti
+
+L'informatica come scienza, sia pura che applicata, ha avuto numerosi promotori e promotrici 
+nel corso della sua storia. Sarebbe impossibile citarli tutti, ma si veda :ref:`History`.
+
+L'evoluzione dell'informatica dal 1950 ad oggi può essere suddivisa in diverse ere, 
+ciascuna caratterizzata da specifici sviluppi tecnologici, cambiamenti nei modelli di business e nuove sfide. 
+
++++++++++++++++++++++++++++++++++++
+Tecnologie e paradigmi software
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 20,40,40
+    :width: 100%
+
+    * - **Era**
+      - **Tecnologia**    
+      - **Paradigmi software**
+
+    * - :blue:`Mainframe` (anni '50 - '70)
+      - Elaborazione centralizzata, batch processing. Valvole termoioniche, transistor.
+      - Subroutine e funzioni, Moduli, Librerie
+
+    * - :blue:`Personal Computer` (anni '80 - '90)    
+      - Elaborazione decentralizzata, interazione utente-macchina. Microprocessori, memoria RAM 
+      - Componenti software "packaged", Oggetti, Componenti COM/DCOM
+
+    * - :blue:`Internet` (anni '90 - 2000)
+      - Connettività globale, applicazioni web. Server, browser, protocolli di rete.
+      - Componenti web, Servizi web, Framework
+    * - :blue:`Cloud Computing` (anni 2000 - oggi)
+      - Elaborazione "on demand", scalabilità. Data center, cloud provider, virtualizzazione.
+      - Microservizi, Container, Funzioni serverless
+    * - :blue:`Sistemi Distribuiti/IoT` (anni 2010 - oggi)
+      - Connessione di dispositivi, raccolta dati, automazione. Dispositivi IoT (sensori, attuatori), gateway
+      - Client-Server, Peer-to-Peer (P2P), Message Passing, Distributed Objects, MapReduce
+
+        Pub/Sub (Publish/Subscribe), Request/Response, Event-Driven, Data Streaming, `Edge Computing`_, Fog Computing
+
+L'era dell'``IoT`` si sovrappone all'era del :blue:`Cloud Computing`, 
+in quanto molte soluzioni ``IoT`` utilizzano infrastrutture cloud per l'elaborazione e l'analisi dei dati.
+ 
++++++++++++++++++++++++++++++++++++
+Componenti e processi software 
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 20,40,40
+    :width: 100%
+
+    * - **Era**
+      - **Componenti	Software**    
+      - **Processi di Produzione del Software**
+
+    * - :blue:`Mainframe` (anni '50 - '70)
+      - Linguaggi di basso livello (assembly), software proprietario    
+      - Sviluppo "artigianale", metodologie "waterfall" 
+
+    * - :blue:`Personal Computer` (anni '80 - '90)    
+      - Software "packaged", linguaggi di alto livello (C, Pascal) 
+      - Metodologie "waterfall", ambienti di sviluppo integrati
+
+    * - :blue:`Internet` (anni '90 - 2000)
+      - Applicazioni web, servizi web, software open source
+      - Metodologie agili (Scrum, XP), controllo di versione
+
+    * - :blue:`Cloud Computing` (anni 2000 - oggi)
+      - Software "as-a-service" (SaaS), microservizi, container
+      - DevOps, Continuous Integration/Continuous Delivery (CI/CD)
+
+    * - :blue:`Sistemi Distribuiti/IoT` (anni 2010 - oggi)
+      - Software "low-code/no-code", componenti IA, applicazioni adattive
+      - Sviluppo di software per dispositivi embedded, integrazione con piattaforme cloud
+
+
+ 
++++++++++++++++++++++++++++++++++++
+Architetture e modelli di business 
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 20,40,40
+    :width: 100%
+
+    * - **Era**
+      - **Architetture Softwaree**    
+      - **Modelli di Business**
+    * - :blue:`Mainframe` (anni '50 - '70)
+      - Centralizzaa    
+      - Vendita di hardware e software, servizi di supporto 
+    * - :blue:`Personal Computer` (anni '80 - '90)    
+      - Client-server 
+      - Vendita di software e hardware, licenze software
+    * - :blue:`Internet` (anni '90 - 2000)
+      - Web (modello a tre livelli), SOA
+      - Pubblicità online, e-commerce, modelli "freemium"
+    * - :blue:`Cloud Computing` (anni 2000 - oggi)
+      - Cloud native, microservizi
+      - Pay-as-you-go, abbonamenti, servizi cloud
+    * - :blue:`Sistemi Distribuiti/IoT` (anni 2010 - oggi)
+      - Architetture distribuite, `Edge computing`_
+      - Servizi basati sui dati, manutenzione predittiva, nuovi ecosistemi
+
+-------------------------------------------
+Tendenze attuali e future
+-------------------------------------------
+  
+:slide3:`Domanda`: Vorrei una tabella con le 'Tendenze attuali e future' relative ai segenti campi della infromatica teorica e applicata: 
+tecnologie di base, paradigmi e linguaggi di programmazione, componenti software, processi di sviluppo del software, 
+architetture software, modelli di business legati al software`
+
+:slidekp:`Chiesto a Gemini 11/Feb/20025`
+
+
+.. list-table::
+    :widths: 20,80
+    :width: 100%
+
+    * - **Campo**
+      - **Tendenza**    
+    * - :blue:`Tecnologie di base`
+      -  
+        - :brown:`Calcolo quantistico`: Sfruttamento dei principi della meccanica quantistica per risolvere problemi 
+          complessi non affrontabili dai computer classici.   
+        - :brown:`Neuromorphic computing`: Ispirato al funzionamento del cervello umano, utilizza hardware specializzato 
+          per eseguire modelli di intelligenza artificiale in modo più efficiente. 
+        - :brown:`Fotoni` Sostituzione degli elettroni con fotoni per una maggiore velocità e minore dispersione di calore.  
+    * - :blue:`Paradigmi e linguaggi`
+      -  
+        -  :brown:`Linguaggi specifici per dominio (DSL)`: Linguaggi specializzati per risolvere problemi in un determinato ambito 
+           (es. finanza, bioinformatica). 
+        - :brown:`Programmazione funzionale`: Paradigma che enfatizza l'utilizzo di funzioni matematiche e l'immutabilità dei dati. 
+        - :brown:`Linguaggi di programmazione visiva`: Sviluppo di software attraverso interfacce grafiche intuitive, 
+          adatte anche a non programmatori.   
+    * - :blue:`Componenti software`
+      -  
+        - :brown:`Componenti IA`: Integrazione di modelli di intelligenza artificiale pre-addestrati in diverse applicazioni. 
+        - :brown:`Componenti adattivi`: Componenti software in grado di modificarsi dinamicamente in base alle esigenze e all'ambiente. 
+        - :brown:`Componenti "low-code/no-code"`: Sviluppo di componenti software senza dover scrivere codice, attraverso piattaforme visuali.   
+
+    * - :blue:`Processi di sviluppo`
+      -  
+        - :brown:`Automazione`: Utilizzo dell’IA per automatizzare attività ripetitive come test, debugging e deployment. 
+        - :brown:`Sviluppo “agile” avanzato`: Metodologie agili sempre più sofisticate, con maggiore attenzione alla collaborazione 
+          e al feedback continuo. 
+        - :brown:`DevSecOps`: Integrazione della sicurezza nel processo di sviluppo del software fin dalle prime fasi.
+
+    * - :blue:`Architetture software`
+      -  
+        - :brown:`Architetture ibride`: Combinazione di risorse on-premise e cloud, richiedendo soluzioni di integrazione complesse. 
+        - :brown:`Architetture adattive`: Sistemi software in grado di modificarsi dinamicamente in base ai cambiamenti dell'ambiente. 
+        - :brown:`Serverless computing`: Esecuzione di codice senza doversi preoccupare della gestione dei server.   
+    * - :blue:`Modelli di business`
+      -  
+        - :brown:`Servizi basati sui dati`: Raccolta, analisi e monetizzazione dei dati per offrire servizi personalizzati. 
+        - :brown:`Nuovi ecosistemi`: Creazione di piattaforme che mettono in contatto diversi attori (es. sviluppatori, utenti, aziende). 
+        - :brown:`Modelli "platform"`: Offrire piattaforme software che consentono a terzi di sviluppare applicazioni e servizi.    
+     
+
+:slidekp:`Chiesto a ChatGpt 11/Feb/20025`
+
+potresti darmi la tabella in un formato rst ``.. list-table``? (colori e formattazione mia)
+
+
+.. list-table:: Tendenze attuali e future nell'informatica
+   :widths: 20 40 40
+   :header-rows: 1
+
+   * - Campo
+     - Tendenze Attuali
+     - Tendenze Future
+   * - :blue:`Tecnologie di base`
+     - - Cloud computing e :brown:`virtualizzazione`
+       - :brown:`Containerizzazione` ed `Edge computing`_
+       - Acceleratori hardware per l’IA (:brown:`GPU, TPU`)
+       - Prime applicazioni di :brown:`blockchain` e `distributed ledger`_
+     - - Maturazione del :brown:`quantum computing`
+       - Sviluppo di  `Ingegneria neuromorfica`_ 
+       - Diffusione pervasiva dell'`Edge computing`_ e :brown:`IoT avanzato`
+       - Integrazione di reti :brown:`5G/6G` per comunicazioni a bassa latenza
+       - Evoluzione di soluzioni di :brown:`sicurezza basate su hardware`
+   * - :blue:`Paradigmi e linguaggi di programmazione`
+     - - Dominio di :brown:`linguaggi multi-paradigma` (Python, JavaScript, Java, C++)
+       - Diffusione di :brown:`paradigmi OOP e funzionale`
+       - Crescente attenzione a linguaggi per la :brown:`concorrenza e la sicurezza` (**Go**, **Rust**)
+     - - Linguaggi nativamente orientati al :brown:`calcolo distribuito` e quantistico
+       - Integrazione di :brown:`strumenti AI` per assistenza alla programmazione e refactoring
+       - Adozione di approcci con :brown:`formal verification` per la sicurezza
+       - :brown:`Sviluppo di DSL` (**domain-specific languages**) per settori specialistici
+   * - :blue:`Componenti software`
+     - - Architetture a :brown:`microservizi` e API-first
+       - Adozione di soluzioni :brown:`serverless e container` (Docker, Kubernetes)
+       - :brown:`Ecosistemi open source` e librerie modulari
+     - - Evoluzione verso micro frontends e :brown:`Function-as-a-Service (FaaS)`
+       - Componenti software basati su :brown:`eventi e architetture reattive`
+       - Adozione di :brown:`piattaforme low-code/no-code` per la composizione automatizzata
+       - Integrazione di :brown:`moduli di machine learning` come “componenti” autonomi
+   * - :blue:`Processi di sviluppo del software`
+     - - Metodologie **Agile** e pratiche  :brown:`DevOps`
+       - Continuous Integration/Continuous Deployment (:brown:`CI/CD`)
+       - Test-driven development (:brown:`TDD`) e automazione dei test
+       - Collaborazione e integrazione di  :brown:`strumenti di monitoraggio`
+     - - :brown:`Utilizzo di AI` per code review, bug detection e generazione di codice
+       - Estensione del concetto di DevOps a :brown:`DevSecOps` (integrazione della sicurezza)
+       - Processi di sviluppo :brown:`adattativi e auto-miglioranti` grazie al **machine learning**
+       - Adozione di :brown:`strumenti di collaborazione` sempre più integrati e basati su **cloud**
+   * - :blue:`Architetture software`
+     - - Diffusione di architetture cloud-native e a :brown:`microservizi`
+       - Soluzioni ibride e :brown:`multi-cloud`
+       - Uso intensivo di :brown:`container e orchestratori`
+       - Architetture orientate ai servizi (:brown:`SOA`)
+     - - Adozione di :brown:`architetture decentralizzate` (**blockchain**, `Edge computing`_)
+       - Sistemi :brown:`self-adaptive e self-healing`
+       - Integrazione più profonda di :brown:`IoT ed ecosistemi distribuiti`
+       - Architetture basate su :brown:`eventi con orchestrazione AI-driven`
+   * - :blue:`Modelli di business legati al software`
+     - - :brown:`SaaS, PaaS` e modelli basati su abbonamento
+       - Approcci :brown:`freemium` e licenze open source
+       - Marketplace e :brown:`piattaforme di distribuzione`
+       - Monetizzazione tramite :brown:`API e servizi aggiuntivi`
+     - - Ecosistemi di :brown:`piattaforme integrate` e soluzioni AI-driven
+       - Modelli di business basati su:brown:`token e blockchain` (decentralized apps)
+       - Billing on-demand e :brown:`microtransazioni`
+       - Nuove :brown:`forme di monetizzazione` basate sui dati e sui servizi in tempo reale
+
+
++++++++++++++++++++++++++++++++++++
+Non solo tendenze 
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 25,75
+    :width: 100%
+
+    * - **Legge di Moore**
+      - 
+        Questa legge, legata, dal 1965, al nome di Gordon Moore, co-fondatore di Intel dice che 
+        il numero di transistor in un microchip raddoppia circa ogni due anni, portando a un 
+        aumento esponenziale della potenza di calcolo e una diminuzione dei costi.
+
+        La Legge ha iniziato a mostrare, negli ultimi anni, segni di rallentamento, in quanto la 
+        miniaturizzazione dei transistor sta raggiungendo limiti fisici. 
+
+
+    * - **Legge di Huang**
+      - 
+        Questa legge, legata al nome di Jensen Huang - CEO di NVIDIA - 
+        è spesso citata come un fattore chiave per la rapida crescita 
+        e i progressi dell'intelligenza artificiale.
+
+        Infatti, le prestazioni delle ``GPU`` (*Unità di Elaborazione Grafica*) per l'intelligenza artificiale raddoppiano ogni anno, 
+        superando di gran lunga il ritmo della Legge di Moore.
+        Bill Dally - Chief Scientist di NVIDIA -  ha dichiarato che in 10 anni è riuscito a migliorare di 1000 volte 
+        le prestazioni di una singola ``GPU``  per l'addestramento di reti neurali. 
+
+    * - **Legge dei ritorni accelerati**
+      -  Questa legge, legata al nome di Ray Kurzweil, futurista e inventore, dice che 
+         il progresso tecnologico avviene a un ritmo esponenziale, e che questo ritmo è in continua accelerazione.
+         
+         La legge è stata utilizzata per prevedere sviluppi 
+         futuri in vari campi, dall'informatica alla medicina, 
+         all'energia. Kurzweil ha anche applicato questa legge per teorizzare la "Singolarità tecnologica", 
+         un punto nel futuro in cui l'intelligenza artificiale supererà quella umana.
+
+:ref:`Il corso 2025<CorsoISS2025>`
+
+.. https://app.wooclap.com/home
+ 

@@ -1,0 +1,1062 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1 
+.. role:: slide2   
+.. role:: slide3   
+.. role:: slidekp
+.. role:: high
+
+.. _conway.html: ../../../../../uniboConway/src/main/resources/conwayJS/conway.html
+.. _conwaycore.js: ../../../../../uniboConway/src/main/resources/conwayJS/conwaycore.js
+.. _conwayio.js: ../../../../../uniboConway/src/main/resources/conwayJS/conwayio.js
+.. _Life.java: ../../../../../uniboConway/src/main/conway/Life.java
+.. _ConwayIO.java: ../../../../../uniboConway/src/main/conway/ConwayIO.java
+
+.. _JavaFX: https://openjfx.io/
+ 
+
+=========================================
+ConwayLife
+=========================================
+
+#. :ref:`Il gioco`
+#. :ref:`Il gioco in pratica`
+#. :ref:`Un progetto concentrato`
+
+   - :ref:`La logica applicativa`
+   - :ref:`Il sottosistema di I/O in JavaScript`
+   - :ref:`Il sottosistema di I/O in JavaFx`
+
+#. :ref:`Conway Life a celle-attori<GLM: introduzione>`
+#. :ref:`Conway Life distribuito<GLM-Sprint9: gamelife distribuito>`
+  
+.. #. :ref:`Un progetto ad attori<Conway Life a celle-attori>`
+.. #. :ref:`Un progetto distribuito<Conway Life distribuito>`
+
+-------------------------------------------
+Il gioco
+-------------------------------------------
+
+
+
+#. Una griglia rettangolare (detta :blue:`mondo`) di caselle quadrate (dette :blue:`celle`) 
+   si estende all'infinito in tutte le direzioni.
+#. Gli stati di tutte le celle in un dato istante sono usati per calcolare lo stato delle 
+   celle all'istante successivo. 
+#. Ogni cella ha 8 celle vicine.
+#. Le celle del mondo vengono  aggiornate simultaneamente nel passaggio (:blue:`generazione`)
+   da un istante a quello successivo  secondo le seguenti :brown:`regole`:
+
+
+Si veda: https://playgameoflife.com/
+
+
++++++++++++++++++++++++
+Le regole del gioco
++++++++++++++++++++++++
+
+- Una cella viva con meno di due celle vive adiacenti muore, per `isolamento`.
+- Una cella viva con due o tre celle vive adiacenti `sopravvive` alla generazione successiva.
+- Una cella viva con più di tre celle vive adiacenti muore, per `sovrappopolazione`.
+- Una cella morta con esattamente tre celle vive adiacenti diventa viva, per `riproduzione`.
+
+-------------------------------------------
+Il gioco in pratica         
+-------------------------------------------
+ 
+
+.. list-table:: 
+  :widths: 70,30
+  :width: 100%
+  
+  * - 
+      #. La griglia ha dimensioni finite. 
+      #. La griglia si può pensare come una matrice di :blue:`RowsNum` righe e :blue:`ColsNum` colonne.
+      #. Oltre a celle con `8` celle vicine, ve ne sono altre con `3`  vicine ed altre con `5` vicine.
+
+    -
+      .. image::  ./_static/img/Conway/griglia.png
+           :align: left 
+           :width: 100%
+
+
+
+-----------------------------------------------------
+Il progetto di una soluzione 
+-----------------------------------------------------
+
+- un sistema software :blue:`concentrato` che definisce a manipola la griglia di Conway come una struttura dati 
+- un sistema software :blue:`distribuito` in cui ciascuna cella è un ente attivo ed autonomo, capace di intergire 
+  con le altre celle solo attraverso scambio di messaggi, in toale assenza di memoria comune.
+
+In ogni caso, il progetto del sistema distingue due macro-parti di codice (sottosistemi):
+
+- il sottosistemi che realizza la logica applicativa;
+- il sottosistemi che realizza la parte di Input/Output.
+
+ 
+=============================================
+Un progetto concentrato
+=============================================
+
+:slide3:`progetto uniboConway`  
+
+Nel seguito presentiamo due esempi di soluzione, una scritta in *JavaScript* (``main.resources.conwayJS``) 
+e una in *Java* (``main.java.conway``).
+
+- il codice che realizza la logica applicativa viene definito in  `conwaycore.js`_ e  `Life.java`_;
+- il codice che realizza la parte di Input/Output viene definito in  `conwayio.js`_ e `ConwayIO.java`_
+
+Vedremo che le due soluzioni sono molto simili per quento riguarda la logica applicativa,
+mentre differiscono sensibilmente per quanto riguarda la parte di Input/Output.
+
+I :slide2:`principi` seguiti nella scrittura del codice sono:
+
+:slide2:`P_1 |` :slidekp:`Il sottosistema di Input non deve realizzare logica applicativa`, ma solo invocare funzioni 
+di livello applicativo.
+
+:slide2:`P_2 |` :slidekp:`Il sottosistema di Output realizza funzioni di utilità` che la logica applicativa ritiene 
+per lei necessarie, **e non viceversa**.
+
+
+---------------------------------------
+La logica applicativa
+---------------------------------------
+
+
+++++++++++++++++++++++++++++
+La struttura
+++++++++++++++++++++++++++++
+
+:slide2:`La parte strutturale`
+consiste nel rappresentare la griglia come un Array di Array di valori 
+:blue:`0` (cella morta)/:blue:`1` (cella viva)`.
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        var rows     = 10;
+        var cols     = 20;
+        var grid     = new Array(rows);
+        var nextGrid = new Array(rows);
+
+    - *Life.java*
+      
+      .. code::
+
+        private int rows = 10;
+        private int cols = 20;
+        private static int[][] grid;
+        private static int[][] nextGrid;
+
+
+La variabile :brown:`nextGrid` viene introdotta per rappresentare il risultato del 
+:ref:`Calcolo della nuova generazione` di celle.
+
+++++++++++++++++++++++++++++++++++++++
+Il funzionamento
+++++++++++++++++++++++++++++++++++++++
+
+:slide2:`La parte del funzionamento` consiste nel :ref:`Calcolo della nuova generazione` di celle,
+che, partendo dallo stato iniziale di :brown:`grid`, procede in due fasi:
+
+#. *Fase1*: per ogni cella della griglia si fa il :ref:`Conteggio delle celle vicine vive`;   
+#. *Fase2*: si applicano :ref:`Le regole del gioco` alle celle, le cui sorti dipendono dal risultato del conteggio.
+
+Questa specifica in linguaggio naturale può essere formalizzata in un linguaggio comprensibile alla macchina 
+introducendo una funzione, qui denominata *computeNextGen*:
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Calcolo della nuova generazione
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La nuova generazione di celle si ottiene costruendo una nuova versione della griglia 
+(:brown:`nextGrid`) mediante la :ref:`Applicazione delle regole del gioco` ad ogni cella della 
+griglia corrente (:brown:`grid`).
+
+Il codice in JavaScript è quasi identico a quello scritto in Java:
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        function computeNextGen() {
+            for (var i = 0; i < rows; i++) {
+                for (var j = 0; j < cols; j++) { 
+                    var n = countNeighborsLive(i,j);
+                    applyRules(i, j, n  ); 
+                }
+            }
+        }    
+
+    - *Life.java*
+      
+      .. code::
+
+        protected void computeNextGen() {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    int n = countNeighborsLive(i,j);
+                    applyRules(i, j, n);
+                }
+            }
+        }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Conteggio delle celle vicine vive
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Il conteggio delle celle vive vicine alla cella di coordinate *row,col* deve guardare alla 
+celle limitrofe. Tenendo conto che *grid* **è di dimensioni finite**, ciò significa guardare:
+
+- sulla riga *row-1* (se esiste), le celle *col-1* (se esiste), *col* e *col+1* (se esiste)
+- sulla riga *row+1* (se esiste) le celle *col-1* (se esiste), *col* e *col+1* (se esiste)
+- la cella di coordinate *row,col-1* (se esiste) e *row,col+1* (se esiste)
+
+Anche ora, il codice in JavaScript è quasi identico a quello scritto in Java:
+
+
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        function countNeighborsLive(row, col) {
+            var count = 0;
+            if (row-1 >= 0) {
+                if (grid[row-1][col] == 1) count++;
+            }
+            if (row-1 >= 0 && col-1 >= 0) {
+                if (grid[row-1][col-1] == 1) count++;
+            }
+            if (row-1 >= 0 && col+1 < cols) {
+                if (grid[row-1][col+1] == 1) count++;
+            }
+            if (col-1 >= 0) {
+                if (grid[row][col-1] == 1) count++;
+            }
+            if (col+1 < cols) {
+                if (grid[row][col+1] == 1) count++;
+            }
+            if (row+1 < rows) {
+                if (grid[row+1][col] == 1) count++;
+            }
+            if (row+1 < rows && col-1 >= 0) {
+                if (grid[row+1][col-1] == 1) count++;
+            }
+            if (row+1 < rows && col+1 < cols) {
+                if (grid[row+1][col+1] == 1) count++;
+            }
+            return count;
+        }
+ 
+
+    - *Life.java*
+      
+      .. code::
+
+        protected int countNeighborsLive(int row, int col) {
+            int count = 0;
+            if (row-1 >= 0) {
+                if (grid[row-1][col] == 1) count++;
+            }
+            if (row-1 >= 0 && col-1 >= 0) {
+                if (grid[row-1][col-1] == 1) count++;
+            }
+            if (row-1 >= 0 && col+1 < cols) {
+                if (grid[row-1][col+1] == 1) count++;
+            }
+            if (col-1 >= 0) {
+                if (grid[row][col-1] == 1) count++;
+            }
+            if (col+1 < cols) {
+                if (grid[row][col+1] == 1) count++;
+            }
+            if (row+1 < rows) {
+                if (grid[row+1][col] == 1) count++;
+            }
+            if (row+1 < rows && col-1 >= 0) {
+                if (grid[row+1][col-1] == 1) count++;
+            }
+            if (row+1 < rows && col+1 < cols) {
+                if (grid[row+1][col+1] == 1) count++;
+            }
+            return count;
+        }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Applicazione delle regole del gioco
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:ref:`Le regole del gioco` vengono realizzate da una funzione (*applyRules*) che decide le sorti di una cella
+di coordinate *row,col* all'interno di :brown:`grid`:
+
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        function applyRules(row, col, numNeighbors) {
+         //CELLA VIVA
+         if (grid[row][col] == 1) {
+          if (numNeighbors < 2) { //muore isolamento
+            nextGrid[row][col] = 0;
+         }else if(numNeighbors==2 || numNeighbors==3){
+            nextGrid[row][col] = 1; //sopravv
+         }else if (numNeighbors > 3) { //muore sovrapp
+            nextGrid[row][col] = 0; 
+         }
+         } 
+         //CELLA MORTA
+         else if (grid[row][col] == 0) {
+            if (numNeighbors == 3) { //riproduzione
+                nextGrid[row][col] = 1; 
+            }
+         }
+        }
+   
+
+    - *Life.java*
+      
+      .. code::
+
+            protected void applyRules(int row,int col,int numNeighbors){
+             //CELLA VIVA
+             if (grid[row][col] == 1) {
+              if (numNeighbors < 2) { //muore isolamento
+                nextGrid[row][col] = 0;
+              }else if(numNeighbors==2 || numNeighbors==3){
+                nextGrid[row][col] = 1; //sopravv
+              }else if (numNeighbors > 3) { //muore sovrapp
+                nextGrid[row][col] = 0;
+              }
+             }
+             //CELLA MORTA
+             else if (grid[row][col] == 0) {
+                if (numNeighbors == 3) { //riproduzione
+                    nextGrid[row][col] = 1;
+                }
+             }
+            }
+
+
+Un volta disponibile la nuova generazione di celle, occorre:
+
+#. Rendere visibile il risultato su un dispositivo di Output
+#. Copiare :brown:`nextgrid` in :brown:`grid` e rieseguire il :ref:`Calcolo della nuova generazione`
+
+La specifica risultante del funzionamento delineato in linguaggio naturale,
+può essere formalizzata da una unica funzione denominata *Play*:
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Play
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        function play() {
+            computeNextGen();
+            copyAndDisplayGrid(); 
+        }  
+    
+    - *Life.java*
+      
+      .. code::
+
+        public void play() {
+            computeNextGen();
+            copyAndDisplayGrid();
+        }
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+copyAndDisplayGrid
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La funzione  *copyAndDisplayGrid*  :
+
+#. copia :brown:`nextgrid` in :brown:`grid`
+#. reinizializza :brown:`nextgrid` 
+#. visualizza ogni cella sul dispositivo di output assumendo l'esistenza di una funzione **setCellColor** realizzata
+   dal Sottosistema di Output
+
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *conwaycore.js*
+
+      .. code::
+
+        function copyAndDisplayGrid() {
+            for (var i = 0; i < rows; i++) {
+                for (var j = 0; j < cols; j++) {
+                    grid[i][j] = nextGrid[i][j];
+                    setCellColor(i,j,grid[i][j])
+                    nextGrid[i][j] = 0;
+                }
+            }
+        }
+
+      La funzione *setCellColor* è definita nel file :blue:`conwayio.js`.
+      Si veda :ref:`Il sottosistema di I/O in JavaScript`.
+    
+    - *Life.java*
+      
+      .. code::
+
+        protected void copyAndDisplayGrid() {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    grid[i][j] = nextGrid[i][j];
+                    outdev.setCellColor(i,j,grid[i][j]);
+                    nextGrid[i][j] = 0;
+                }
+            }
+        }
+
+      La funzione *setCellColor* è definita in un oggetto :brown:`outdev`,
+      istanza di :ref:`La classe ConwayOutput`.
+
+.. di classe :blue:`ConwayOutput` fornito alla classe *Life* mediante iniezione dal configuratore di sistema.
+
+++++++++++++++++++++++++++++++++++++
+Ripetizione di play
+++++++++++++++++++++++++++++++++++++
+
+:slide1:`Ripetizione ciclica:` il gioco consiste nella esecuzione ripetuta della funzione *play*, che 
+viene ottenuta in modi diversi in JavaScript e in Java.
+
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - Sfrutta il meccanismo *setTimeout* in *conwaycore.js*
+
+      .. code::
+
+        function doPlay(){
+            if( playing ){
+                play();
+                timer = setTimeout(doPlay, 500);
+            }
+        }
+
+    - Sfrutta il meccanismo *AnimationTimer* in :ref:`La classe LifeController`  
+  
+      .. code::
+
+        ...
+        AnimationTimer runAnimation = new AnimationTimer() {
+        private long lastUpdate = 0;
+            @Override
+            public void handle(long now) {
+             long dt = TimeUnit.MILLISECONDS.toNanos((long) generationTime);
+             if ((now - lastUpdate) >= dt)) {
+                life.play();
+                lastUpdate = now;
+             }
+             ...
+        }        
+ 
+
+============================================
+Configurazione e attivazione
+============================================
+
+:slide2:`La struttura del software` nel caso di JavaScript è molto diversa da quella di Java. 
+
+- JavaScript permette (o forse promuove) la definzione di un insieme 'piatto' di funzioni che vengono 
+  definite all'interno di una pagina HTML;
+- Java obbliga a definire un ineieme di classi, promuovendo un visione del softwrae più orientata ai sistemi 
+  che non ai semplici algoritmi.
+
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - *JavaScript*
+
+      :ref:`Il codice JavaScript`  realizza il sistema includendo il codice all’interno di una pagina HTML, 
+      visualizzabile con un comune Browser.
+       
+      .. code::
+
+        <html>
+        ...
+            <script src="conwaycore.js"></script>
+            <script src="conwayio.js"></script>  
+        </html>
+     
+    - *Java*
+      
+      :ref:`Il codice Java` realizza il sistema introducendo diverse classi:
+
+      #. :ref:`La classe Life`, responsabile della logica applicativa.
+      #. :ref:`La classe ConwayIO`, che realizza il sottosistema di Input/Output.
+      #. :ref:`La classe ConwayOutput`, che fornisce l'adapter tra la logica applicativa e il sottosistema di Output.
+      #. :ref:`La classe LifeController`, che trasforma l'Input in azioni applicative.
+      #. :ref:`La classe MainConway`, che funge da configuratore del sistema.
+
+
+-------------------------------------------
+Il codice JavaScript
+-------------------------------------------
+JavaScript permette di realizzare il sistema Conway all'interno di una pagina HTML, visualizzabile
+con un comune Browser.
+
+.. list-table:: 
+  :widths: 55,45
+  :width: 100%
+  
+  * - File  `conway.html`_
+  
+      .. code::
+
+        <head>
+            <meta charset = "UTF-8" />
+            <title>The Game of Life</title>
+            <link rel="stylesheet" href="life.css">
+        </head>
+        
+        <body>
+        <!-- sezione di OUTPUT -->
+        <div id="gridContainer">
+        </div>
+        <!-- sezione di INPUT -->
+        <div class="controls">
+            <button id="start"><span>Start</span></button>
+            <button id="clear"><span>Clear</span></button>
+        </div>
+
+        <script src="conwaycore.js"></script>
+        <script src="conwayio.js"></script>  
+        </body>
+
+    -
+      .. image::  ./_static/img/Conway/conwayJs.png
+           :align: left 
+           :width: 100%
+
+      .. image::  ./_static/img/Conway/configForTest.png
+           :align: left 
+           :width: 30%
+
+Il file :blue:`conwaycore.js` contiene:
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * -  la logica applicativa discussa in precedenza:
+    
+       .. code::
+
+            function copyAndResetGrid() { ... }
+            function play() { ... ]
+            function computeNextGen() { ... }
+            function applyRules(row, col, numNeighbors) { ... }
+            function countNeighborsLive(row, col) { ... }
+
+    -  funzioni di utilità:
+      
+       .. code::
+
+            function initializeGrids() { ... }
+            function resetGrids() { ... }
+            function configureTheSystem() { ... }
+            function setCellState{ ... } //cellClickHandler
+
+Il file :blue:`conwayio.js` definisce il sottisistema di I/O e viene descritto in 
+:ref:`Il sottosistema di I/O in JavaScript`.
+
+:slide2:`La configurazione del sistema in JavaScript` viene definita nel file  *conwaycore.js* 
+
+.. code::
+
+    function configureTheSystem() {
+        initializeGrids();   //crea la struttura a griglia
+        resetGrids();        //pone 0 (dead) lo stato di tutte le celle
+        initIO(rows,cols)    //in conwayio.js crea la griglia in HTML e i control buttons
+    }
+
+    function initIO(rows,cols){
+        createHtmlTable(rows,cols);
+        setupControlButtons(rows,cols);
+    }
+
+:slide2:`La attivazione del sistema in JavaScript` viene realizzta da una istruzione posta al termine
+del file  *conwayio.js* 
+
+.. code::
+
+    window.onload = configureTheSystem; 
+
+
+-------------------------------------------
+Il codice Java
+-------------------------------------------
+Il codice Java realizza il sistema introducendo diverse classi
+
+.. image::  ./_static/img/Conway/conwayJavaUMLClassi.png
+    :align: center 
+    :width: 80%
+ 
+
+.. list-table:: 
+  :widths: 55,45
+  :width: 100%
+  
+  * -  
+
+      #. :ref:`La classe Life`, responsabile della logica applicativa.
+      #. :ref:`La classe ConwayIO`, che realizza il sottosistema di Input/Output.
+      #. :ref:`La classe ConwayOutput`, che fornisce l'adapter tra la logica applicativa e il sottosistema di Output.
+      #. :ref:`La classe LifeController`, che trasforma l'Input in azioni applicative.
+      #. :ref:`La classe MainConway`, che funge da configuratore del sistema.
+
+    - 
+      .. image::  ./_static/img/Conway/conwayJava.png
+           :align: left 
+           :width: 100%
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+La classe Life
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. code::
+
+    public class Life {
+        //La struttura
+        private int rows = 10;
+        private int cols = 20;
+        private static int[][] grid;
+        private static int[][] nextGrid;
+        private ConwayOutput outdev;
+
+        public Life( int rowsNum, int colsNum, ConwayOutput outdev ) {
+            this.rows   = rowsNum;
+            this.cols   = colsNum;
+            this.outdev = outdev;
+            initializeGrids();   //crea la struttura a griglia
+            initGrids();         //pone 0 lo stato di tutte le celle
+        }
+
+        protected void  initializeGrids() {
+            grid     = new int[rows][cols];
+            nextGrid = new int[rows][cols];  //???
+        }
+
+        protected void initGrids() {
+         for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                grid[i][j]     = 0;
+                setCellState(   i,   j, false );
+                nextGrid[i][j] = 0;
+            }
+         }
+        }        
+
+        public void play() { ... }
+        protected void computeNextGen() { ... }
+        protected void copyAndDisplayGrid() { ... }
+        protected void applyRules(int row, int col, int numNeighbors) { ... }
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+La classe ConwayOutput
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+La versione Java mostra in modo esplicito che la funzione *setCellColor* è definita da un oggetto
+:brown:`outdev` di classe *ConwayOutput*, che viene fornito alla logica applicativa 
+con un **meccansimo di iniezione alla costruzione** da un configuratore di sistema (in pratica il main
+program definito in :ref:`La classe MainConway`).
+
+
+.. code::
+
+    public class ConwayOutput {
+
+        public void setCellColor( int i, int j, int state ){
+            if( state == 0 ) ConwayIO.cellOff(i,j);
+            else ConwayIO.cellOn(i,j);
+        }
+    }
+
+La classe *ConwayOutput* realizza l'adapter tra la logica applicativa e il sottosistema di Output
+definito, più avanit, in :ref:`La classe ConwayIO`. 
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+La classe LifeController 
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. code::
+
+    public class LifeController {   
+    private int generationTime = 1000;
+    public Button startStop;
+    public Slider slider;
+    private  Life life;
+    
+        public LifeController( Life game){ //,GridPane gameGrid, Button startStop
+            this.startStop = startStop;
+            this.life      = game;
+        }
+
+        public void cellClicked(MouseEvent e) {...}
+        public void startStopClicked(Boolean isStart, Button startStop) { 
+            AnimationTimer runAnimation = new AnimationTimer() {
+            private long lastUpdate = 0;
+                @Override
+                public void handle(long now) {
+                long dt = TimeUnit.MILLISECONDS.toNanos((long) generationTime);
+                if ((now - lastUpdate) >= dt)) {
+                    life.play();
+                    lastUpdate = now;
+                }
+                if( startStop.getText().equals("Start") ){
+                    CommUtils.outred("LifeController | runAnimation STOPPED "  );
+                    this.stop();
+                }
+            }
+        };
+       if( isStart ){
+            runAnimation.start();
+            startStop.setText("Stop");
+        } else {
+            //CommUtils.outred("LifeController | STOPPED "  );
+            startStop.setText("Start");
+        }
+    }
+
+
+
+:slide2:`La configurazione del sistema in Java` viene realizzata da :ref:`La classe MainConway`.
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+La classe MainConway
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Il main della classe Java viene introdotto come specializzazione della classe
+*javafx.application.Application* in quanto si vuole usare `JavaFX`_ come 
+tecnologia di costruzione dei dispositivi virtuali di I/O.
+
+.. code::
+
+    public class MainConway extends Application{
+
+        protected void configureTheSystem(){
+            ConwayOutput outdev = new ConwayOutput();
+            Life life           = new Life(10,20, outdev);
+            LifeController cc   = new LifeController(life);
+            new ConwayIO(life.getRowsNum(), life.getColsNum(), cc);
+        }
+
+        @Override
+        public void start(Stage primaryStage) throws Exception {
+            ConwayIO.setTheStage(primaryStage);  //injection
+            configureTheSystem();
+        }
+
+        public static void main(String[] args) {
+            launch();
+        }
+
+
+
+ 
+
+:slide2:`La attivazione del sistema in Java` viene realizzata invocando il metodo :brown:`launch`
+di *javafx.application.Application*, che pone in esecuzione il metodo :brown:`start`.
+Il sistema Java viene dunque eseguito nel thread *JavaFX Application* e non nel thread *main*.
+
+
+=================================================
+Il sottosistema di I/O in JavaScript
+=================================================
+
+Il codice relativo alla costruzione di dispositivi virtuali di I/O nella pagina HTML,
+parte dalla definizione della sezione di OUTPUT (elemento con *id="gridContainer"*)
+e dei pulsanti di controllo (elemento con *id="start"* e con *id="clear"*).
+
+.. code::
+
+    <!-- sezione di OUTPUT -->
+    <div id="gridContainer">
+    </div>
+    <!-- sezione di INPUT  -->
+    <div class="controls">
+        <button id="start"><span>Start</span></button>
+        <button id="clear"><span>Clear</span></button>
+    </div>
+
+----------------------------------
+La table delle celle 
+----------------------------------
+
+La visualizzazione della *grid* corrente si basa su una tabella (matrice) di una dato numero 
+di righe (*rows*) e colonne (*cols*) che viene costruita dalla funzione che segue:
+
+.. code::
+      
+    function createHtmlTable(rows,cols) {
+        var gridContainer = document.getElementById('gridContainer');
+        if (!gridContainer) {
+            console.error("Problem: No div for the drid table!");
+        }
+        var table = document.createElement("table");
+        for (var i = 0; i < rows; i++) {
+            var tr = document.createElement("tr");
+            for (var j = 0; j < cols; j++) { 
+                var cell = document.createElement("td");
+                cell.setAttribute("id", i + "_" + j);
+                cell.setAttribute("class", "dead");
+                cell.onclick = cellClickHandler;
+                tr.appendChild(cell);
+            }
+            table.appendChild(tr);
+        }
+        gridContainer.appendChild(table);
+    }
+
+La tabella è costruita in modo  che ogni suo elemento *cell* abbia come attributi
+
+- l'attributo *id* di valore *i_j* (per rappresentare le coordinate)
+- l'attributo *class* di valore *dead* (di default) oppure *live*
+- una funzione di controllo-utente (*cellClickHandler*) per permettere all'utente finale di 
+  porre (con un click) la cella nello stato *live* oppure ancora *dead*   
+
+
+----------------------------------
+cellClickHandler
+----------------------------------
+
+L'impostazione strutturale della tabella delle celle, si accompagna alla funzione di controllo-utente che segue:
+
+.. code::
+
+        function cellClickHandler() {
+            var rowcol  = this.id.split("_");  
+            var row     = rowcol[0];
+            var col     = rowcol[1];
+            var classes = this.getAttribute("class");
+            if(classes.indexOf("live") > -1) {
+                this.setAttribute("class", "dead");
+                setCellState(row,col,0)  
+            } else {
+                this.setAttribute("class", "live");
+                setCellState(row,col,1)  
+            }
+        }
+
+La funzione **setCellState** è definita nel file :blue:`conwaycore.js` che protegge la visibilità
+della variabile *grid*
+
+
+----------------------------------
+setCellColor
+----------------------------------
+
+La modifica del colore delle celle della griglia viene esguita da una funzione che 
+il codice della logica applicativa **suppone disponibile**.
+
+
+.. code::
+
+    function setCellColor( i,j,state ){
+        var cell = document.getElementById(i + "_" + j);
+    	if( state == 0 ) cell.setAttribute("class", "dead");
+    	else cell.setAttribute("class", "live");
+    }
+
+----------------------------------
+I pulsanti di controllo
+----------------------------------
+
+I pulsanti che l'utente finale può usare per attivare/sospendere il gioco sono costruiti da
+una funzione che crea elementi cui sono associati opportune funzioni di gestione.
+
+.. code::
+
+    function setupControlButtons(rows,cols) {
+        // button to start
+        var startButton = document.getElementById('start');
+        startButton.onclick = startButtonHandler;
+        // button to clear
+        var clearButton = document.getElementById('clear');
+        clearButton.onclick = clearTheGrid;
+    }
+
+.. list-table:: 
+  :widths: 55,55
+  :width: 100%
+  
+  * - Attivazione/pausa
+
+      .. code::
+
+        function startButtonHandler() {
+            if (isPlaying()) { // in conwaycore.js
+                console.log("Pause the game");
+                playing = false;
+                this.innerHTML = "Continue";
+                clearTimeout(timer);   
+            } else {
+                console.log("Continue the game");
+                playing = true;
+                this.innerHTML = "Pause";
+                doPlay();
+            }
+        }
+
+        function doPlay(){
+            if( playing ){
+                play();
+                timer = setTimeout(doPlay, 500);
+            }
+        }
+
+    - Azzeramento delle celle live sulla griglia di output
+
+      .. code::
+
+        function clearTheGrid() {
+            stopPlaying();     
+            var startButton=document.getElementById('start');
+            startButton.innerHTML="Start";
+            clearTimeout(timer);  //timer in conwaycore.js
+            var cellsList=document.getElementsByClassName("live");
+            var cells = [];
+            for (var i = 0; i < cellsList.length; i++) {
+                cells.push(cellsList[i]);
+            }
+            for (var i = 0; i < cells.length; i++) {
+                cells[i].setAttribute("class", "dead");
+            }
+            resetGrids();  //in conwaycore.js
+        }
+
+
+
+=========================================
+Il sottosistema di I/O in JavaFx
+=========================================
+
+La classe *ConwayIO.java* definisce il sottosistema di I/O realizzato con tecnologia  `JavaFX`_. Essa:
+
+- Riceve un oggetto di classe *javafx.stage.Stage* per injection da parte del metodo start de 
+  :ref:`La classe MainConway`.
+- Crea la scena del gioco che include una matrice di celle rettangolari (OUTPUT) e i pulsanti 
+  Start / Clear di INPUT. Ciascuna cella creata dal metodo *createCells* è associata a un *javafx.event.EventHandler*
+  che invoca il metodo **cellClicked** de :ref:`La classe LifeController` in modo da permettere all'utente 
+  finale di modificare il colore (e quindi lo stato di una cella nella fase iniziale del gioco.
+- Associa ai pulsanti un *javafx.event.EventHandler* che connette un click del pulsante ``Start`` al metodo 
+  **startStopClicked**  de :ref:`La classe LifeController` e un click del pulsante ``Clear``
+  al metodo  **clearTheCells**  de :ref:`La classe LifeController`.
+- Definisce i metodi cellOn/cellOff per permettere alla classe Life (attraverso :ref:`La classe LifeController`)
+  di cambiare il colore di una cella, quando il suo stato passa da *dead* a *live* e viceversa.
+
+.. image::  ./_static/img/Conway/conwayJavaUMLAll.png 
+    :align: center 
+    :width: 80%
+
+-----------------------------------------
+La classe ConwayIO 
+-----------------------------------------
+
+.. code::
+
+    public class ConwayIO  {
+    private static int CELL_SIZE = 45;
+    private static Rectangle[][]  cells   ;
+    private static Stage stage; //injected by start in MainConway
+    private GridPane gridPane;
+    private Scene scene;
+    private Button bstart;
+    private Button bclear;
+    private int rows=0;
+    private int cols=0;
+    private LifeController cc;
+
+    public ConwayIO(  int rows, int cols, LifeController cc ){ 
+        this.cc   = cc;
+        this.rows = rows;  
+        this.cols = cols;  
+        createScene(   );    
+    }
+
+     public static void setTheStage(Stage primaryStage){
+        stage  = primaryStage;
+     }
+     protected void createScene( ){ 
+      /*
+      Crea e configura scena e pulsanti di Input
+      */
+      ...
+      createCells(    );
+      stage.show();
+     }
+
+     protected void createCells(  ){ 
+     cells = new Rectangle[rows][cols];
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                cells[row][col] = new Rectangle(CELL_SIZE, CELL_SIZE);
+                cells[row][col].setId(row+","+col);
+                cells[row][col].setFill( Color.WHITE );
+                cells[row][col].setStroke( Color.BLACK );
+
+                gridPane.add( cells[row][col], col, row ) ;
+
+                cells[row][col].addEventHandler(MouseEvent.MOUSE_CLICKED,
+                        e ->  cc.cellClicked(e)
+                );
+            }//col
+        }//row
+    }
+
+     public static void cellOn(int i, int j){ 
+        if( cells == null ) return;
+        cells[i][j].setFill(Color.RED);
+     }
+     public static void cellOff(int i, int j){
+     if( cells == null ) return;
+        cells[i][j].setFill(Color.WHITE);
+     }
+    }
+ 

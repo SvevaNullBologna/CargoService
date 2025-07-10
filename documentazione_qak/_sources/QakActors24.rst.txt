@@ -1,0 +1,1881 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta    
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp 
+
+
+.. _BlokingQueue: https://www.baeldung.com/java-blocking-queue
+.. _Programmazione funzionale: https://it.wikipedia.org/wiki/Programmazione_funzionale
+.. _Paradigma di programmazione: https://it.wikipedia.org/wiki/
+.. _Modello computazionale ad attori: https://en.wikipedia.org/wiki/Actor_model
+.. _CSP: https://en.wikipedia.org/wiki/Communicating_sequential_processes
+.. _Hewitt: https://en.wikipedia.org/wiki/Carl_Hewitt
+.. _Akka: https://akka.io/
+.. _GOLang: //www.html.it/guide/go-lang/
+.. _GO: https://go.dev/
+.. _GO doc: https://go.dev/doc/
+.. _Go Manual: https://go.dev/doc/
+.. _Kotlin Actors: https://kotlinlang.org/docs/shared-mutable-state-and-concurrency.html#actors
+.. _Kotlin Channel: https://play.kotlinlang.org/hands-on/Introduction%20to%20Coroutines%20and%20Channels/08_Channels
+.. _Akka Actors: https://doc.akka.io//docs/akka/current/typed/guide/actors-motivation.html
+.. _Akka Documentation: https://doc.akka.io//docs/akka/current/index.html
+.. _Java annotation: https://en.wikipedia.org/wiki/Java_annotation
+.. _Automa a stati finiti : https://it.wikipedia.org/wiki/Automa_a_stati_finiti
+.. _FSM di Moore: https://en.wikipedia.org/wiki/Moore_machine
+
+
+.. _Automa a stati finiti : https://it.wikipedia.org/wiki/Automa_a_stati_finiti
+.. _Microservizi : https://microservices.io/
+
+.. _Akka actor model: https://doc.akka.io//docs/akka/current/typed/guide/actors-motivation.html
+
+.. _Kotlin: https://kotlinlang.org/
+.. _kotlinUnibo: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html
+.. _kotlinUniboCoroutinesIntro: ../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#coroutinesIntro
+.. _kotlinInheritance: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#inheritance
+.. _kotlinAboutInit: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#ill
+.. _kotlinrunBlocking: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#runBlocking
+.. _kotlininitblock: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#init block
+.. _kotlinactors: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#actors
+.. _kotlinclass: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#kotlinclass
+.. _Dispatchers: ../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#dispatchers
+
+.. _PrologOps: ./_static/LabQakPrologUsage2021.html#builinops   
+
+.. _Eclipse Xtext: https://www.eclipse.org/Xtext/download.html
+.. _Qak syntax: ./_static/Qactork.xtext
+.. _Uso di Prolog: ./_static/LabQakPrologUsage2021.html
+.. _shortcut: ./_static/LabQakPrologUsage2021.html#shortcut
+.. _Xtext: https://www.eclipse.org/Xtext/: https://www.eclipse.org/Xtext/
+.. _Moore machine: https://it.wikipedia.org/wiki/Macchina_di_Moore
+.. _Coroutine context and dispatchers: https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html
+.. _FSMKotlin: ./_static/FSMKotlin.html
+.. _tuProlog: http://amsacta.unibo.it/5450/7/tuprolog-guide.pdf
+.. _PrologUsage: ./_static/LabQakPrologUsage2020.html
+
+.. _Reactive programming: https://en.wikipedia.org/wiki/Reactive_programming
+.. _Observer: https://en.wikipedia.org/wiki/Observer_pattern
+.. _Iterator: https://en.wikipedia.org/wiki/Iterator_pattern
+.. _Functional programming: https://en.wikipedia.org/wiki/Functional_programming
+
+.. _build2022.gradle: ./_static/build2022.gradle
+.. _CoAP: https://en.wikipedia.org/wiki/Constrained_Application_Protocol
+
+.. _MqttCallback: https://eclipse.dev/paho/files/javadoc/org/eclipse/paho/client/mqttv3/MqttCallback.html
+.. _CoapResource: https://github.com/eclipse-californium/californium/blob/main/californium-core/src/main/java/org/eclipse/californium/core/CoapResource.java
+
+
+.. _Model driven engineering: https://en.wikipedia.org/wiki/Model-driven_engineering
+.. _QakAndProcess.html: ./_static/QakAndProcess.html
+
+
+.. http://www-lia.deis.unibo.it/Courses/RetiLM/proposteProgetti/akka_dds_proposal.html
+.. it.unibo.qakactor/userDocs/LabQakPrologUsage2020.html
+.. .. _Hewitt: https://en.wikipedia.org/wiki/Carl_Hewitt#Actor_model
+.. .. _Kotlin Actors: ../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html#actors
+
+
+
+=============================================
+QakActors24
+=============================================
+
+
+Secondo Carl `Hewitt`_ -> (uno dei padri fondatori) il modello computazionale ad attori è stato ispirato, 
+a differenza dei precedenti modelli di calcolo,  
+dalla fisica, inclusa la relatività generale e la meccanica quantistica.
+
+Proviamo a :ref:`chiedere a ChatGpt<OOP vs. messages>`
+
+Vi è oggi una ampia gamma di proposte di linguaggi / librerie ad attori, tra cui:
+ 
+- `Akka`_ ->: ispirato a `Modello computazionale ad attori`_ -> di  Hewitt. Per le motivazioni si veda `Akka actors`_ ->.
+- `GO`_ ->: ispirato a `CSP`_->, propone *goroutine* e *CanaliGO*. Per la documentazione si veda `GO doc`_->.
+- `Kotlin Actors`_ -> : propone *croutines* e *channels* (si veda `Kotlin channel`_->)
+
+Un motto di riferimento alquanto significativo per questo modello è il seguente:
+
+:slide2:`Do not communicate by sharing memory … instead, share memory by communicating`
+
+.. :slide3:`Do not communicate by sharing memory ...`
+.. :slide3:`...  instead, share memory by communicating.`
+
+
+.. :slide:`Il quadro generale` 
+
+--------------------------------------
+QakActors24: Introduzione
+--------------------------------------
+
+La :blue:`Q/q`  nella parola *QActor*, significa "quasi" poiché il linguaggio non è inteso come un linguaggio 
+di programmazione generico, ma piuttosto un :remark:`linguaggio di modellazione eseguibile`,
+da utilizzare durante l'analisi del problema e il progetto di protitpi di sistemi distribuiti,
+i cui componenti sono  attori  che si comportano come un `Automa a stati finiti`_, in stretta relazione 
+con l'idea di sistemi basati su `Microservizi`_.
+
+L'aggiunta di :blue:`k` al prefisso (es ``qak``, ``Qak``) significa che stiamo facendo riferimento alla versione 
+implementata in `Kotlin`_ ->, senza utilizzare i supporti Akka (come fatto nella prima versione del linguaggio).
+
+Per una :slide2:`Introduzione all'uso di Kotlin` si veda: si veda: :ref:`KotlinNotes`.
+
+.. :slide:`Qak overview`
+
++++++++++++++++++++++++++++++++++++++++
+Quadro generale
++++++++++++++++++++++++++++++++++++++++
+
+Un attore qak specializza la classe astratta  :ref:`it.unibo.kactor.ActorBasicFsm.kt` 
+che a sua volta specializza la classe astratta  :ref:`it.unibo.kactor.ActorBasic.kt`,
+entrambe definite nella :ref:`Qak infrastructure`.
+
+E'  possibile costruire un sistena software basato su attori qak semplicemente usando queste
+librerie; per un esempio, si veda :slidekp:`TODO`. 
+
+Tuttavia, l'uso della :ref:`Qak software factory` e del connesso :ref:`Linguaggio qak`
+rende lo sviluppo dei sistemi molto più rapido, comprensibile e gestibile.
+
+..  in modo *First-In-First-Out* (FIFO). 
+  Questo modo di operare vine denominato come :remark:`attore message-driven`.
+
+ 
+++++++++++++++++++++++++++++++++++++
+Qak software factory
+++++++++++++++++++++++++++++++++++++
+
+Il :ref:`Linguaggio Qak` è definito utilizzando il framework `Xtext`_ ->, che permette di costruire un insieme di 
+:remark:`plugin` per l'ecosistema Eclipse che, una volta installati, permettono ad un application designer
+de realizzare in tempi rapidi un :remark:`modello eseguibile del sistema`.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+I plugin della Qak factory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+I plugin che,  installati in Eclipse, realizzano la :ref:`Qak software factory` sono:
+
+- ``it.unibo.Qactork.ide_1.5.9.jar``
+- ``it.unibo.Qactork.ui_1.5.9.jar``
+- ``it.unibo.Qactork_1.5.9.jar``
+
+Essi sono disponibili in :slide2:`issLab25/iss25Material/plugins`.
+
+.. list-table:: 
+  :widths: 55,45
+  :width: 100%
+  
+  * - .. image:: ./_static/img/Qak/qakSoftwareFactory.png
+          :align: center
+          :width: 100%
+    - L'application designer usa l'editor guidato dalla sintassi per scrivere un :ref:`modello<Modelli>` del sistema 
+      che definisce :slide2:`struttura, interazione e comportamento` di un sistema distribuito.
+
+      Il :ref:`modello<Modelli>` è una istanza de :ref:`Il metamodello Qak`, sulla base del quale è costruita la Factory.
+      
+      Una volta salvato il modello, la factory produce  
+      :ref:`codice e risorse<Qak codice e risorse generate>`.
+
+
+Questa impostazione 
+(rissunta anche in in QakAndProcess.html)
+è tipica delle software factories relative ai :ref:`Domain Specific Languages` che si pongono 
+nel solco della `Model driven engineering`_ 
+ 
+.. list-table::
+  :widths: 70,30
+  :width: 100%
+  
+  * - .. image:: ./_static/img/Qak/factory.jpg
+          :align: center
+          :width: 100%
+    -  
+      La factory genera il codice necessario per 'mappare' i concetti di alto livello (espressi nel modello) 
+      in strutture di più basso livello, che possono essere eseguite avvelendosi di appositi supporti e librerie di utilità 
+      application-independent.
+
+
+.. REMEMBER: C:\Didattica2021\privato\userxyz
+
+
+++++++++++++++++++++++++++++++++++++
+Qak codice e risorse generate
+++++++++++++++++++++++++++++++++++++
+
+La :ref:`Qak software factory` costruisce vari prodotti indispensabili o utili, tra cui:
+
+- un file che contiene la descrizione del sistema, in sintassi Prolog
+- il file ``build2024.gradle`` e  altre risorse
+- il codice di raccordo con la :ref:`Qak infrastructure` 
+  (la :ref:`parte sommersa<Vista sommersa>` di ogni sistema Qak)
+- il codice Python per la produzione di una rappresentazione grafica del sistema
+
+
++++++++++++++++++++++++++++++++++
+Qak infrastructure
++++++++++++++++++++++++++++++++++
+ 
+La libreria :slide3:`unibo.qakactor23-5.0.jar` è prodotta nel progetto  :blue:`unibo.qakactor23` e costituisce
+la :blue:`qak-infrastructure`, che si appoggia 
+al supporto :slide3:`unibo.basicomm23-1.0.jar` introdotto nel progetto :ref:`unibo.basicomm23`, 
+che implementa il concetto astratto di :ref:`Interaction<unibo.basicomm23.interfaces.Interaction>` per diversi protocolli (TCP, UDP, CoAP, etc.).
+
+La classe ``sysUtil`` della infrastruttura offre un insieme di metodi di utilità:
+
+%%%%%%%%%%%%%%%%%%%%
+metodi di supporto
+%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+      ``suspend autoMsg(msg:IApplMessage)``
+
+    -  
+       realizza le operazioni **AutoMsg** e **AutoDispatch** desctitte in :ref:`Operazioni di messaggista punto a punto`
+
+  * -  
+      ``open public fun fromRawDataToApplMessage(m: String)``
+
+    -  
+       deve essere realizzato dall'application designer per trasformare una stringa in un messggio di tipo 
+      :ref:`IApplMessage` e per eseguire un  autoMsg di questo messaggio
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+sysUtil for users
+%%%%%%%%%%%%%%%%%%%%
+
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+       #. ``curThread() : String``
+       #. ``aboutThreads(info: String)``
+       #. ``strRepToList( liststrRep: String ) : List<String>``
+       #. ``strCleaned( s : String) : String``
+       #. ``showOutput(proc: Process)``
+       #. ``waitUser(prompt: String,tout: Long=2000)``
+       #. ``createFilefname:String,dir:String ="logs" )``
+       #. ``deleteFile( fname : String, dir  : String )``
+       #. ``updateLogfile(fname:String,msg:String,dir:String="logs")``
+       #. ``getMqttEventTopic() : String``
+ 
+    -  
+       #. ``curThread() : String``
+       #. ``aboutThreads(info: String)``
+       #. ``strRepToList( liststrRep: String ) : List<String>``
+       #. ``strCleaned( s : String) : String``
+       #. ``showOutput(proc: Process)``
+       #. ``waitUser(prompt: String,tout: Long=2000)``
+       #. ``createFilefname:String,dir:String ="logs" )``
+       #. ``deleteFile( fname : String, dir  : String )``
+       #. ``updateLogfile(fname:String,msg:String,dir:String="logs")``
+       #. ``getMqttEventTopic() : String``
+
+          
+%%%%%%%%%%%%%%%%%%%%
+sysUtil for kb
+%%%%%%%%%%%%%%%%%%%%
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+
+       #. ``getPrologEngine() : Prolog``
+       #. ``solve(goal:String, resVar:String):String?``
+       #. ``loadTheory( path: String )``
+       #. ``loadTheoryFromDistribution( path: String )``
+
+    -  
+       #. ``getPrologEngine() : Prolog``
+       #. ``solve(goal:String, resVar:String):String?``
+       #. ``loadTheory( path: String )``
+       #. ``loadTheoryFromDistribution( path: String )``
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+sysUtil for system
+%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+
+       #. ``getActorNames(ctxName:String):List<String>``
+       #. ``getAllActorNames(ctxName: String) : List<String>``
+       #. ``getAllActorNames( )``
+       #. ``getNonlocalActorNames(ctx:String ):List<String>``
+       #. ``getActor( actorName : String ) : ActorBasic?``
+
+       #. ``getContext(ctxName : String) : QakContext?``
+       #. ``getContextNames(): MutableSet<String>``
+       #. ``getActorContextName(actorName:String):String?``
+       #. ``getActorContext(actorName : String):QakContext?``
+
+       #. ``getCtxCommonobjClass(ctxName:String): String``
+
+    -  
+       #. ``getActorNames(ctxName:String):List<String>``
+       #. ``getAllActorNames(ctxName: String) : List<String>``
+       #. ``getAllActorNames( )``
+       #. ``getNonlocalActorNames(ctx:String ):List<String>``
+       #. ``getActor( actorName : String ) : ActorBasic?``
+
+       #. ``getContext(ctxName : String) : QakContext?``
+       #. ``getContextNames(): MutableSet<String>``
+       #. ``getActorContextName(actorName:String):String?``
+       #. ``getActorContext(actorName : String):QakContext?``
+
+       #. ``getCtxCommonobjClass(ctxName:String): String``
+
+
+
+
+
+==============================================
+Il metamodello Qak
+==============================================
+
+Il :ref:`Linguaggio qak` reso disponibile dalla :ref:`Qak software factory` intende fornire un linguaggio 
+per la definizione di :slide2:`modelli eseguibili` di un sistema, basati su un insieme
+di concetti volti a cattuare l'idea che un sistema software (distribuito):
+
+- è formato da una insieme di attori che si comportano come :ref:`Automi a stati finiti`
+- che interagiscono scambiandosi messaggi
+- raggruppati in contesti che li abilitano a interazioni via rete
+- contesti che possono essere allocati (deployed) su uno o più  nodi computazionali
+
+--------------------------------------------
+QakActors24: il sistema
+--------------------------------------------
+
+.. list-table::
+  :widths: 70,30
+  :width: 100%
+
+  * - Un sistema ad attori qak è composto da una collezioni di attori, attivati in uno o più contesti,
+      allocati in uno o piò nodi di elaborazione.
+
+    - .. image:: ./_static/img/Actors24/Actor24sysqak.PNG
+          :align: center
+          :width: 100%
+
+  * - Un sistema ad attori qak è configurato in modo automatico a partire da una descrizione espressa in forma 
+      di :blue:`base di conoscenza`, in sintassi Prolog. 
+      
+      .. Si veda :ref:`Descrizione di un sistema distribuito`.
+
+    - 
+      .. code::
+
+        context(ctx1, "localhost",  "TCP", "8923").
+        context(ctx2, "localhost",  "TCP", "8925").
+        qactor( producer1, ctx1, <className>).
+        qactor( consumer,  ctx2, <className>).  
+        qactor( producer2, ctx3, <className>).  
+        ...
+
+
+--------------------------------------------
+QakActors24 - l’attore
+--------------------------------------------
+
+
+
+.. list-table::
+  :widths: 70,30
+  :width: 100%
+  
+  * - Un attore qak è un componente attivo che:
+ 
+      - nasce, vive e muore in un :ref:`contesto<QakActors24: il contesto>` che può essere comune a (molti) altri attori;
+      - ha un **nome univoco** nell'ambito di tutto il sistema;
+      - è logicamente attivo, cioè dotato di flusso di controllo autonomo;
+      - è capace di inviare messaggi ad un altro attore, di cui conosce il **nome**, incluso sè stesso;
+      - è capace di eseguire elaborazioni autonome e/o elaborazioni di messaggi;
+      - è dotato di una sua :remark:`coda locale` (**msgQueue**) in cui sono depositati i messaggi 
+        a lui inviati
+
+
+    - .. image:: ./_static/img/Actors24/actor24.png
+          :align: center
+          :width: 100%
+  
+      - Elabora i messaggi secondo quanto riportato in :ref:`La gestione dei messaggi`.
+
+
+
+--------------------------------------------
+QakActors24: il contesto
+--------------------------------------------
+ 
+Un contesto è un componente software che gestisce ``N>0`` actor qak, **abilitandoli** 
+alla ricezione e trasmissione di messaggi via rete.
+
+.. list-table::
+  :widths: 70,30
+  :width: 100%
+  
+
+  
+  * - Un contesto rappresenta un nodo logico di elaborazione dotato di un server e di un porta di ingresso, 
+      su cui altri contesti possono stabilire una :ref:`Interconnessione`, di solito basata su ``TCP``,
+      ``CoAP`` e ``MQTT``.
+
+      Un contesto deve essere allocato su un computer fisico o su un  virtual macìhine / container.
+
+      .. Si veda :ref:`unibo.basicomm23.actors23.ActorContext23`
+
+    - .. image:: ./_static/img/Actors24/actor24Ctx.png
+          :align: center
+          :width: 100%
+
+  * - Un contesto mantiene una tabella  (:blue:`actorMap`)  con i riferimento agli attori locali e una tabella 
+      (:blue:`proxyMap`) con i riferimenti ai Proxy che mantengono una :ref:`Interconnessione` con gli altri contesti
+      del sistema.
+
+      .. Si veda :ref:`unibo.basicomm23.actors23.ActorBasic23` e   :ref:`unibo.basicomm23.actors23.Proxy`
+    
+    - .. image:: ./_static/img/Actors24/actor24CtxMaps.png
+          :align: center
+          :width: 100%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+
+  * - Il Server di contesto depone i messaggi :ref:`IApplMessage<unibo.basicomm23.interfaces.IApplMessage>`
+      ricevuti su una :ref:`Interconnessione` sulla  ``msgQueue`` 
+      dell'attore destinatario.
+      
+      Per questo scopo, il Sever si avvale di un unico :blue:`gestore di messaggi di sistema`: 
+      il ``ContextMsgHandler``.
+     
+    
+    - .. image:: ./_static/img/Actors24/Actors24SingleNodeAndCtx.png
+          :align: center
+          :width: 100%
+
+      La figura mostra il caso di attori locali ad un nodo di elaborazione che possono 
+      inviare/ricevere messaggi tra loro oppure elaborare messaggi inviati
+      da componenti remoti.
+
+--------------------------------------------
+Linguaggio qak
+--------------------------------------------
+
+Il linguaggio si pone nel solco dei :ref:`Domain Specific Languages` e permette di esprimere
+un insieme dei concetti che forma  :ref:`Il metamodello Qak`.
+
+Il ruolo 'strategico' dei linguaggi in informatica si comprende subito considerando 
+che **ogni computazione** (ogni sistema software) può essere espressa usando un insieme molto limitato 
+di 'mosse' (istruzioni) studiate dalla teoria 
+come :ref:`macchine astratte elementari<Macchine di Turing di Minky e PDA>`.
+
+In sintesi, possiamo dire che l'uso du un linguaggio comporta descrizioni di un 
+sistema software:
+
+:remark:`più compatte, più esplicie e semanticamente più ricche`
+
+ 
+
+.. usando le istruzioni low-level in un certo modo si fa emergere da un spazio in cui 
+   tutto è possibile un sottoinsime di 'cose' la cui semantuca è legata al modo
+   con cui sono organizzate le istruzioni.
+   Questo accade in modo ricorsiva anche a livello applicativo, lavorando con i Qak: ogni sistema 
+   prodotto è un sottoinsieme delle 'cose' possibili Qak 
+
+Il linguaggio qak intende promuovere
+la definizione in tempi brevi di :blue:`prototipi di sistemi distribuiti`, utilizzabili nelle fasi preliminari 
+di un progetto di sviluppo software, al fine di **interagire con il committente**, per chiarire e stabilizzare
+i requisiti.
+
+In molti casi, la formalizzazione dei requsiti e della analisi del problema
+in ternini di modelli eseguibili qak costituisce anche un passo pragmaticamente utile
+per la costruzione effettiva del prodotto finale.
+
+
+++++++++++++++++++++++++++++++++++++++++++
+Qak syntax
+++++++++++++++++++++++++++++++++++++++++++
+
+La sintassi del linguaggio è riportata in  `Qak syntax`_.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Scopo della grammatica
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Lo 'scopo' della grammatica è la produzione relativa alla specifica del sistema.
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+
+        QActorSystemSpec:
+          name=ID                             //(1) 
+          ( mqttBroker = BrokerSpec)?         //(2)      
+          ( libs       = UserLibs  )?         //(3)   
+          ( message   += Message   )*         //(4)   
+          ( context   += Context   )*         //(5)   
+          ( actor     += QActorDeclaration )* //(6)   
+          (display    = DisplayDecl)?         //(7)   
+          (facade     = FacadeDecl)?          //(8)	 
+
+     ``( ... )``:slidekp:`?` signitifca **opzionale**
+
+     ``( ... )``:slidekp:`*` signitifca **zero o più volte**
+
+    - 
+        **Specifica del sistema**
+
+        #.  nome del sistema  
+        #.    indirizzo di un broker MQTT
+        #.    dichiarazione di una o più :slide2:`librerie applicative`
+        #.    :ref:`Dichiarazione dei messaggi`
+        #.    :ref:`Dichiarazione dei contesti`
+        #.    :ref:`Dichiarazione degli attori`
+        #.    Dichiarazione di un Display di sistema
+        #.    :ref:`Dichiarazione di una Facade` di sistema
+
+Le regole sintattche del linguaggio impongono che un
+modello Qak venga definito organizzando la sua descrizione 
+in una **sequenza di dichiarazioni**.
+
+
+
+++++++++++++++++++++++++++++++++++
+Dichiarazione dei messaggi
+++++++++++++++++++++++++++++++++++
+
+I diversi :ref:`Tipi di messaggi` sono dichiarati usando una *sintassi* Prolog-like (si veda `tuProlog`_ ->):
+
+.. code::
+
+  Message      :  BasicMessage | Event | OtherMsg;
+  BasicMessage :  Dispatch | Request;
+  OtherMsg     :  Reply;
+
+  Event:    "Event"     name=ID  ":" msg = PHead  (cmt=STRING)?;
+  Dispatch: "Dispatch"  name=ID  ":" msg = PHead  (cmt=STRING)?;
+  Request:  "Request"   name=ID  ":" msg = PHead  (cmt=STRING)?;
+  Reply:    "Reply"     name=ID  ":" msg = PHead  ( "for" reqqq = [Request] )? (cmt=STRING)?;
+
+  PHead :	PAtom | PStruct	| PStructRef ;  //sintassi Prolog
+  ...
+
+++++++++++++++++++++++++++++++++++
+Dichiarazione dei contesti
+++++++++++++++++++++++++++++++++++
+
+.. code::
+
+  Context : "Context"  name=ID "ip"  ip = ComponentIP   ( "commonObj" commonObj = STRING)?  ;
+  ComponentIP : {ComponentIP} "[" "host=" host=STRING "port=" port=INT "]" ; 
+
+Un contesto può introdurre un :slide2:`oggetto accessibile a tutti gli attori`.
+ 
+
+
+++++++++++++++++++++++++++++++++++
+Dichiarazione degli attori
+++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+
+      QActorDeclaration: QActorInternal |
+                         QActorExternal;
+      
+      QActorInternal:  QActor | 
+                       QActorCoded;
+
+    -  La sintassi indica che vi sono tre tipi di attori. 
+  
+       #. :ref:`Attori normali`  
+       #. :ref:`Attori coded`
+       #. :ref:`Attori external`  
+
+Gli attori possono inoltre comportarsi come generatori di stream
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Attori normali
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * - 
+     Gli attori 'normali' sono descritti come :ref:`Automi a stati finiti`.
+
+      #. Nome dell'attore
+      #. Riferimento al Contesto
+      #. Oggetto locale usato dall'attore (per un esempio si veda :ref:`helloworld3 withobj`)
+      #. Attore creato solo dinamicamente
+      #. Libreirie importate
+      #. Azioni iniziali dell'attore
+      #. Stati dell'attore
+      #. Dichiarazione dell'oggetto locale
+      #. Dichiarazione delle librerie importate
+  
+    -  
+      .. code::
+  
+        QActor: "QActor" 
+        /*1*/ name=ID  
+        /*2*/"context" context = [ Context ]  
+        /*3*/("withobj" withobj = WithObject)? 
+        /*4*/( dynamic ?= "dynamicOnly")?    
+          "{"      	
+        /*5*/( imports += UserImport )*  
+        /*6*/( start   = AnyAction )?
+        /*7*/( states += State )*
+          "}"; 
+          
+        /*8*/WithObject: name=ID 
+               "using" method=STRING;
+          
+        /*9*/UserImport: 
+            "import" file=STRING ;
+
+      Si veda :ref:`AnyAction`
+
+
+.. attori :ref:`'normali'<Dichiarazioni di attori normali>` (``QActor``)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Stati di un attore normale
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 70,30
+  :width: 100%
+
+  * - 
+  
+       #. Nome dello stato
+       #. Stato iniziale. Il tag ``initial`` deve essere presente in un **unico stato**.
+       #. Azioni locali allo stato
+       #. Transizioni verso lo stato futuro
+
+    - 
+      .. code::
+
+        /*1*/State: "State" name=ID 
+        /*2*/( normal?="initial")?
+          "{" 
+        /*3*/( actions += StateAction )*  
+          "}"
+        /*4*/( transition = Transition )?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Attori coded
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     Un :slide3:`CodedQActor` è un attore scritto direttamente in codice (kotlin, Java o altro) che si comporta 
+     come fli attori qak.
+
+     :slidekp:`Es->` :ref:`democodedqactor.qak`
+
+    -  
+     .. code::
+
+      /*1*/QActorCoded : "CodedQActor"    name=ID 
+          "context" context = [ Context ] 
+          "className" className = STRING 
+          ( dynamic ?= "dynamicOnly")?;
+
+
+..  attori :ref:`'codificati'<CodedQActor>` (``QActorCoded``)   :slidekp:`TODO from`
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Attori external
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * - 
+     Un attore dichiearato :slide3:`external` è un attore cha fa parte del sistema ma senza essere definito nel modello corrente, 
+     in quanto parte di un altro contesto.
+
+     :slidekp:`Es->` :ref:`demoaddtocore.qak`
+
+    - 
+     .. code::
+
+      /*1*/QActorExternal: "ExternalQActor" name=ID 
+          "context" context = [ Context ] ;
+
+
+.. attori :ref:`'esterni al contesto'<ExternalQActor>` (``QActorExternal``)   :slidekp:`TODO from`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Attori streamer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+La `Reactive programming`_ è una combinazione di idee riconducibili al modello :slide2:`Observer`, 
+al modello :slide2:`Iterator` e al modello di programmazione :slide2:`funzionale`. 
+
+In questo stile di programmazione, 
+un servizio-consumatore reagisce ai dati non appena arrivano, con la capacità anche di propagare 
+le modifiche come eventi agli osservatori registrati.
+
+Un sistema Qak può essere impostato seguendo questo stile  programmazione
+emettendo eventi usando la primitiva :ref:`subscribeTo<Operazioni di messaggista streamed>`. 
+Per un esempio si veda: :slidekp:`Es->` :ref:`demostreams.qak`
+
+.. Ad esempio, come un produttore osservabile di dati, cioè può inviare eventi  
+   ad altri attori locali allo stesso contesto, che si sono registrati come osservatori 
+   presso di lui, con la primitiva :ref:`subscribeTo<Operazioni di messaggista publisch-subscribe>`.
+
+
+++++++++++++++++++++++++++++++++++
+Dichiarazione di una Facade
+++++++++++++++++++++++++++++++++++
+Una Facade:
+
+- rappresenta un componente che offre accessi tramite Web ad un sistema qak.
+- vuole essere un modo per dotare un sistema qak di interfacce Web in accordo ai principi 
+  della :ref:`Clean architecture<La Clean Architecture>`
+- deve essere realizzata da una classe applicativa definita dall'application designer
+- lascia alla :ref:`Qak infrastructure`  il compito di interagire con un attore di riferimento del sistema qak
+  mediante invio/ricezione di messaggi. 
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - 
+ 
+      .. code::
+
+        FacadeDecl : "Facade" 
+        /*1*/ name=ID   
+        /*2*/ "port" port=INT 
+        /*3*/ "usingactor" actor=[QActorInternal] 
+                           "inctx" context= [Context] 
+        /*4*/ "appl" appl=STRING  
+        /*4*/ libs=UserLibs ;
+
+    - 
+        #. identificatore della Facade
+        #. porta di accesso alla Facade
+        #. attore di riferimento per la Facade
+        #. classe applicativa che realizza la Facade
+        #. librerie per la Facade
+
+:slidekp:`Es->` :ref:`ServiceMath24Facade`.
+
+
+----------------------------------
+Transizioni di stato
+----------------------------------
+
+.. code::
+
+  Transition         :  EmptyTransition | NonEmptyTransition  ;
+
+La transizone da uno stato a uno stato successivo può avvenire senza attesa di alcun messaggio (:blue:`EmptyTransition`) 
+oppure (:blue:`NonEmptyTransition`) in relazione alla disponibilità di un messaggio tra quelli definiti in :ref:`Dichiarazione dei messaggi`. 
+
+
+++++++++++++++++++++++++++++++++++
+EmptyTransition
+++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+
+        EmptyTransition:  
+        /*1*/    "Goto" targetState=[State]  
+        /*2*/    ("if" eguard=AnyAction 
+        /*3*/    "else" othertargetState=[State] )?  ;
+
+    -
+      #. Riferimento allo stato futuro (nel caso di guardia ``true``)
+      #. Specifica (opzionale) di una :ref:`Guardia` 
+      #. Stato futuro nel caso di :ref:`Guardia` ``false``
+
+      :slidekp:`Es->` :ref:`demoguards.qak`.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Guardia
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+- Una guardia è una espressione scritta in Kotlin, che può essere valutata come ``true`` o ``false``.
+
+- Una transizione associata a una guardia, viene attivata solo se la valutazione della condizione espressa dalla 
+  guardia produce il valore ``true``.
+
+
+.. - Per un esempio si veda :ref:`resourcecore.qak`.
+
+++++++++++++++++++++++++++++++++++
+NonEmptyTransition
+++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * - 
+     .. code::
+  
+        NonEmptyTransition: 
+        /*1*/  "Transition" name=ID  
+        /*2*/  (duration=Timeout)?  
+        /*3*/  (trans+=InputTransition)* 
+        
+     .. /*4*/  ("else" elseempty=EmptyTransition)?;
+
+
+    -
+      #. Nome della transizione
+      #. Specifica di un tempo massimo di attesa: si veda :ref:`Timeout per transizioni`
+      #. Transizione relativa a un messaggio
+        
+      :slidekp:`Es->` :ref:`demoguards.qak`.
+
+
+Una :blue:`NonEmptyTransition` associata alla disponibilità di un messaggio 
+distingue tra i diversi 
+:ref:`tipi di messaggio<Dichiarazione dei messaggi>`:
+
+.. code::
+
+  InputTransition    : MsgTransSwitch | RequestTransSwitch |  ReplyTransSwitch |
+                       EventTransSwitch | InterruptTranSwitch ;
+
+  MsgTransSwitch     : "whenMsg"     message=[Dispatch] 
+                        ("and"  guard=AnyAction  )?  "->"  targetState=[State]  ;
+  RequestTransSwitch : "whenRequest" message=[Request]  
+                        ("and"  guard=AnyAction  )?  "->"  targetState=[State]  ;
+  ReplyTransSwitch   : "whenReply"   message=[Reply]    
+                        ("and"  guard=AnyAction  )?  "->"  targetState=[State]  ;
+  EventTransSwitch   : "whenEvent"   message=[Event]    
+                        ("and"  guard=AnyAction  )?  "->"  targetState=[State]  ;
+  InterruptTranSwitch: "whenInterrupt"   message=[Dispatch] 
+                        ("and"  guard=AnyAction  )?  "->"  targetState=[State]  ;
+
+.. - Per un esempio di *MsgTransSwitch* si veda :ref:`demo0.qak<QActor demo0>`.
+.. - Per un esempio di *RequestTransSwitch* e *ReplyTransSwitch* si veda :ref:`demorequest.qak`.
+.. - Per un esempio di *EventTransSwitch*   si veda actor *perceiver* in :ref:`demo0.qak<QActor demo0>`.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+whenInterrupt
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Esegue la transzione da uno stato ``SA`` a uno stato ``SB``, con ritorno allo stato ``SA``,
+quando ``SB`` esegue l'istruzione qak  
+:ref:`returnFromInterrupt<Operazioni di ritorno da interruzione>`.   
+ 
+:slidekp:`Es->` :ref:`demointerrupt.qak`.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Timeout per transizioni
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Per evitare una attesa indefinita di messaggi in uno stato, è poosibile associare alla transizione un :blue:`timeout`
+(come un numero naturale in *msec*)
+scaduto il quale l'automa transita nello stato specificato. 
+
+.. code::
+
+  Timeout            : TimeoutInt | TimeoutVar | TimeoutSol | TimeoutVarRef; 
+  TimeoutInt         : "whenTime"    msec=INT  "->" targetState = [State]  ;   
+  TimeoutVar         : "whenTimeVar"    variable   = Variable    "->" targetState = [State]  ;  
+  TimeoutVarRef      : "whenTimeVarRef" refvar     = VarRef      "->" targetState = [State]  ;  
+  TimeoutSol         : "whenTimeSol"    refsoltime = VarSolRef   "->" targetState = [State]  ;  
+
+Lo scadere del tempo indicato in :blue:`whenTime` (regola ``TimeoutInt``) provoca l'emissione di un **evento**, 
+con indentificatore  
+``local_tout_actorname_state`` ove ``actorname`` è il nome dell'attore e ``state`` è  il nome dello stato corrente.
+:slidekp:`Es->` :ref:`demo0 perceiver`
+
+.. - Per un esempio si veda l'actor *perceiver* in :ref:`demo0.qak<QActor sender e perceiver>`.
+
+Le forme che si aggiungono a ``TimeoutInt`` sono utili in situazioni in cui il tempo non sia noto a priori,
+ma derivi da elaborazioni. :slidekp:`Es->` :ref:`demo0 sender`
+
+ 
+
+
+.. - Per un esempio di ``TimeoutVar`` si veda l'actor *sender* in :ref:`demo0.qak<QActor sender e perceiver>`.
+
+----------------------------------
+Comportamento di un attore
+----------------------------------
+
+Prima di illustrare cosa un attore qak può fare, è importante sottolienare che:
+
+- un attore qak :slide2:`non dispone di una operazione receive bloccante`
+
+La ragione è dovuta al comportamento *message-driven* dell'attore.
+
+Infatti, il **comportamento di base** di un attore qak è definito dalla classe  :ref:`it.unibo.kactor.ActorBasic.kt`
+che gestisce i messaggi disponibili sulla :ref:`msgQueue dell'attore<QakActors24: l’attore>` in modo FIFO;
+l'attore qak di base opera quindi in modo :slidekp:`message-driven` utilizzando un :ref:`canale Kotlin<actor channel>`.
+
+      .. image::  ./_static/img/Qak/ActorBasic.png
+          :align: center 
+          :width: 50% 
+
+L'attore che  specializza :ref:`it.unibo.kactor.ActorBasicFsm.kt`
+opera invece come un :slidekp:`automa di Moore` :ref:`a stati finiti<Automi a stati finiti>` , 
+gestendo i messaggi ricevuti sul :ref:`canale Kotlin<I canali>`
+ereditato da :ref:`ActorBasic<it.unibo.kactor.ActorBasic.kt>` non in modo FIFO,
+ma :remark:`in funzione dello suo stato corrente`.
+
+Un attore qak ha un comportamento autonomo e quindi, una volta attivato 
+dalla :ref:`Qak infrastructure` con un messaggio iniziale di 'start',
+può eseguire azioni anche ignorando eventuali altri messaggi sulla sua coda di input.
+
+Normalmente però, un attore qak può entrare in specifici stati elaborativi se sulla sua 
+coda di input sono presenti messaggi di un certo tipo. Vediamo come.
+
+
+++++++++++++++++++++++++++++++++++++++
+La gestione dei messaggi
+++++++++++++++++++++++++++++++++++++++
+
+
+#. ogni attore possiede, oltre alla coda dei messaggi principale :ref:`msgQueue<QakActors24: l’attore>` , 
+   una seconda coda :slide2:`msgQueueStore`,
+   in cui memorizza messaggi (di tipo **request** e **dispatch**) non elaborati;
+#. uno stato è di norma associato a un insieme di transizioni :slide3:`TSET`, ciascuna delle quali speciifca  lo stato futuro,
+   in corrispondenza a un messaggio con uno specifico identificatore ``msgId``;
+#. al termine delle sue azioni, lo stato corrente dell'attore qak consulta, :slidekp:`nell'ordine`, le sue code
+   ``msgQueueStore`` e ``msgQueue``, ciascuna in modo FIFO;
+#. se l'identificatore del messaggio prelevato da una coda è uguale al ``msgId`` di una qualche transizione in :slide3:`TSET`, 
+   quella transizione è attivabile; in caso contrario, il messaggio 'esaminato' viene lasciato dove è se era nella coda
+   ``msgQueueStore``, oppure, se è un messaggio di tipo  **request** o **dispatch** prelevato dalla coda principale 
+   ``msgQueue``,  viene  depositato in fondo alla coda ``msgQueueStore``. 
+   
+   Un messaggio di tipo :remark:`event` il cui 
+   identificatore non compare in :slide3:`TSET`, viene :slidekp:`scartato` (e quindi ignorato e dimenticato);
+#. appena lo stato corrente trova una transizione attivabile,; passa  il controllo allo stato futuro
+   specificato da questa transizione;
+#. se nessuna transizione è attivabile, l'attore qak rimane nello stato corrente; all'arrivo di un nuovo
+   messaggio, si riprende ad eseguire il punto :slide3:`3`.
+
+
+++++++++++++++++++++++++++++++++++
+Variabili e riferimenti
+++++++++++++++++++++++++++++++++++
+
+
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+ 
+  * - 
+     .. code::
+
+
+        Variable:  varName= VARID ;
+
+        //USING vars (from solve or from code)
+        VarRef      : "$" varName= VARID ;	 
+        VarRefInStr : "#" varName= VARID ;	 
+        VarSolRef   : "@" varName= VARID ;	 
+
+    -  
+       I simboli ``$ # @`` sono :ref:`Notazioni Shortcut` per l'accesso al valore di 
+       variabili i cui nomi iniziano con una :slidekp:`lettera MAIUSCOLA`
+
+        
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Notazioni Shortcut
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  Notazione :slide3:`$` Kotlin-like per accesso al valore di una variabile entro una String
+  
+       .. code::
+ 
+         VarRef : "$" varName= VARID ;
+    -  
+            
+       .. code::
+
+          // Esempio: 
+          [# var N = 0 #]            //Instruzione Kotlin
+          println("Valore di N=$N")  //Frase qak
+
+  * -  Notazione :slide3:`#` per accesso al valore in forma di String
+       al vslore di una variabile della soluzione di una dimostrazione logica
+  
+       .. code::
+ 
+          VarRefInStr : "#" varName= VARID ;
+    - 
+  
+      .. code::
+         
+         //Equivale a:
+         ${ getCurSol("<VARID>").toString() }
+         
+         // Esempio: 
+         solve(move(M));println( #M )
+        
+
+  * -  Notazione :slide3:`@` per accesso al vslore 
+       di una variabile della soluzione di una dimostrazione logica     
+  
+       .. code::
+ 
+          VarSolRef   : "@" varName= VARID ;
+    - 
+  
+      .. code::
+
+         //Equivale a:
+         getCurSol("<VARID>").toString()
+
+         // Esempio: 
+         solve(move(M)); doMove( @M )
+
+
+
+++++++++++++++++++++++++++++++++++
+Azioni di un attore
+++++++++++++++++++++++++++++++++++
+
+Una volta entrato in un particolare stato computazionale, un attore qak può eseguire una sequenza di azioni
+di 'alto livello' espresse in linguaggio qak oppure di 'basso livello' espresse direttemante in Kotlin.
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+ 
+  * - 
+     .. code::
+
+        StateAction: 
+        /*1*/ AnyAction	|
+        /*2*/ Forward|Demand|Answer|ReplyReq|AutoMsg|AutoRequest|
+        /*3*/ MsgCond | GuardedStateAction |	IfSolvedAction |
+        /*4*/ MqttConnect | Publish | Subscribe | SubscribeTopic|
+        /*5*/ Emit |  EmitLocal |  EmitLocalStream |
+        /*6*/ UpdateResource | 	ObserveResource  |
+        /*7*/ Delegate |  DelegateCurrent	| 								
+        /*8*/ SolveGoal | 
+        /*9*/ CreateQActor | ExecResult	|
+        /*10*/ ReturnFromInterrupt |
+        /*11*/ CodeRunSimple | CodeRunActor | MachineExec |
+        /*12*/ Print | PrintCurMsg | DiscardMsg |
+        /*13*/  DelayInt  | MemoTime | Duration |		
+        /*14*/ EndActor | 
+        
+    -  
+       #.  :ref:`Azioni kotlin<AnyAction>`  
+       #.  :ref:`Operazioni di messaggista punto a punto`   		
+       #.  :ref:`Azioni condizionali`
+       #.  :ref:`Operazioni di messaggista streamed`
+       #.  :ref:`Operazioni di messaggista via MQTT`
+       #.  :ref:`Operazioni relative agli eventi`
+       #.  :ref:`Operazioni relative alla osservabilità`
+       #.  :ref:`Operazioni di delegazione`
+       #.  :ref:`Operazioni per le basi di conoscenza`
+       #.  :ref:`Creazione dinamica di attori`
+       #.  :ref:`Operazioni di ritorno da interruzione`
+       #.  :ref:`Operazioni per esecuzione di codice`
+       #.  :ref:`Operazioni di utilità`
+       #.  :ref:`Operazioni con il tempo`
+       #.  :ref:`Operazioni di terminazione`
+      
+         
+             
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+AnyAction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Le azioni esprimibili nel linguaggio qak 
+non danno un linguaggio computazionalemte completo.
+
+Pertanto, volendo rendere eseguibile un modello qak, si introduce la possibilità
+che un attore qak possa esprimere una qualunque sequenza di azioni scritte in Kotlin.
+
+ 
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+ 
+  * - 
+     .. code::
+  
+        AnyAction : "[" body=KCODE "]"  ; 
+
+        terminal KCODE  : '#' ( . )* '#'  ; 
+
+    - 
+      :slide3:`[# ... #]`: Specifica di codice Kotlin. 
+ 
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di messaggista punto a punto
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Le operazioni di invio messaggio sono le seguenti:
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+ 
+  * - 
+     .. code::
+  
+       Forward: "forward" dest=[QActorDeclaration]  
+                 "-m" msgref=[Dispatch] ":" val=PHead;
+    - 
+      :slide3:`forward`: Invio di Dispatch.    :slidekp:`Es->` :ref:`demo0.qak`
+  * - 
+     .. code::
+  
+       Demand: "request" dest=[QActorDeclaration] 
+                 "-m" msgref=[Request] ":" val=PHead;
+    - 
+      :slide3:`request`. Invio di Request.   :slidekp:`Es->` :ref:`demorequest caller`
+  * - 
+     .. code::
+  
+       Answer: "replyTo" reqref=[Request] 
+              ("ofsender" sender=VarRef)?  
+              "with"  msgref=[Reply] 
+              ":" val=PHead 
+              ("caller==" dest=[QActorDeclaration])?;      
+    - 
+      :slide3:`replyTo`. Invio di Reply a una Request.  :slidekp:`Es->` :ref:`demorequest called`
+
+  * - 
+     .. code::
+  
+      ReplyReq  : "ask"  reqref=[Request] 
+        ":" val = PHead  
+        "forrequest" msgref=[Request] 
+        ( "caller==" dest=[QActorDeclaration])?;    
+    - 
+      :slide3:`ask`. Invio di Request a un attore che ha fatto una Request.   :slidekp:`Es->` :ref:`demoasktocaller caller`
+ 
+  * - 
+     .. code::
+  
+        AutoMsg: "autodispatch" msgref=[Dispatch]  
+          ":" val = PHead ;
+        
+        AutoRequest: "autorequest"  msgref=[Request]   
+          ":" val = PHead ;            
+    - 
+      :slide3:`autodispatch`. Invio di Dispatch di un attore a sè stesso.   
+
+      :slide3:`autorequest`. Invio di Request di un attore a sè stesso.   
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Accesso al contenuto dei messaggi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+  
+        MsgCond: "onMsg" "(" message=[Message] 
+             ":" msg = PHead ")" 
+             "{" ( condactions += StateAction )*  "}"
+             ("else" ifnot = NoMsgCond )? ;  
+
+        NoMsgCond:	  
+        "{" (  notcondactions += StateAction )*  "}";
+    - 
+      :slide3:`onMsg`: esegue il body *condactions* solo se il *messaggio corrente*  ha msgId di *<Message>*
+      e può essere **unificato in Prolog** con il template di messaggio definito nella dichiarazione :slide3:`e`
+      con il template *<msg>* specificato in *onMsg*.
+      
+      :slidekp:`Es->` :ref:`QActor demo0`
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Azioni condizionali
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * -
+      .. code::
+  
+         GuardedStateAction : 
+           "if" guard = AnyAction "{"
+            ( okactions += StateAction )*  
+           "}"   
+					 ("else" "{"
+            ( koactions += StateAction )*  
+            "}" )?; 
+
+    - :slide3:`if else`  
+  * -
+      .. code::
+  
+          IfSolvedAction: "ifSolved" "{" 
+           ( solvedactions += StateAction )*  "}"  
+					 ("else"  "{" 
+            ( notsolvedactions += StateAction )*  
+            "}")?;  
+
+    - :slide3:`ifSolved` 
+
+Supponiamo di avere un messaggio dichiarato come segue:
+
+.. code::
+
+   Dispatch m : m(X,Y,Z)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+payloadArg
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Lo stato relativo alla elaborazione di tale messaggio potrebbe voler accedere a un argomento 
+specifico del suo payload.
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - In tal caso si può usare la primitiva :blue:`onMsg` e la 
+      funzione  ``payloadArg(N)``:
+ 
+      .. code::
+
+        onMsg( m : m(X,Y,Z) ){ 
+          println("$payloadArg(1)")  //stampa Y
+        }  
+
+    - :blue:`payloadArg(N)` 
+       
+      Restituisce l'argomento di ordine N (convertito in  String) del payload di un messaggio.
+      
+      .. Esempio in :ref:`QActor demo0`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di messaggista via MQTT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+  
+        MqttConnect: "connectToMqttBroker" brokerAddr=STRING;   
+    - 
+      :slide3:`connectToMqttBroker`. Connessione a Broker MQTT.   :slidekp:`Es->` :ref:`demomqttexplicit.qak`
+  
+  * - 
+     .. code::
+  
+        Publish: "publish"  topic=STRING 
+                   "-m" msgref=[Event] ":" val=PHead;   
+    - 
+      :slide3:`publish`. Pubblicazione  su topic MQTT.   :slidekp:`Es->` :ref:`demomqttexplicit.qak`  
+  * - 
+     .. code::
+  
+        SubscribeTopic: "subscribe" topic=STRING;   
+    - 
+      :slide3:`subscribe`. Sottoscrizione  a topic MQTT.  :slidekp:`Es->` :ref:`demomqttexplicit.qak`  
+
+Al momento, la capacità espressiva del linguaggio qak è  :slide2:`limitata alla pubblicazione di eventi`, 
+ma è possibile **inviare dispatch usando MQTT** anche nella versione implicita, operarando a basso livello.
+:slidekp:`Es->` :ref:`Invio di dispatch via MQTT`.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di messaggista streamed
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+  
+        Subscribe : "subscribeTo" localactor=[QActor] 
+                      ("_" suffix=STRING)? "for" event=[Event];;   
+    - 
+      :slide3:`subscribeTo`. Sottoscrizione  a eventi emessi con la primitiva 
+      :ref:`emitlocalstream<Operazioni relative agli eventi>`. Si veda :ref:`Attori streamer`.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni relative agli eventi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+  
+       Emit: "emit" msgref=[Event] ":" val=PHead;   
+    - 
+      :slide3:`emit`. Emissione di un evento globale.  :slidekp:`Es->` :ref:`demo0.qak`
+  * - 
+     .. code::
+  
+       EmitDelayed: "emitdelayed" msgref=[Event] 
+                    ":" val=PHead
+                    delay=Delay;    
+    - 
+      :slide3:`emitdelayed`. Emissione di un evento dopo un dato tempo.    
+  * - 
+     .. code::
+  
+       EmitLocal: "emitlocal" 
+                      msgref=[Event] ":" val=PHead;   
+    - 
+      :slide3:`emitlocal`. Emissione di un evento locale .  
+  * - 
+     .. code::
+  
+       EmitLocalStream: "emitlocalstream" 
+               msgref=[Event] ":" val = PHead;   
+    - 
+      :slide3:`EmitLocalStream`. Emissione di un evento stream.  :slidekp:`Es->` :ref:`demostreams.qak`
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni relative alla osservabilità
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - 
+     .. code::
+  
+        UpdateResource: "updateResource"  val=AnyAction;   
+
+     
+    - 
+      :slide3:`updateResource`.  :slidekp:`Es->` :ref:`helloworld4`.
+
+  * - 
+     .. code::
+  
+        ObserveResource: "observeResource" 
+                resource=[QActorDeclaration] 
+                ("_" suffix=STRING)? 
+                ("msgid" msgid=[Dispatch] )?; 
+    - 
+      :slide3:`observeResource`.  :slidekp:`Es->` :ref:`helloworld4`.
+
+- L'informazione emessa un *observable* mediante  ``updateResource`` sono gestite 
+  dalla :ref:`Qak infrastructure` inviando a ciascun *observer* il dispatch che l'*observer* stesso ha dichiarato
+  (campo opzionale ``msgid``) di voler usare per ricevere l'informazione.
+
+- Se l'*observer* non dichiara **alcun dispatch**,** il nome usato dalla :ref:`Qak infrastructure` è ``coapinfo``.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di delegazione
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 40,60
+  :width: 100% 
+
+  * - 
+     .. code::
+  
+        Delegate : "delegate" 
+            msg=[BasicMessage] "to" localactor=[QActor];   
+    - 
+      :slide3:`delegate`
+
+      Delega la gestione del :ref:`BasicMessage<Dichiarazione dei messaggi>`  a un attore locale.
+      
+      :slidekp:`Es->` :ref:`demodelegate.qak`.
+
+  * - 
+     .. code::
+  
+        DelegateCurrent: 
+           "delegateCurrentMsgTo" localactor=[QActor];   
+    - 
+      :slide3:`delegateCurrentMsgTo`.  
+      
+      Delega la gestione del :ref:`BasicMessage<Dichiarazione dei messaggi>`  a un attore locale creato dinamicamente.
+      
+      :slidekp:`Es->` :ref:`democreate.qak` 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni per le basi di conoscenza
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 38,62
+  :width: 100%
+
+   
+  * - Dimostrazione goal Prolog 
+    - 
+      - :slide3:`solve`. 
+        
+        Si veda `PrologOps`_ (html)
+  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Creazione dinamica di attori
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+          CreateQActor: "create"  
+          /*1*/  executor=[QActorDeclaration]  
+          /*2*/  ("_" suffix=STRING)? 
+          /*3*/  (confined="confined")?  
+            (outinforeply=OutInforReply)? 
+
+    -  
+       :slide3:`create`:   
+         
+       #. Riferimento all':ref:`attore<Dichiarazione degli attori>` da creare  
+       #. Suffisso opzionale per il nome dell'attore creato
+       #. Attore creato attivato in modo confinato (vedi :ref:`confined<it.unibo.kactor.ActorBasic.kt>`)
+
+       :slidekp:`Es->` :ref:`democreate.qak` 
+ 
+  * -
+      .. code::
+  
+
+          OutInforReply: "requestbycreator" 
+            msgref=[Request]  ":" val = PHead ;	
+
+    -  
+       :slide3:`requestbycreator`:    richiesta inviata all'attore creato 
+ 
+  * -
+       .. code::
+  
+
+          ExecResult: "execresultReplyTo" 
+            reqref=[Request]  "with"  msgref=[Reply] 
+            ":" val = PHead ;
+
+    -  
+
+        .. :slide3:`emitforcreator`:    evento emesso per l'attore creatore 
+
+        :slide3:`execresultReplyTo`:  invio di Reply a una Request associata alla creazione di un Attore
+        Questa operazione è superata dalla primitiva :ref:`delegateCurrentMsgTo<Operazioni di delegazione>`.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di ritorno da interruzione
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+        ReturnFromInterrupt:  
+            "returnFromInterrupt" memo=STRING?; 
+
+    -  
+      -  restituisce il controllo allo stato precedente
+         (interrotto), senza eseguirne le azioni, ma :slide2:`solo le transizioni`.
+      -  :remark:`interrupt innestati non sono supportati`
+
+      :slidekp:`Es->` :ref:`demointerrupt.qak`
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni per esecuzione di codice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+         CodeRunSimple : "run" bitem=QualifiedName 
+            "(" 
+               (args+=PHead ("," args+=PHead)* )? 
+            ")";   
+
+    -  :slide3:`run`: ``run ccc.xxx()``  
+       
+       invoca  il metodo *static* ``xxx`` della classe ``ccc``. 
+       Esecuzione codice esterno 
+
+       .. Es. :ref:`datahandler`
+
+  * -
+      .. code::
+  
+         MachineExec: "machineExec" action=STRING ;   
+
+    - :slide3:`machineExec`:  ``machineExec(cmd:string)``
+  
+      Esecuzione codice di sistema locale 
+
+  * -
+      .. code::
+  
+         CodeRunActor: "qrun"   
+           aitem=QualifiedName 
+           "(" 
+               "myself" ( "," args+=PHead ("," args+=PHead)* )? 
+           ")";  
+
+    - :slide3:`qrun` : ``qrun ccc.xxx()``  
+      
+      invoca  il metodo *static*  ``xxx`` della classe ``ccc``. Il 
+      metodo deve avere come primo argomento un riferimento all'attore corrente (**myself**). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni con il tempo
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+        Delay: DelayInt | DelayVar | DelayVref | DelaySol ;
+
+        DelayInt : "delay" time=INT ;  
+
+    - :slide3:`delay` 
+
+  * -
+      .. code::
+  
+         MemoTime: "memoCurrentTime" store=VARID ;  
+
+    - :slide3:`memoCurrentTime` :slidekp:`Es->` :ref:`corecaller` in :ref:`demoaddtocore.qak` 
+
+  * -
+      .. code::
+  
+         Duration: "setDuration" 
+              store=VARID "from" start=VARID;  
+
+    - :slide3:`setDuration` 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di terminazione
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+         EndActor: "terminate" arg=INT;  
+
+    - :slide3:`terminate` 
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Operazioni di utilità
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * -
+      .. code::
+  
+         PrintCurMsg: "printCurrentMessage"  
+                   ("color" color=PCOLOR )? ;   
+
+    - :slide3:`printCurrentMessage` 
+
+  * -
+      .. code::
+  
+         Print:"println" 
+           "(" args=PHead ")" 
+            ("color" color=PCOLOR )?;  
+
+    - :slide3:`println` 
+
+
+
+
++++++++++++++++++++++++++++++++++++++++++++
+Parti ereditate
++++++++++++++++++++++++++++++++++++++++++++
+
+Ogni attore è una specializzazione della classe  ``it.unibo.kactor.ActorBasicFsm`` 
+(che specializza ``it.unibo.kactor.ActorBasic`` del progetto *unibo.qakactor23*) da cui eredita 
+un insieme di variabili e operazioni, tra cui quelle qui di seguito riportate.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Variabili interne importanti
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 38,62
+  :width: 100%
+
+  * - Sostituto di :blue:`this`
+    - 
+      - :slide3:`myself`.  
+  
+  * - Riferimento allo stato corrente
+    - 
+      - :slide3:`currentState`.  
+  
+  * - Riferimento al messaggio corrente
+    - 
+      - :slide3:`currentMsg`.  
+   
+  * - Memorizzazione messaggi non attesi
+    - 
+      - :slide3:`discardMsg On/Off`.    :slidekp:`Es->` :ref:`QActor demo0`
+  
+  
+  
+.. - Stati interrotti
+.. :slide3:`interruptStateTransitions`  : List<Transition>? = null.   
+..  - Stato interrotto
+.. :slide3:`interruptedState`.   : State? = null
+
+ 
+
+----------------------------------------------
+Note sulla implementazione
+----------------------------------------------
+
+ 
+++++++++++++++++++++++++++++++++++++++
+it.unibo.kactor.ActorBasic.kt
+++++++++++++++++++++++++++++++++++++++
+
+Realizza  il concetto di un ente computazionale dotato di flusso di controllo autonomo, capace di recevere e gestire
+messaggi in modo FIFO, sfruttando un  :ref:`Kotlin actor` incapsulato:
+
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * -  
+      .. code::
+
+         
+        /*1*/ abstract class  ActorBasic(  
+        /*2*/   name: String,
+        /*3*/   val scope:CoroutineScope=GlobalScope,
+        /*4*/   var discardMessages Boolean=false, 
+        /*5*/   val confined :    Boolean = false,
+        /*6*/   val ioBound :     Boolean = false,
+        /*7*/   val channelSize : Int = 50
+                ) : 
+        /*8*/     CoapResource(name), 
+        /*9*/      MqttCallback { 
+              ...      
+            //To be overridden by the application
+        /*10*/ abstract suspend fun actorBody(
+                  msg:IApplMessage)
+          }
+
+      .. image::  ./_static/img/Qak/ActorBasic.png
+          :align: center 
+          :width: 100% 
+      
+      Si veda: :ref:`actor channel`
+
+    - 
+      #. :slide3:`class ActorBasic` Si veda :ref:`Oggetti e classi` in :ref:`KotlinNotes`.
+      #. :slide3:`name` Nome (**univoco** nel sistema) dell'attore
+      #. :slide3:`scope` Si veda :ref:`Le coroutines` in :ref:`KotlinNotes` e  `kotlinUniboCoroutinesIntro`_ in `kotlinUnibo`_.
+      #. :slide3:`discardMessages` scarta o meno i messaggi non attesi. Usato principalmente in  
+         :ref:`ActorBasicFsm<it.unibo.kactor.ActorBasicFsm.kt>`
+      #. :slide3:`confined` Si veda :ref:`Confinamento` in :ref:`KotlinNotes`. 
+      #. :slide3:`ioBound` Si veda :ref:`Confinamento` in :ref:`KotlinNotes`. 
+      #. :slide3:`channelSize`  Si veda :ref:`I canali` in :ref:`KotlinNotes`.
+      #. :slide3:`CoapResource`  Si veda :ref:`Estende CoapResource`
+      #. :slide3:`MqttCallback` Si veda :ref:`Implementa MqttCallback` 
+      #. :slide3:`actorBody`  codice per la gestione dei messaggi :ref:`IApplMessage<unibo.basicomm23.interfaces.IApplMessage>` 
+         ricevuti dall'attore.
+         
+         .. Si veda :ref:`Suspending functions` in :ref:`KotlinNotes` e  :ref:`Come definire CodedQactor`.
+
+  
+
+ 
+.. Parte `kotlinInheritance`_
+ 
+
+La notazione: 
+
+.. code::
+
+  class  ActorBasic( ... ) : CoapResource(name), MqttCallback
+
+esprime in forma compatta che *ActorBasic* :remark:`eredita` dalla classe `CoapResource`_ e 
+:remark:`implementa` l'interfaccia `MqttCallback`_ (si veda `kotlinInheritance`_).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Estende CoapResource
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Ogni attore è anche una risorsa CoAP, specializzazione della classe definita nella libreria 
+https://www.eclipse.org/californium/.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Implementa MqttCallback 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Ogni attore implementa anche l'interfaccia
+``org.eclipse.paho.client.mqttv3.MqttCallback``. Pertanto
+ogni attore può gestire notifiche emesse da un MQTT client, attraverso il metodo ``messageArrived``. (TODO REF)
+
+  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+actor channel
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. code::
+
+    val actor = scope.actor<IApplMessage>( dispatcher, capacity=channelSize ) {
+      for( msg in channel ) {
+			  if( msg.msgContent() == "stopTheActor") {  channel.close() }
+        else actorBody( msg ) 
+      }
+    }
+
+Si veda: :ref:`Kotlin actor` in :ref:`KotlinNotes`.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+sendMessageToActor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Il metodo ``sendMessageToActor`` realizza l'invio di un messaggio ad un attore 
+di cui è noto il nome o la connessione.
+
+.. code::
+
+    suspend fun sendMessageToActor(msg : IApplMessage, 
+           destName: String, conn : Interaction? = null ) {
+      //realizza l'invio di msg all'attore di nome destName
+      //usando conn se conn!=null (destname è un 'alieno')
+      val destactor = context!!.hasActor(destName)
+      /* 
+        se destactor  è locale: destactor.kactor.send( msg )
+        altrimenti usa il proxy verso il contesto di destactor
+    }
+
+
+++++++++++++++++++++++++++++++++++++++
+it.unibo.kactor.ActorBasicFsm.kt
+++++++++++++++++++++++++++++++++++++++
+
+.. code::
+
+    abstract class ActorBasicFsm(  qafsmname:  String,
+                          fsmscope: CoroutineScope = GlobalScope,
+                discardMessages : Boolean = false,
+                          confined :    Boolean = false,
+                          ioBound :     Boolean = false,
+                          channelSize : Int = 50
+    ): ActorBasic(qafsmname,fsmscope,discardMessages,confined,ioBound,channelSize) { ... }
+
+- Un attore che specializza questa classe opera come un automa a stati finiti.
+
+- Il codice Kotlin viene generato dalla :ref:`Qak software factory`
+
+- I messaggi ricevuti sul canale Kotlin
+  (ereditato da :ref:`ActorBasic<it.unibo.kactor.ActorBasic.kt>`) sono gestiti in relazione 
+  alle specifiche sulle transizioni associate allo stato corrrente dell'automa.
+
+ 
+NEXT: :ref:`QakActors24Demo`

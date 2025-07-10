@@ -1,0 +1,173 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta    
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp 
+
+=====================================
+Libri
+=====================================
+
+.. list-table:: 
+  :widths: 55,45
+  :width: 100%
+  
+  * - .. image:: ./_static/img/Libri/Algdefinitivo.png
+          :align: center
+          :width: 60%
+    -  
+      - L'algoritmo definitivo. La macchina che impara da sola e il futuro del nostro mondo
+      - 2016
+      - ISBN-13 978-8833927060
+      - 354 pagine
+
+      Le *tribu'*: Simbolisti,Connesionisti,Evoluzionisti,Bayesiani,Analogisti
+  
+  * - .. image:: ./_static/img/Libri/DysonCattedrale.png
+          :align: center
+          :width: 60%
+    -  
+      - La cattedrale di Turing. Le origini dell'universo digitale
+      - 2012
+      - ISBN-13 978-8875783181
+      - 480 pagine
+
+  * - .. image:: ./_static/img/Libri/Maniac.png
+          :align: center
+          :width: 60%
+    -  
+      - MANIAC
+      - 2023
+      - ISBN-13 978-8845938320
+      - 352 pagine
+
+  * - .. image:: ./_static/img/Libri/IO&IA.png
+          :align: center
+          :width: 60%
+    -  
+      - Io & Ia. Mente, cervello e GPT 
+      - 2023
+      - ISBN-13 9978-8849876642
+      - 176 pagine
+
+
+  * - .. image:: ./_static/img/Libri/Aresu.png
+          :align: center
+          :width: 60%
+    -  
+      - Geopolitica dell'intelligenza artificiale 
+      - 2024
+      - ISBN-13 978-8807174735
+      - 576 pagine
+
+
+
+
+  * - .. image:: ./_static/img/Libri/Cristuanini1.png
+          :align: center
+          :width: 60%
+    -  
+      - Machina sapiens. L'algoritmo che ci ha rubato il segreto della conoscenza
+      - 2024
+      - ISBN-13 978-8815384461
+      - 152 pagine
+
+
+
+  * - .. image:: ./_static/img/Libri/ChipWar.png
+          :align: center
+          :width: 60%
+    -  
+      - Chip war. La sfida tra Cina e USA per il controllo della tecnologia che deciderà il nostro futuro
+      - 2024
+      - ISBN-13 978-8811011699
+      - 432 pagine
+
+  * - .. image:: ./_static/img/Libri/PenroseLamente.png
+          :align: center
+          :width: 60%
+    -  
+      - La mente nuova dell'imperatore
+      - 2000
+      - ISBN-13 978-8817865524
+      - 622 pagine
+
+
+
+
+  * - .. image:: ./_static/img/Libri/CarrolQualcosa.png
+          :align: center
+          :width: 60%
+    -  
+      - Qualcosa di nascosto a fondo: Il mondo dei quanti e l'emergere dello spaziotempo
+      - 2014
+      - ISBN-13 978-8806253899
+      - 398 pagine
+
+  * - .. image:: ./_static/img/Libri/RovelliRealtà.png
+          :align: center
+          :width: 60%
+    -  
+      - La realtà non è come ci appare. La struttura elementare delle cose
+      - 2014
+      - ISBN-13 978-8860306418
+      - 248 pagine
+
+  * - .. image:: ./_static/img/Libri/AutoOrg.png
+          :align: center
+          :width: 60%
+    -  
+      - Auto-organizzazioni. Il mistero dell'emergenza dal basso nei sistemi fisici, biologici e sociali
+      - 2011
+      - ISBN-13 978-8831708012
+      - 280 pagine
+
+  * - .. image:: ./_static/img/Libri/FagginIrriduc.png
+          :align: center
+          :width: 60%
+    -  
+      - Irriducibile. La coscienza, la vita. i computer e la nostra natura
+      - 2022
+      - ISBN-13 978-8804739036
+      - 300 pagine
+
+
+  * - .. image:: ./_static/img/Libri/Quantum.png
+          :align: center
+          :width: 60%
+    -  
+      - Quantum Computation and Quantum Information: 10th Anniversary Edition
+      - 2010
+      - ISBN-13 978-1107002173
+      - 702 pagine
+
+
+  * - .. image:: ./_static/img/Libri/Minardi.png
+          :align: center
+          :width: 60%
+    -  
+      - Dalla Macchina di Turing al Qubit: Introduzione all'Informatica Quantistica
+      - 2023
+      - ISBN-13 979-8863380292
+      - 328 pagine
+
+
+
+
+------------------------------------
+Tools
+------------------------------------
+
+
+- https://simonbrown.je/
+- https://c4model.info/#what-is-the-c4-model
+- https://static.simonbrown.je/devsum2024-c4-model-misconceptions-misuses-mistakes.pdf
+- VIDEO OK https://www.google.com/search?q=modello+C4+di+Simon+Brown&sca_esv=d544c2d20ee04d76&rlz=1C1RXQR_itIT929IT929&sxsrf=AHTn8zq73qXUrUQzJtAwkUhXB-XoHFsN-A%3A1739457426633&ei=kgOuZ-irJvqWi-gP15--wAk&ved=0ahUKEwjovJDw78CLAxV6ywIHHdePD5gQ4dUDCBA&uact=5&oq=modello+C4+di+Simon+Brown&gs_lp=Egxnd3Mtd2l6LXNlcnAiGW1vZGVsbG8gQzQgZGkgU2ltb24gQnJvd24yBRAhGKABMgUQIRigAUiXHVDGBFjOFXABeAGQAQCYAW2gAbMDqgEDNC4xuAEDyAEA-AEB-AECmAIGoALDA8ICChAAGLADGNYEGEfCAgUQABiABMICBhAAGBYYHsICCBAAGIAEGKIEwgIFEAAY7wXCAggQABiiBBiJBZgDAIgGAZAGCJIHAzUuMaAH7hE&sclient=gws-wiz-serp#fpstate=ive&vld=cid:2a5301df,vid:KvoBrUd1-5E,st:0
+- https://icepanel.io/?utm_source=c4_model_info&utm_medium=website&utm_campaign=c4_model_info_website
+- https://it.wikipedia.org/wiki/Single-page_application

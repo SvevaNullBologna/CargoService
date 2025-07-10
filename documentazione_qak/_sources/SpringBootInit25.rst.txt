@@ -1,0 +1,552 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3
+
+.. _SpringBoot: https://spring.io/projects/spring-boot
+.. _Applicazione web: https://it.wikipedia.org/wiki/Applicazione_web    
+.. _WebappFrameworks: https://www.geeksforgeeks.org/top-10-frameworks-for-web-applications/
+.. _Springio: https://spring.io/
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _Node.js: https://nodejs.org/it/
+.. _Express: https://expressjs.com/it/
+.. _CleanArchitecture: https://clevercoder.net/2018/09/08/clean-architecture-summary-review
+.. _Buster: https://www.raspberrypi.com/news/buster-the-new-version-of-raspbian/
+.. _Bullseye: https://www.raspberrypi.com/news/raspberry-pi-os-debian-bullseye/
+.. _REST : https://en.wikipedia.org/wiki/Representational_state_transfer
+.. _HATEOAS: https://en.wikipedia.org/wiki/HATEOAS
+.. _BannerTool: https://manytools.org/hacker-tools/ascii-banner/
+.. _jQuery: https://www.w3schools.com/jquery/default.asp
+.. _Thymeleaf: https://www.thymeleaf.org/
+.. _SpringMVCModel: https://www.baeldung.com/spring-mvc-model-model-map-model-view
+.. _Introduzione a Spring Boot: https://azure.microsoft.com/it-it/resources/cloud-computing-dictionary/what-is-java-spring-boot/
+
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _SockJs: https://openbase.com/js/sockjs/documentation#what-is-sockjs
+.. _Bootstrap: https://getbootstrap.com/
+.. _jsdelivr: https://www.jsdelivr.com/
+.. _WebJars: https://mvnrepository.com/artifact/org.webjars
+.. _WebJarsExplained: https://www.baeldung.com/maven-webjars 
+.. _WebJarsDocs: https://getbootstrap.com/docs/5.1/getting-started/introduction/
+.. _WebJarsExamples: https://getbootstrap.com/docs/5.1/examples/
+.. _WebJarsContainer: https://getbootstrap.com/docs/5.1/layout/containers/
+.. _Heart-beating: https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
+
+
+.. _conwaygui: ../../../../conwaygui 
+.. _HIControllerDemo.java: ../../../../conwaygui/src/main/java/unibo/conwaygui/HIControllerDemo.java
+
+
+==================================
+SpringBootInit25
+==================================  
+
+Come detto in ref:, lo sviluppo di una `Applicazione web`_ -> non può presceindere dall'uso di uno dei numerosi 
+framework disponibili, come ad esempio il framework `SpringBoot`_ > cui facciamo riferikmento in questo documento.
+
+
+-----------------------------------------------
+Primi passi con SpringBoot
+-----------------------------------------------
+:slide3:`progetto conwaygui`  `conwaygui`_
+
+:slide1:`Usiamo Spring initializr`
+
+   .. image::  ./_static/img/Spring/conwayguiInit.PNG
+     :align: center 
+     :width: 100%
+
+ 
+
+.. Spring Boot da ``3.0.0`` in avanti richiede ``Java 17`` come versione minima. Poichè noi usiamo Java 8 o 11,  :slide3:`ci dovremo attenere alla serie di rilascio  2.x`.
+
+
+
+#. Connettersi a https://start.spring.io/ 
+#. Selezionare ``Gradle-Groovy``, ``Java``, ``3.4.2`` Group= ``unibo.disi``, Artifact= ``conwaygui`` (Options:Packaging=``Jar``, 
+   Java = ``17`` ) e le seguenti Dipendenze:
+
+   - :blue:`Spring Web`: crea applicazioni Web, inclusi RESTful, utilizzando Spring MVC. Utilizza Apache Tomcat come contenitore incorporato predefinito.
+   - :blue:`Thymeleaf`: `Thymeleaf`_ è un moderno motore di template Java lato server per ambienti web e standalone,
+     che mira a fornire un modo elegante e altamente gestibile per creare modelli. 
+     Consente di visualizzare correttamente l'HTML nei browser e come prototipi statici.
+   - :blue:`WebSocket`: per l'uso delle WebSocket in Spring.
+   - :blue:`Spring Boot DevTools`: Fornisce riavvii rapidi delle applicazioni, LiveReload e configurazioni per un'esperienza di sviluppo avanzata. 
+     Accelera questo ciclo di aggiornamento (codifica di una modifica, riavvio dell'applicazione e aggiornamento del browser 
+     per visualizzare la modifica).
+
+#. Attivare **Generate**
+#. Decomprimiere il file generato ``conwaygui.zip`` nella directory di lavoro di *ISS25* 
+
+
+.. list-table::
+    :widths: 25,75
+    :width: 100%
+    
+    * - Risultato della decompressione:
+
+        .. image::  ./_static/img/Spring/conwayguiInitDirs.png
+            :align: center 
+            :width: 100%
+      
+      - file ``build.gradle``
+ 
+        .. code::
+
+            plugins {
+                id 'java'
+                id 'org.springframework.boot' version '3.4.2'
+                id 'io.spring.dependency-management' version '1.1.7'
+            }
+
+            group = 'unibo.disi'
+            version = '0.0.1-SNAPSHOT'
+
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(17)
+                }
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+                implementation 'org.springframework.boot:spring-boot-starter-web'
+                implementation 'org.springframework.boot:spring-boot-starter-websocket'
+                developmentOnly 'org.springframework.boot:spring-boot-devtools'
+                testImplementation 'org.springframework.boot:spring-boot-starter-test'
+                testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+            }
+
+
+
+
++++++++++++++++++++++++++++++++++
+Progetto conwaygui
++++++++++++++++++++++++++++++++++
+
+ 
+
+
+
+#. Aprire un IDE e aprire o importare il progetto `conwaygui`_. 
+   Osservare la classe generata ``unibo.disi.conwaygui.ConwayguiApplication.java``
+
+    .. code:: Java
+
+        package unibo.disi.conwaygui;
+
+        import org.springframework.boot.SpringApplication;
+        import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+        @SpringBootApplication
+        public class ConwayguiApplication {
+
+            public static void main(String[] args) {
+                SpringApplication.run(ConwayguiApplication.class, args);
+            }
+
+        }
+#. esegure
+ 
+   ``gradlew build``
+#. Eseguire l'applicazione (``gradlew bootrun``) e aprire un browser su  ``localhost:8080``: compare la pagina che segue:
+
+   .. image::  ./_static/img/Spring/springboot1.PNG
+     :align: center 
+     :width: 50%
+
+------------------------------------------------------
+Verso una prima applicazione
+------------------------------------------------------
+
+
+#. Creare il file ``conwaygui\src\main\resources\templates\welcome.html`` con il seguente contenuto:
+
+   .. code:: Html
+
+    <html xmlns:th="http://www.thymeleaf.org"> 
+    <head><title>Welcome</title></head>
+    <body>
+    <h1>Welcome (in templates)</h1>
+    <p>Welcome to <b><span th:text="${arg}">Our Arg</span></b>.</p>
+    </body>
+    </html>
+
+   :slide2:`th:`: `Thymeleaf`_  sostituisce  il valore risultante dalla valutazione di :blue:`${arg}`
+   durante l'elaborazione del modello della pagina.
+
+#. Inserire nel file ``conwaygui\src\main\resources\application.properties`` quanto segue:
+
+   .. code:: 
+
+      spring.application.name=conwaygui
+
+      spring.banner.location=classpath:banner.txt
+      server.port   = 8085
+      human.logo    = Gui for human-machine interaction
+      machine.logo  = Gui for machine-to-machine interaction
+
+#. Inserire nella ``directory resources`` un file ``banner.txt``  personalizzato ( si veda `BannerTool`_, Font ``Small``).  
+
+
+:slide2:`Un primo controller`
+
++++++++++++++++++++++++++++++++++++++++++++++
+HIControllerDemo 
++++++++++++++++++++++++++++++++++++++++++++++
+
+Per introdurre un primo controller, creiamo (nel package ``unibo.disi.conwaygui``) un file `HIControllerDemo.java`_ con il seguente contenuto:
+
+.. code:: 
+
+    package unibo.conwaygui;
+    import ...
+    
+    @Controller //ANNOTAZIONE IMPORTANTE
+    public class HIControllerDemo { 
+    @Value("${spring.application.name}")
+    String appName;
+
+    @GetMapping("/") 		 
+    public String homePage(Model model) {
+        model.addAttribute("arg", appName);
+        return "welcome";
+    } 
+            
+
+
+Attiviamo di nuovo l'applicazione e un browser su ``localhost:8085``. Vedremo comparire:
+
+.. image::  ./_static/img/Spring/springboot25-2.PNG
+  :align: center 
+  :width: 60%
+
+
+
+
+
+:slide1:`Usiamo le WebSocket`
+
+------------------------------
+SpringBootWebSocket
+------------------------------
+
+
+.. https://www.dariawan.com/tutorials/spring/spring-boot-websocket-basic-example/
+
+Come primo semplice esempio di uso di :ref:`WebSocket` in Spring, creiamo una applicazione che consente
+a un client di utilizzare un browser per inviare un messaggio o una immagine a un server 
+che provvede a visualizzare il messaggio o l'immagine presso tutti i client collegati.
+
+.. _SetupNoStomp:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Usare le WebSocket in SpringBoot
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Con riferimento al progetto :ref:`Progetto conwaygui` inseriamo nel file ``build.gradle`` la seguente dipendenza:
+
+.. code::
+
+    repositories {
+        mavenCentral()
+        flatDir { dirs '../unibolibs' }
+    }
+
+   dependencies {
+    ...
+    //Added for WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    //JSON
+     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    //CUSTOM unibo
+	implementation name: 'unibo.basicomm23-1.0'
+   }
+
+
+:slide2:`Operiamo senza un Controller`
+
+-  Inseriamo un file ``index.html`` in **resources/static** per poter lanciare un'applicazione che 
+   presenta un'*area  di ouput* per la visualizzazione di messaggi e un'*area di input* per la loro 
+   immissione. 
+
+.. _index:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Il file static/index.html
++++++++++++++++++++++++++++++++++++++++++++++++
+
+    .. code:: 
+
+        <html>
+        <head>
+            <title>static/index</title>
+        </head>
+
+        <body>
+        <h1>Welcome in static/index.html</h1>
+           
+        <textarea id="messageArea" name="messageArea" rows="10" cols="60">
+        </textarea>
+
+        <div>
+            <p>Type a message and hit send:</p>
+            <input id="inputmessage"/><button id="sendMessage">Send</button>
+        </div>
+
+        <script src="wsminimal.js"></script>
+        </body>
+        </html>
+
+-  In questo caso, l'applicazione funzionerà anche senza la introduzione di un Controller,
+   in quanto Spring utilizza di default il file ``resources/static/index.html``. 
+   
+   Per fare una prova, :remark:`commentiamo l'annotazione @Controller` in :ref:`HIControllerDemo`, 
+   rilanciamo l'applicazione e  apriamo su un browser con ``localhost:8085``.
+
+
+
+.. Notiamo che l'applicazione funziona anche in assenza di un controller, in quanto Spring utilizza di default il file **resources/static/index.html**.
+
+La pagina si presenta come segue:
+
+.. image:: ./_static/img/Spring/pageMinimal.PNG
+    :align: center
+    :width: 50%
+
+Se invece è presente il controller :ref:`HIControllerDemo`, allora apriamo in un browser la pagina 
+``http://localhost:8085/index.html``.
+    
+
+
+:slide1:`Funzioni JS nella pagina`
+
+.. _wsminimal:
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Lo script wsminimal.js
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Lo script  ``resource/static/wsminimal.js`` definisce funzioni che realizzano la connessione con il server
+e funzioni di ``I/O`` che permettono di inviare un messaggio al server e di visualizzare la risposta.
+
+
+:slide2:`Funzioni per inviare e ricevere`
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Funzioni di connessione e ricezione messaggi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+- *connect*: effettua una connessione alla WebSocket e riceve i messaggi inviati dal server.
+
+.. _connect:
+
+.. code:: js
+
+    var socket = connect();
+
+    function connect(){
+      var host     = document.location.host;
+      var pathname =  document.location.pathname;
+      var addr     = "ws://" +host + pathname + "socket"  ;
+
+      // Assicura che sia aperta un unica connessione
+      if(socket!==undefined && socket.readyState!==WebSocket.CLOSED){
+        alert("WARNING: Connessione WebSocket già stabilita");
+      }
+      socket = new WebSocket(addr); //CONNESSIONE
+
+      socket.onopen = function (event) {
+        addMessageToWindow("Connected");
+      };
+      socket.onmessage = function (event) { //RICEZIONE
+        addMessageToWindow(""+`${event.data}`);
+      };
+      return socket;
+    }//connect
+
+.. Si noti la struttura di codice già incontrata in Java.
+
+:slide2:`Funzioni per aggiornare`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Funzioni di input/output
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. _sendMessage:
+
+- *sendMessage*: invia un messaggio al server attraverso la socket 
+- *addMessageToWindow* : visualizza un messaggio nella output area 
+
+.. code:: js
+
+    const messageWindow   = document.getElementById("messageArea");
+    const messageInput    = document.getElementById("inputmessage");
+    const sendButton      = document.getElementById("sendMessage");
+
+    sendButton.onclick = function (event) {
+        sendMessage(messageInput.value);
+        messageInput.value = "";
+    }
+    function sendMessage(message) {
+        var jsonMsg = JSON.stringify( {'name': message});
+        socket.send(message);
+    }
+    function addMessageToWindow(message) {
+        messageWindow.innerHTML += message  + "\n"
+    }
+
+:slide1:`Implementiamo WebSocketConfigurer`
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Configurazione con WebSocketConfigurer
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Affinché l'applicazione Spring inoltri le richieste di un client al server, 
+è necessario registrare un gestore utilizzando una classe di configurazione 
+che implementa l'interfaccia ``WebSocketConfigurer``.
+
+.. code:: java
+
+    @Configuration
+    @EnableWebSocket
+    public class WebSocketConfiguration implements WebSocketConfigurer {
+    public static final WebSocketHandlerDemo wshandler = new WebSocketHandlerDemo();
+    public static final String wspath                  = "socket";
+      @Override
+      public void registerWebSocketHandlers(WebSocketHandlerRegistry registry){
+        registry.addHandler(wshandler, wspath).setAllowedOrigins("*");
+      }
+    }
+
+L'annotazione ``@EnableWebSocket`` (da aggiungere a una classe qualificata ``@Configuration``)  
+abilita l'uso delle plain WebSocket. 
+
+In base alla configurazione :remark:`wspath="socket"` trasferita in fase di registrazione dell'handler
+:ref:`WebSocketHandlerDemo<Il gestore WebSocketHandlerDemo>`, il server, avvalendosi di una istanza di ``WebSocketHandler``, 
+risponderà a richieste inviate al seguente indirizzo:
+
+.. code:: java
+
+    ws://<serverIP>:8085/socket
+
+:slide1:`Definiamo il gestore dei messaggi`
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Il gestore WebSocketHandlerDemo
++++++++++++++++++++++++++++++++++++++++++++++++
+
+La classe  ``WebSocketHandlerDemo`` definisce un gestore custom di messaggi come specializzazione della classe astratta
+``org.springframework.web.socket.handler.AbstractWebSocketHandler`` 
+(o delle sue sottoclassi ``TextWebSocketHandler`` o ``BinaryWebSocketHandler``).    
+
+.. code:: java
+
+    public class WebSocketHandlerDemo 
+        extends AbstractWebSocketHandler {//che implements WebSocketHandler interface
+      
+      private final List<WebSocketSession> sessions=new CopyOnWriteArrayList<>();
+        ...
+    }
+
+:slide2:`Propaghiamo l'informazione dal server ai client`
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Propagazione a tutti i client
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Per propagare un messaggio a tutti i client connessi attraverso la WebSocket, basta tenere traccia
+delle sessioni.
+
+.. code:: java
+
+    @Override  //AbstractWebSocketHandler
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception{
+        sessions.add(session);
+        super.afterConnectionEstablished(session);
+    }
+    @Override //AbstractWebSocketHandler
+    public void afterConnectionClosed( WebSocketSession session, 
+                            CloseStatus status) throws Exception{
+        sessions.remove(session);
+        super.afterConnectionClosed(session, status);
+    }
+
+
+Nel nostro caso, la gestione del messaggio ricevuto 
+consiste nel reinviare sulla WebSocket il messaggio stesso.
+Questa azione del server porrà in esecuzione sul client  l'operazione ``socket.onmessage`` 
+(si veda `connect`_) che visualizzerà il messaggio nell'area di output.
+
+.. code:: java
+
+    @Override //AbstractWebSocketHandler
+    protected void handleTextMessage(WebSocketSession session, 
+                        TextMessage message) throws IOException{
+        String cmd = message.getPayload();
+        sendToAll("echo: "+cmd);
+    }
+
+    protected void sendToAll(TextMessage message) throws IOException{
+        Iterator<WebSocketSession> iter = sessions.iterator();
+        while( iter.hasNext() ){ iter.next().sendMessage(message);}
+    }
+
++++++++++++++++++++++++++++++++++++++++++++++++
+Un client in Java
++++++++++++++++++++++++++++++++++++++++++++++++
+Definiamo un client in Java che usa
+:ref:`ConnectionFactory<unibo.basicomm23.utils.ConnectionFactory>` per creare una connessione 
+di tipo :ref:`WsConnection` con il server,
+aggiungendo se stesso come osservaore sulla connessione.
+
+.. code::
+
+    public class TestClient extends ApplAbstractObserver {
+        private Interaction2021 clientConn;
+
+        public TestClient(){
+            clientConn = ConnectionFactory.createClientSupport(
+                    ProtocolType.ws, "localhost", "8085/socket"); //!!! NOTE 8085/socket
+            ((WsConnection)clientConn ).addObserver(this);
+        }
+
+        @Override
+        public void update(String s) {
+            CommUtils.outblue("TestClient update=" + s);
+        }
+
+        public void doJob(){
+            try {
+                clientConn.forward("hello from Java client");
+                CommUtils.outblue("TestClient forward done " );
+                Thread.sleep(2000); //To sse the update
+            } catch (Exception ex) {
+                CommUtils.outred("TestClient ERROR: " + ex.getMessage());
+            }
+        }
+        public static void main(String[] args) {
+            TestClient appl = new TestClient();
+            appl.doJob();
+        }
+    }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Esecuzione del client
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#. Attivare l'applicazione Spring ``conwayguiApplication`` **SENZA Controller**
+#. Aprire un browser su ``localhost:8085``
+#. Attivare ``TestClient`` e osservare l'update  sulla output area della pagina
+
+

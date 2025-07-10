@@ -1,0 +1,34 @@
+
+==============================================
+Ere informatiche
+==============================================
+
+Era dei Mainframe (anni '50 - '70)
+
+Subroutine e funzioni: Le prime forme di componenti software erano le subroutine e le funzioni, blocchi di codice riutilizzabili all'interno di un programma.
+Moduli: Con la crescita della complessità dei software, si è iniziato a raggruppare subroutine e funzioni in moduli, unità logiche di codice con una specifica funzionalità.
+Librerie: I moduli potevano essere compilati e collegati ad altri programmi, formando librerie di codice riutilizzabile.
+
+Era dei Personal Computer (anni '80 - '90)
+
+Componenti software "packaged": Con la diffusione dei PC, si è sviluppato un mercato di componenti software "packaged", ovvero librerie di codice precompilato che potevano essere integrate in diverse applicazioni.
+Oggetti: La programmazione orientata agli oggetti (OOP) ha introdotto il concetto di oggetto, un'entità software che incapsula dati e metodi che operano su tali dati. Gli oggetti potevano essere riutilizzati e combinati per creare applicazioni più complesse.
+Componenti COM/DCOM: Microsoft ha introdotto i componenti COM (Component Object Model) e DCOM (Distributed COM), che permettevano la creazione di componenti software riutilizzabili e interoperabili tra diverse applicazioni.
+
+Era di Internet (anni '90 - 2000)
+
+Componenti web: Con la diffusione di Internet, si sono sviluppati componenti software specifici per il web, come i controlli ActiveX e i plugin Java, che permettevano di aggiungere funzionalità interattive alle pagine web.
+Servizi web: I servizi web (es. SOAP, REST) hanno introdotto un nuovo modo di pensare ai componenti software, come unità di funzionalità accessibili tramite protocolli standard.
+Framework: Si sono sviluppati framework software (es. .NET, Java EE), che offrivano un insieme di componenti e strumenti per semplificare lo sviluppo di applicazioni complesse.
+
+Era del Cloud Computing (anni 2000 - oggi)
+
+Microservizi: L'architettura a microservizi ha portato a una nuova visione dei componenti software, come piccoli servizi autonomi che comunicano tra loro tramite API.
+Container: La containerizzazione (es. Docker) ha semplificato la distribuzione e la gestione dei componenti software, garantendo la portabilità tra diversi ambienti.
+Funzioni serverless: Le funzioni serverless (es. AWS Lambda, Azure Functions) rappresentano un'ulteriore evoluzione, in cui i componenti software sono eseguiti "on demand" senza la necessità di gestire server.
+
+Tendenze attuali e future
+
+Componenti IA: L'intelligenza artificiale sta portando allo sviluppo di nuovi tipi di componenti software, come modelli di machine learning pre-addestrati che possono essere integrati in diverse applicazioni.
+Componenti adattivi: I componenti software del futuro dovranno essere in grado di adattarsi dinamicamente ai cambiamenti delle esigenze e dell'ambiente.
+Componenti "low-code/no-code": Le piattaforme "low-code/no-code" permettono di creare componenti software senza dover scrivere codice, aprendo nuove opportunità per la creazione di applicazioni personalizzate.

@@ -1,0 +1,65 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta       
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp
+
+============================================
+CriteriValutazioneISS2025
+============================================
+
+
+
+---------------------------------
+Come si valuta il lavoro svolto
+---------------------------------
+
+#. La costruzione di un prototipo di sistema software che soddisfa l'insieme di requisiti dato nel :ref:`Temafinale<TemaFinale22>`, 
+   mira a verificare il raggiungimento di adeguate abilità teorico/pratiche 
+   e può essere effettuata in :remark:`modo individuale` oppure in un :remark:`gruppo di non più di tre studenti`.
+#. La discussione individuale orale che segue la demo del prototipo è volta a valutare  
+   :blue:`il livello di conoscenza, consapevolezza e di autonomia analitico/progettuale` :remark:`del singolo studente`.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Dettagli sul colloquio orale
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+- 48 h prima del colloqio, il codice del sistema finale deve essere stato pubblicato sul sito del prototipo
+  (individuale o di gruppo), 
+  dandone relativa informazione via mail al docente.
+
+- Il giorno del colloquio, ogni gruppo deve avere effettuato gli opportuni preparativi per la/le demo, 
+  in modo da essere subito operativo.
+
+L'ordine di presentazione dei gruppi verrà opportunamente stabilito dal docente e si svolgerà come qui di seguito
+indicato.
+
+#. Presentazione (collettiva di gruppo) di una :slide2:`demo 'live' del sistema finale` di durata 10-15(max) minuti.
+   La demo deve mostrare la esecuzione di almeno un Test(Plan) automatizzato ritenuto significativo.
+   Per applicazioni che NON usano robot reali NON sono ammessi video, 
+   che potrebbero essere invece utili per mostrare il funzionamento di robot reali 
+   o di sistemi che includono il RaspberryPi o altri dispositivi
+#. Presentazione (collettiva di gruppo) del progetto del sistema e della sua relazione 
+   con la fase di analisi. In questa fase è RICHIESTA la preparazione di 
+   :slide2:`5-7 SLIDES  di illustrazione del processo e dell'architettura finale` con figure e (se ritenuto utile) 
+   riferimenti al codice. 
+   Al termine di queste fasi il gruppo può raggiungere un 
+   
+   :slide3:`punteggio massimo di 27/30`.
+#. Domande (per esempi, si veda qui sotto) rivolte dal docente a singole persone, 
+   riguardo al prodotto, al progetto e alla analisi del problema/requisiti. 
+   Al termine di questa fase, il **singolo studente** può raggiungere un 
+   
+   :slide3:`punteggio massimo di 29/30`.
+#. Altre domande rivolte dal docente a singole persone. Al termine di questa fase, il **singolo studente**
+   può raggiungere il 
+   
+   :slide3:`punteggio di 30 e lode`.
+
+Si veda anche :ref:`OrganizzareLaValutazioneFinale`

@@ -1,0 +1,505 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3  
+.. role:: slidekp
+
+========================================
+History
+========================================
+
+.. _Gottfried Wilhelm von Leibniz: https://it.wikipedia.org/wiki/Gottfried_Wilhelm_von_Leibniz
+.. _Thomas Bayes: https://it.wikipedia.org/wiki/Thomas_Bayes
+.. _George Boole: https://it.wikipedia.org/wiki/George_Boole
+.. _Ada Lovelace: https://it.wikipedia.org/wiki/Ada_Lovelace
+.. _Alan Turing: https://it.wikipedia.org/wiki/Alan_Turing
+.. _John von Neumann: https://it.wikipedia.org/wiki/John_von_Neumann
+.. _Kurt Friedrich Gödel: https://it.wikipedia.org/wiki/Kurt_G%C3%B6del
+.. _Grace Murray Hopper: https://it.wikipedia.org/wiki/Grace_Murray_Hopper
+.. _Claude Shannon: https://it.wikipedia.org/wiki/Claude_Shannon
+.. _Richard Phillips Feynman: https://it.wikipedia.org/wiki/Richard_Feynman
+.. _John McCarthy: https://it.wikipedia.org/wiki/John_McCarthy
+.. _Niklaus Wirth: https://it.wikipedia.org/wiki/Niklaus_Wirth
+.. _Steve Jobs: https://it.wikipedia.org/wiki/Steve_Jobs
+.. _Geoffrey Hinton: https://it.wikipedia.org/wiki/Geoffrey_Hinton
+.. _Raymond Kurzweil: https://it.wikipedia.org/wiki/Raymond_Kurzweil
+.. _Barners-Lee: https://it.wikipedia.org/wiki/Tim_Berners-Lee
+.. _Linus Torvalds: https://it.wikipedia.org/wiki/Linus_Torvalds
+.. _Larry Page: https://it.wikipedia.org/wiki/Larry_Page
+.. _Jen-Hsun (Jensen) Huang: https://en.wikipedia.org/wiki/Jensen_Huang
+.. _Edsger W. Dijkstra: https://it.wikipedia.org/wiki/Edsger_W._Dijkstra
+.. _Morris Chung-Mou Chang: https://it.wikipedia.org/wiki/Morris_Chang
+ 
+.. _Demis Hassabis: https://it.wikipedia.org/wiki/Demis_Hassabis
+.. _Fei-Fei Li: https://it.wikipedia.org/wiki/Fei-Fei_Li
+.. _Google: https://it.wikipedia.org/wiki/Google
+.. _Amazon: https://it.wikipedia.org/wiki/Amazon
+.. _OpenAI: https://en.wikipedia.org/wiki/OpenAI
+.. _Microssoft:
+.. _NVIDIA:
+.. _TMSC:
+.. _IBM:
+.. _Anthropic: https://en.wikipedia.org/wiki/Anthropic
+
+-------------------------------------
+I padri
+-------------------------------------
+
+
+
+.. list-table:: 
+  :widths: 30,70
+  :width: 100%
+  
+  * -   
+      .. image:: ./_static/img/History/Leibniz.png
+          :align: center
+          :width: 50% 
+       
+      `Gottfried Wilhelm von Leibniz`_  1646 - 1716
+
+
+    -
+      Filosofo, matematico, scienziato, teologo, linguista, glottoteta, diplomatico, 
+      giurista, storico e magistrato tedesco. 
+      Considerato il precursore dell'informatica, della neuroinformatica e del calcolo automatico.
+      Una delle poche figure di "genio universale"
+
+
+  * -   
+      .. image:: ./_static/img/History/Bayes.png
+          :align: center
+          :width: 50% 
+       
+      `Thomas Bayes`_  1702 - 1761
+
+
+    -
+       Matematico e ministro presbiteriano britannico. Deve la sua fama ai suoi studi nel campo della 
+       matematica e della filosofia.
+       E' noto soprattutto nella statistica per il teorema di Bayes, vertente sulla probabilità condizionata, 
+       pubblicato postumo nel 1763.
+
+      .. image:: ./_static/img/Libri/Algdefinitivo.png
+                :align: center
+                :width: 30%
+
+      ISBN-13 978-8833927060
+ 
+
+
+
+  * - 
+      .. image:: ./_static/img/History/Boole.png
+           :align: center
+           :width: 50% 
+       
+      `George Boole`_ 1815 - 1864
+    
+    -   Matematico e logico inglese, considerato il fondatore della logica matematica.
+
+  * - 
+      .. image:: ./_static/img/History/AdaLovelace.png
+           :align: center
+           :width: 50% 
+       
+      `Ada Lovelace`_  1815 - 1852
+    
+    -  Nobildonna e matematica britannica, nota soprattutto per il suo contributo alla macchina analitica ideata 
+       da Charles Babbage. Considerata la prima programmatrice della storia, 
+       ha scritto il primo algoritmo destinato ad essere eseguito da una macchina.
+
+
+
+
+  * - 
+      .. image:: ./_static/img/History/VonNeumann.png
+          :align: center
+          :width: 50% 
+       
+      `John von Neumann`_ 1903 - 1957
+    
+    -   Matematico, fisico, informatico e ingegnere ungherese naturalizzato statunitense.
+        Ha apportato contributi significativi, spesso assolutamente innovativi, in molti campi, 
+        dalla matematica alla statistica, dalla meccanica quantistica alla cibernetica, 
+        dall'economia all'evoluzione biologica, dalla teoria dei giochi, all'intelligenza artificiale.
+
+        .. image:: ./_static/img/Libri/Maniac.png
+                :align: center
+                :width: 30%
+
+        ISBN-13 978-8845938320
+
+  * - 
+      .. image:: ./_static/img/History/Godel.png
+          :align: center
+          :width: 50% 
+       
+      `Kurt Friedrich Gödel`_ 1906 - 1978
+    
+    -  Ritenuto uno dei più grandi logici di tutti i tempi insieme ad Aristotele, Leibniz e Frege.
+       I suoi  teoremi di incompletezza precisano proprietà che i sistemi formali non possono avere.
+
+  * - 
+      .. image:: ./_static/img/History/GraceHopper.png
+          :align: center
+          :width: 50% 
+       
+      `Grace Murray Hopper`_ 1906 - 1992
+    
+    -  Informatica e ammiraglio della Marina statunitense, ha sviluppato il primo compilatore 
+       per linguaggi di programmazione di alto livello e ha contribuito alla creazione del linguaggio COBOL.
+
+  * - 
+      .. image:: ./_static/img/History/Turing.png
+          :align: center
+          :width: 50% 
+       
+      `Alan Turing`_ 1912 - 1954
+    
+    -  Matematico, considerato uno dei padri dell'informatica  
+  
+  * - 
+      .. image:: ./_static/img/History/Shannon.png
+          :align: center
+          :width: 50% 
+       
+      `Claude Shannon`_ 1916 - 2001
+    
+    -  Ingegnere e matematico, spesso definito "il padre della teoria dell'informazione"
+
+  * - 
+      .. image:: ./_static/img/History/Feynman.png
+          :align: center
+          :width: 50% 
+       
+      `Richard Phillips Feynman`_ 1918 - 1988
+    
+    -  Fisico . Premio Nobel per la fisica nel 1965 (con Julian Schwinger e Shin'ichirō Tomonaga)
+       per aver contribuito allo sviluppo dell'elettrodinamica quantistica.
+
+       *Quello che non posso creare, non lo saprò mai capire*
+
+  * - 
+      .. image:: ./_static/img/History/McCarthy.png
+          :align: center
+          :width: 50% 
+       
+      `John McCarthy`_ 1927 - 1971
+    
+    -  Informatico statunitense che ha vinto il Premio Turing nel 1971 per i suoi contributi 
+       nel campo dell'intelligenza artificiale. Inventò il linguaggio di programmazione Lisp.
+
+  * - 
+      .. image:: ./_static/img/History/Wirth.png
+          :align: center
+          :width: 50% 
+       
+      `Niklaus Wirth`_ 1934 - 2024
+    
+    -  informatico e inventore svizzero, pioniere dell'informatica. 
+       Fu l'inventore dei linguaggi di programmazione Pascal, Modula-2 e Oberon.
+
+  * - 
+      .. image:: ./_static/img/History/SteveJobs.png
+          :align: center
+          :width: 50% 
+       
+      `Steve Jobs`_ 1955 - 2011
+    
+    -  Fondatore di Apple Inc e di NeXT computer.
+
+       *Il vostro tempo è limitato, quindi non sprecatelo vivendo la vita di qualcun altro. 
+       Siate affamati, siate folli, perché solo coloro che sono abbastanza folli da pensare 
+       di poter cambiare il mondo lo cambiano davvero*
+
+
+--------------------------------------
+Attori di oggi
+--------------------------------------
+
+.. list-table:: 
+  :widths: 30,70
+  :width: 100%
+  
+  * - 
+       .. image:: ./_static/img/History/Dijkstra.png 
+          :align: center
+          :width: 80% 
+       
+       `Edsger W. Dijkstra`_ 1930 - 
+    
+    -  Informatico olandese, ha dato importanti contributi alla teoria dei linguaggi di 
+       programmazione, alla progettazione di algoritmi e alla verifica formale del software.
+       Nel 1972 ha ricevuto il Premio Turing.
+ 
+  * - 
+       .. image:: ./_static/img/History/Morris.png 
+          :align: center
+          :width: 80% 
+       
+       `Morris Chung-Mou Chang`_ 1931 - 
+    
+    -  Fondatore TMSC di Taiwan
+
+       .. image:: ./_static/img/Libri/ChipWar.png
+          :align: center
+          :width: 30%
+
+       ISBN-13 978-8811011699  
+
+  * - 
+       .. image:: ./_static/img/History/Hinton.png 
+          :align: center
+          :width: 60% 
+       
+       `Geoffrey Hinton`_  1947 - 
+    -  Informatico studioso di reti neurali. Permio Turing 2018 (con Yoshua Bengio e Yann LeCun) 
+       per i suoi contributi allo sviluppo dell'apprendimento profondo 
+       premio Nobel per la Fisica nel 2024 (con John Hopfield) per gli studi sulla AI.
+
+  * - 
+       .. image:: ./_static/img/History/Kurzweil.png 
+          :align: center
+          :width: 60%  
+       
+       `Raymond Kurzweil`_  1948 - 
+
+    -  Inventore, informatico e saggista statunitense. 
+       È stato fra i primi a creare sistemi di intelligenza artificiale in grado di leggere testi, sintetizzare suoni, comprendere il parlato
+       È autore di numerosi libri sulla salute, 
+       l'intelligenza artificiale, il transumanesimo e la singolarità tecnologica. 
+       Ha introdotto il concetto di "singolarità tecnologica" nel 2005 e il concetto della "legge dei ritorni accelerati".
+       È ricercatore e AI Visionary presso Google.
+
+       The Singularity Is Near ("La Singolarità è vicina") fu pubblicato nel 2005.
+        
+       .. image:: ./_static/img/Libri/kurzweil.png
+          :align: center
+          :width: 30%
+
+       ISBN-13 978-8850337378  
+
+  * - 
+       .. image:: ./_static/img/History/Barners-Lee.png 
+          :align: center
+          :width: 60% 
+       
+       `Barners-Lee`_  1955 - 
+
+       
+    -  Informatico britannico, inventore del World Wide Web
+
+
+  * - 
+      .. image:: ./_static/img/History/Huang.png
+          :align: center
+          :width: 50% 
+       
+      `Jen-Hsun (Jensen) Huang`_ 1963 - 
+    
+    -  Co-fondatore NVIDIA  
+
+
+  * - 
+      .. image:: ./_static/img/History/Torvalds.png
+          :align: center
+          :width: 50% 
+       
+      `Linus Torvalds`_ 1969 - 
+    
+    -   Informatico e blogger finlandese, conosciuto soprattutto per essere stato l'autore e programmatore 
+        della prima versione del kernel Linux  
+
+
+  * - 
+      .. image:: ./_static/img/History/Page.png
+          :align: center
+          :width: 60% 
+       
+      `Larry Page`_ 1973 - 
+    
+    -  Co-fondatore di Google (con Sergey Brin) dopo il dottorato con Terry Winograd e la collaborazione con 
+       *Scott Hassan*, il principale programmatore del motore di ricerca originale (noto come *BackRub*) 
+       un progetto di ricerca avviato nel 1996
+
+  * - 
+       .. image:: ./_static/img/History/Fei-FeiLi.png 
+          :align: center
+          :width: 60% 
+       
+       `Fei-Fei Li`_  1976 - 
+    
+    -  Informatica cinese-americana,specializzata in intelligenza artificiale e visione artificiale, 
+       ha svolto un ruolo fondamentale nello sviluppo di ImageNet e ha contribuito a democratizzare 
+       l'accesso all'IA.
+
+
+  * - 
+       .. image:: ./_static/img/History/Hassabis.png 
+          :align: center
+          :width: 60% 
+       
+       `Demis Hassabis`_  1976 - 
+    
+    -  Amministratore delegato di DeepMind, premio Nobel per la Chiimica nel 2024 (con John M. Jumper)
+       per i sistemi di predizione delle proteine
+
+
+
+
+
+
+
+++++++++++++++++++++++++++++++++
+Companies
+++++++++++++++++++++++++++++++++
+
+
+.. list-table:: 
+  :widths: 33,33,33
+  :width: 100%
+  
+  * -  
+      .. image:: ./_static/img/History/Google.png
+          :align: center
+          :width: 50% 
+       
+      `Google`_  Fondata da Larry Page e Sergey Brin il 4 settembre 1998
+
+
+    -  
+      .. image:: ./_static/img/History/Amazon.png
+          :align: center
+          :width: 50% 
+       
+      `Amazon`_ Fondata con il nome di Cadabra.com da Jeff Bezos il 5 luglio 1994 e lanciata nel 1995.
+
+       
+    -  
+      .. image:: ./_static/img/History/OpenAI.png
+          :align: center
+          :width: 50% 
+       
+      `OpenAI`_ Fondata nel dicembre 2015 come organizzazione non-profit, poi "capped" for-profit dal 2019 
+      e dopo ancora patner di Microsoft a altri  
+
+
+
+Sam Altman Greg Brockman Jakub Pachocki Ilya Sutskever
+
+On May 22, 2023, Sam Altman, Greg Brockman and Ilya Sutskever posted recommendations for the governance 
+of https://en.wikipedia.org/wiki/Superintelligence.
+
+https://en.wikipedia.org/wiki/Superintelligence_(film)
+
+
+
+.. list-table:: Sistemi LLM più noti dal 2010 in avanti
+   :header-rows: 1
+
+   * - Modello
+     - Parametri
+     - Azienda
+     - Data di rilascio
+   * - GPT-3
+     - 175 miliardi
+     - OpenAI
+     - Maggio 2020
+   * - LaMDA
+     - 137 miliardi
+     - Google
+     - Maggio 2021
+   * - PaLM
+     - 540 miliardi
+     - Google
+     - Aprile 2022
+   * - GPT-NeoX-20B
+     - 20 miliardi
+     - EleutherAI
+     - Febbraio 2022
+   * - Megatron-Turing NLG
+     - 530 miliardi
+     - NVIDIA e Microsoft
+     - Maggio 2022
+   * - Chinchilla
+     - 70 miliardi
+     - DeepMind
+     - Marzo 2022
+   * - LLaMA
+     - 7 miliardi - 65 miliardi
+     - Meta
+     - Febbraio 2023
+   * - GPT-4
+     - Non divulgato
+     - OpenAI
+     - Marzo 2023
+   * - DALL-E
+     - 12 miliardi
+     - OpenAI
+     - Gennaio 2021
+   * - PaLM-E
+     - Non divulgato
+     - Google
+     - Marzo 2023
+   * - Gemini
+     - Non divulgato
+     - Google
+     - Maggio 2023 (annuncio)
+
+
+ChatGpt
+
+.. list-table:: Sistemi basati su modelli LLM (dal 2010 in avanti)
+   :widths: 25 25 25 25
+   :header-rows: 1
+
+   * - Sistema
+     - Azienda
+     - Parametri
+     - Data di rilascio
+   * - GPT-1
+     - OpenAI
+     - 117M
+     - 2018
+   * - BERT (Large)
+     - Google
+     - 340M
+     - Ottobre 2018
+   * - GPT-2
+     - OpenAI
+     - 1.5B
+     - Febbraio 2019
+   * - T5 (11B)
+     - Google
+     - 11B
+     - 2020
+   * - GPT-3
+     - OpenAI
+     - 175B
+     - Giugno 2020
+   * - Megatron-Turing NLG
+     - Microsoft
+     - 530B
+     - Ottobre 2021
+   * - PaLM
+     - Google
+     - 540B
+     - Aprile 2022
+   * - OPT-175B
+     - Meta
+     - 175B
+     - Maggio 2022
+   * - LLaMA (65B)
+     - Meta
+     - 65B
+     - Febbraio 2023
+   * - GPT-4
+     - OpenAI
+     - ND
+     - Marzo 2023

@@ -1,0 +1,236 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta    
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp 
+
+.. _rst editor: http://rst.ninjs.org/
+
+.. _Domain Driven Design : https://it.wikipedia.org/wiki/Domain-driven_design
+.. _gradle: https://gradle.org/ 
+.. _GradleIntro: ../../../../GradleIntro/userdocs/Gradle.intro.html
+.. _IntelliJ: https://www.jetbrains.com/idea/
+.. _template: _static/templateToFill.html
+.. _Eclipse IDE for Java and DSL Developers: https://www.eclipse.org/downloads/packages/
+.. _Basic Git commands: https://confluence.atlassian.com/bitbucketserver/basic-git-commands-776639767.html
+.. _Video on GIT: https://www.youtube.com/watch?v=HVsySz-h9r4
+.. _github: https://github.com/
+.. _opinionated: https://govdevsecopshub.com/2021/02/26/opinionated-software-what-it-is-and-how-it-enables-devops/
+
+ 
+
+================================
+Primipassioperativi25
+================================
+
+----------------------------------
+Installare su PC
+----------------------------------
+
+#. Installare :blue:`Java JDK 17` (e anche :blue:`Java JDK 11`) *Windows->Preferences->Java->InstalledJRE*
+#. Installare :blue:`GIT` e un Git reposotory :brown:`PERSONALE PRIVATO` e **dare accesso al docente**
+#. Installare :blue:`Gradle`  (8.4, 8.6)  (per *System Properties Advanced* su Windows: ``sysdm.cpl``)
+#. Installare  :blue:`Eclipse IDE`: `Eclipse IDE for Java and DSL Developers`_ (2023 12)  
+#. Installare :blue:`Python (3.9.13)`
+#. Installare :blue:`Docker`
+#. Installare :blue:`IntelliJ`
+#. Installare :blue:`Node.js` 
+
+----------------------------------
+Clonare il sito del corso
+----------------------------------
+#. Clonare https://github.com/anatali/issLab2025 in una directory vuota e.g. ``C:/.../issLab25``
+#. Compilare il `template`_ inserendo **fotografia, email e numero di matricola**
+
+
+----------------------------------
+Creazione progetto con Gradle
+----------------------------------
+La costruzione di un sistema software non può oggi prescindere dall'uso di un **IDE** e di 
+strumenti di come `Gradle`_, uno strumento open source per automatizzare la costruzione (build) del software.
+
+Gradle è ormai uno standard di fatto in questo settore ed è interessante non solo in quanto
+strumento, ma anche perchè applica i principi del `Domain Driven Design`_ (**DDD**) 
+per modellare il suo proprio  domain-building software.
+
+Ne consegue che non poco tempo deve essere dedicato allo studio di questi tools e 
+alla preparazione del file ``build.gradle`` che governa lo sviluppo e il deployment
+del sistema software.
+
+Le rete offfre numerosi tutorial su Gradle, come ad esempio:
+https://tomgregory.com/gradle/gradle-tutorial-for-complete-beginners/
+
+ 
+
+.. In questa prima fase il file ``build.gradle`` necessario viene fornito, lasciando a un momento successivo un approfondimento su come costruirlo.
+
+
+.. Anticipiamo però anche che noi useremo un :ref:`software factory<>` custom che produrrà questo e altri numerosi file in modo automatico, a partire da un descrizione di alto livello del sistema, scritto nel linguaggio custom :ref:`qak`.
+
+----------------------------------
+Eclipse e Gradle
+----------------------------------
+
+Per usare Eclipse insieme a Gradle, potrebbe essere necessario eseguire i seguenti passi (Grazie a *Stefano Arasi*):
+
+#. Help->Eclipse MarketPlace
+#. Search "Gradle"
+#. Go to "BuildShop Gradle Integration 3.0" (the elephant) which is indicated as installed and 
+   clic on the grayed installed button.
+#. Either click on update or uninstall and reinstall it, this will restart eclipse.
+
+
++++++++++++++++++++++++++++++++++++
+Convivenza Eclipse/Gradle
++++++++++++++++++++++++++++++++++++
+
+- I plugin unibo per :blue:`qak` creano la struttura di directory prevista da Gradle.
+- Tuttavia Eclipse non accetta  la specifica di directory sorgenti innestate, per cui inseriamo nel file build.gradle 
+  la specifica
+
+  .. code::
+
+      eclipse {
+         classpath {
+            sourceSets -= [sourceSets.main, sourceSets.test]	
+         }	
+      }
+
+- Supponiamo ora di inserire un programma :blue:`PJAVA` nella directory ``main.java``
+- La esecuzione da parte di Ecipse run di :blue:`PJAVA`  non 
+  'vede' il file ``logback.xml`` inserito nella cartella ``main.resource`` e quindi usa la versione di default che visualizza 
+  i log sullo **STDOUT**.
+- La esecuzione del programma mediante un task di gradle procede invece usando il file ``logback.xml`` inserito nella cartella ``main.resource``.
+- Per (ri)ottenere lo stesso con Eclipse, si può copiare il file  ``logback.xml`` in una nuovo src-folder creato 
+  **al di fuori di src** (ad esempio in una directory `resources`).
+
+----------------------------------
+Impostazione di un progetto
+----------------------------------
+
+#. Creare un progetto :slide3:`basic` con Gradle e importarlo in Eclipse.
+#. Osservare il file ``build.gradle``, ``settings.gradle``, ``cargoproduct\gradle\wrapper\gradle-wrapper.properties``
+   e l'assenza di specifiche sulle librerie.
+#. Aggiungere la natura Java al progetto.
+#. Creare il source folder ``src``.
+
++++++++++++++++++++++++++++++
+Completamento del workspace  
++++++++++++++++++++++++++++++
+#. Aprire ``Window->Show View->Project Explorer`` e rendere visibili  ``*.resources`` e ``Gradle build folder``
+#. Creare un modello qak (ad esempio il file ``cargoproduct.qak``)  con il  contenuto: :slide3:`System cargoproduct``.
+#. Salvare il file e osservare i nuovi contenuti generati dai plugin unibo relativi al DSL :blue:`qak`, tra cui 
+   il file ``build2025Starting.gradle``, che non prevede l'uso di *Kotlin*, ma introduce dipendenze utili alla sperimentazione
+   di protocolli di comunicazione via rete e del logging.
+#. Eliminare il file (vuoto) ``build.gradle`` e **ridenominare** il file ``build2025Starting.gradle`` in ``build.gradle``.
+#. Eseguire :slide3:`gradlew eclipse` e osservare la creazione di un progetto Eclipse con le librerie necessarie.
+#. Aprire **Project->Properties->Source** e controllare che contenga *cargoproduct/src* e nessuna altra directory.
+#. Verificare che nel file *gradle.build* non abbiamo ancora definito mainClassName e quindi non possiamo ancora eseguire alcun programma.
+
+.. #. Eseguire :blue:`gradlew run` e verificare
+
+
+----------------------------------
+Una prima applicazione
+----------------------------------
+
+
++++++++++++++++++++++++++++++++++++++++
+Journal della applicazione
++++++++++++++++++++++++++++++++++++++++
+Nella directory ``userDocs`` impostiamo il file ``cargoproduct_v0.html`` con l'intento
+di tenere un :slide3:`diario (journal)`  del lavoro da compiere e del processo 
+con cui svolgiamo tale lavoro.
+
+Iniziamo in modo semplice, con una descrizione del dominio e degli obiettivi della prima applicazione,
+anticipando che in seguito useremo un template più strutturato,
+quale quello riportato in `template`_.
+
+Introduciamo:
+
+- la directory :blue:`userDocs/css` per gli stili 
+- la directory :blue:`userDocs/img` per le immagini
+- il file :blue:`cargoproduct_v0.html` come primo contirbuto al journal
+
+++++++++++++++++++++++++++++++++++++++++++
+Scopo e Dominio della prima applicazione
+++++++++++++++++++++++++++++++++++++++++++
+
+- Si tratta di rappresentare e gestire prodotti da trasportare in un cargo.
+
++++++++++++++++++++++++++++++++++++++++
+Goal1 della prima applicazione
++++++++++++++++++++++++++++++++++++++++
+
+- Introdurre una classe di dominio che descrive le proprietà dei prodotti:
+
+#. La classe ``Product`` 
+
+   .. image::  ./_static/img/cargo/ProductUML.JPG 
+      :align: center 
+      :width: 20% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+La specifica per i logs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. code::
+   
+   logback.xml in \src\main\resources
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Goal1 Prima esecuzione
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+- Impostiamo ``mainClassName='main.java.domain.Product'`` in *gradle.build*
+- Eseguiamo **gradlew run**: vediamo i messaggi in uscita e vediamo comparire 
+  file di log :blue:`app_cargoproduct.log`
+- Eseguiamo ``main.java.domain.Product`` da Eclipse: vediamo i messaggi di log su STDOUT perchè Eclipse 
+  non vede il file *logback.xml*
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Goal1 Testing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+- Impostiamo il file ``\src\test\java\domain\TestProduct.java`` con riferimento a JUnit
+- Eseguiamo ``gradlew test``: vediamo comparire il file di log :blue:`app_cargoproductTest.log`
+  e la directory :slide3:`build\reports\tests\test` in cui compare il risultato del test
+  cui possiamo accedere tramite il file :blue:`index.html`
+
+ 
+
+
++++++++++++++++++++++++++++++++++++++++
+Goal2 della prima applicazione
++++++++++++++++++++++++++++++++++++++++
+
+- Introdurre una classe di dominio che descrive la **logica di un servizio** di gestione 
+  dei prodotti da trasportare.
+
+#. La classe ``ProductServiceLogic`` e le interfaces ``ICrudOps`` e ``IStorage``
+
+   .. image::  ./_static/img/cargo/ProductServiceLogicUML.JPG
+      :align: center 
+      :width: 70%
+
+
+
+#. La specifica ddel main in gradle.build
+
+   .. code::
+
+      mainClassName = 'main.java.domain.ProductServiceLogic'
+
+#. La esecuzione come :blue:`gradlew run`
+
+#. Il testing con JUnit e con gradlew test
+   
+   Con gradlew test, controllare 
+   - logs/apptest.log
+   - build/reports/tests/test/index.html

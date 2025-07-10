@@ -1,0 +1,443 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta    
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp 
+
+=================================
+MQTTConnection
+=================================
+
+-----------------------------------------
+Uso diretto della libreria Paho
+-----------------------------------------
+
+
+- Per effettuare operazioni *publish/subscribe* usando un Broker MQTT usiamo la 
+  liberia   ``org.eclipse.paho.client.mqttv3`` che contiene la classe ``MqttClient``
+- :slide3:`Esempio` di uso diretto della libreria - Progetto ``mqttdemo``
+  
+
+.. list-table:: 
+    :widths: 50,50
+    :width: 100%
+
+
+    * -  
+        .. code::
+        
+           public class MqttJavaPublisher 
+      - 
+         
+        .. code::
+        
+           client = new MqttClient("tcp://localhost:1883", "client1", new MemoryPersistence());
+           client.connect();
+           ... 
+           String msg = "...";
+           client.publish( "unibo/conn",  new MqttMessage( msg.getBytes() ) );
+
+    * -  
+        .. code::
+        
+           public class MqttJavaSubscriber
+      -  
+        
+        .. code::
+        
+           client = new MqttClient("tcp://localhost:1883", "client2" );
+           client.setCallback(new MqttCallback() {
+               public void messageArrived(String topic, MqttMessage message) throws Exception {
+                   ...;
+               }
+               ...
+           });
+
+-----------------------------------------
+Oltre la libreria Paho
+-----------------------------------------
+
+Per evitare di rimanere al basso livello (technology-dependent) della libreria Paho, 
+abbiamo realizzato, nel :slide2:`progetto unibo.basicomm23`, un insieme di classi che introducono livelli 
+crescenti di astrazione. Gli esempi sono nel :slide3:`progetto mqttdemo`.
+
+++++++++++++++++++++++++++++++++++++++
+MqttSupport
+++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+    :widths: 30,70
+    :width: 100%
+
+
+    * -  :slidekp:`MqttSupport.java`
+
+         :slide3:`main.java.usingSupport`
+      -  Usa (nascondendolo) **MqttClient** di Paho per realizzare le operazioni:
+
+         .. code:: java
+
+          boolean connectToBroker(String clientid,  String brokerAddr)
+          void disconnect()
+          void cleartopic(String topic)
+          void subscribe ( String topic, MqttCallback handler)
+          void unsubscribe( String topic )
+          void publish(String topic, String msg )
+          void publish(String topic, String msg, int qos, boolean retain)
+          void publish( String topic, byte[] payload, int qos, boolean retain)
+
+
+++++++++++++++++++++++++++++++++++++++
+MqttConnectionBase
+++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+    :widths: 30,70
+    :width: 100%
+
+    * -  :slidekp:`MqttConnectionBase.java`
+
+         :slide3:`main.java.usingConnBase`
+      -  Estende *MqttSupport*  per fornire metodi di connessione e di :slide2:`send/receive` di messaggi.
+
+         .. code:: java
+
+            MqttConnectionBase(String mqttBrokerAddr, String clientid, String topic )
+            MqttConnectionBase( 
+                String mqttBrokerAddr, String clientid, String topic, MqttCallback callback)
+            
+            void send(String msg)
+            String receive()
+
+         L'operazione :blue:`receive` (bloccante) restitusice un valore **non null** solo se viene usato
+         il costruttore **senza callback** . In caso contrario, il messaggio ricevuto deve essere elaborato
+         in modo asincrono dal *callback* specificato nel costruttore.
+
+         :ref:`MqttConnectionCallbackForReceive`
+
+++++++++++++++++++++++++++++++++++++++
+MqttInteractionBase
+++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+    :widths: 30,70
+    :width: 100%
+
+    * -  :slidekp:`MqttInteractionBase.java`
+
+         :slide3:`main.java.usingInteractionBase`
+      - Implementa :ref:`Interaction2021` per realizzare il concetto astratto di :ref:`Interconnessione`
+        con riferimento a messaggi di tipo :slidekp:`String`.
+
+        .. code:: java
+
+          MqttInteractionBase(
+             String mqttBrokerAddr, String clientid, String topic, boolean sendonly )
+          void forward(String msg) throws Exception
+          String request(String msg) throws Exception  //bloccante
+          void reply(String msg) throws Exception
+          String receiveMsg() throws Exception
+          void close() throws Exception
+
+        L'operazione **request** è realizzata in modo bloccante, cioè attende il messaggio di risposta
+        prima di restituire il controllo.
+
+++++++++++++++++++++++++++++++++++++++
+MqttInteraction
+++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+    :widths: 30,70
+    :width: 100%
+    
+    * -  :slidekp:`MqttInteraction.java`
+
+         :slide3:`main.java.usingInteraction`
+      -  Implementa :ref:`Interaction2023` per realizzare il concetto astratto di :ref:`Interconnessione`
+         con riferimento a messaggi di tipo :ref:`IApplMessage<unibo.basicomm23.interfaces.IApplMessage>`.
+    
+         .. code:: java
+
+            MqttInteraction(
+                String mqttBrokerAddr, String clientid, String topic, boolean alsoreceive)
+          	void forward(  IApplMessage msg ) throws Exception;
+            IApplMessage request(  IApplMessage msg ) throws Exception;
+            IApplMessage request(  IApplMessage msg, int tout ) throws Exception; //bloccante
+            void reply(  IApplMessage msg ) throws Exception;
+            IApplMessage receive(  ) throws Exception ;
+            void close( )  throws Exception
+
+         L'operazione **request** è realizzata in modo bloccante, cioè attende il messaggio di risposta
+         prima di restituire il controllo.
+
+
+++++++++++++++++++++++++++++++++++++++
+MqttConnection25
+++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+    :widths: 30,70
+    :width: 100%
+
+    * -  :slidekp:`MqttConnection25.java`
+
+         :slide3:`main.java.usingMqttConnection25`
+
+         .. image:: ./_static/img/Conway/MqtttConnection25.png
+            :align: center
+            :width: 80%
+      -  Implementa :ref:`Interaction<unibo.basicomm23.interfaces.Interaction>` per realizzare una interconnessione 
+         basata su due topic, ciascuna concepita come ingresso di un agente.
+
+         .. code:: java
+
+            //Operazioni di Interaction2023
+            MqttConnection25(
+                String clientName, String mqttBrokerAddr, String topicIn, String topicOut)
+            void forward(IApplMessage msg) throws Exception
+            IApplMessage request(  IApplMessage msg ) throws Exception;
+            IApplMessage request(  IApplMessage msg, int tout ) throws Exception; //bloccante
+            void reply(  IApplMessage msg ) throws Exception;
+            IApplMessage receive(  ) throws Exception ;
+
+            //Operazioni di Interaction2021
+            void forward(String msg) throws Exception 
+            String request(String msg) throws Exception  //bloccante
+            void reply(String msg) throws Exception
+            String receiveMsg() throws Exception
+
+            //Chiusura
+            void close() throws Exception
+
+         Possiede una coda :blue:`blockingQueue` su cui pone l'handler :ref:`MqttConnectionCallbackForReceive`
+         i messaggi ricevuti sulla topic di ingresso (``topicIn``) 
+        
+         .. code:: java
+
+            BlockingQueue<String> blockingQueue = new LinkedBlockingDeque<String>(10)
+        
+        
+--------------------------------------------
+Classi di supporto per la gestione messaggi
+--------------------------------------------
+
+
+++++++++++++++++++++++++++++++++++
+IApplMsgHandlerMqtt
+++++++++++++++++++++++++++++++++++
+
+.. code::
+
+    public interface IApplMsgHandler  {
+        public String getName(); 
+        public void elaborate( IApplMessage message, Interaction  conn ); 
+   
+   IApplMsgHandlerMqtt extends IApplMsgHandler, 
+                               org.eclipse.paho.client.mqttv3.MqttCallback.MqttCallback
+
+
+++++++++++++++++++++++++++++++++++
+MqttAnswerHandler
+++++++++++++++++++++++++++++++++++
+
+.. code::
+
+   MqttAnswerHandler implements IApplMsgHandlerMqtt  
+
+   MqttAnswerHandler( String name,  
+              MqttConnection conn, 
+              IApplMsgHandler handler, 
+              BlockingQueue<String> blockingQueue )
+
+Definisce il metodo **messageArrived** che elabora il messaggio ricevuto 
+di tipo :ref:`IApplMessage`, ponendo il messaggio stesso nella **blockingQueue**.
+
+
+
+++++++++++++++++++++++++++++++++++
+MqttConnectionCallbackForReceive
+++++++++++++++++++++++++++++++++++
+
+.. code::
+
+    MqttConnectionCallback implements MqttCallback
+
+    MqttConnectionCallback( BlockingQueue<String> blockingQueue )
+    public void messageArrived(String topic, MqttMessage message)   {
+      //pone il messaggio nella blockingQueue
+    }
+
+Il metodo **messageArrived**  elabora il messaggio ricevuto,
+di tipo String,  ponendo il messaggio stesso nella **blockingQueue**.
+
+.. Viene usato da ``subscribe( String clientid, String answertopic)`` per creare un gestore dei messaggi ricevuti.
+
+
+
+-----------------------------------------
+uuuuuuuu
+-----------------------------------------
+
+Per evitare di rimanere al basso livello (technology-dependent) della libreria Paho, 
+abbiamo realizzato la classe **MqttConnection**,
+che estende la classe astratta :ref:`Connection<unibo.basicomm23.utils.Connection>`,
+la quale a sua volte realizza la nostra idea astratta di :ref:`Interaction<unibo.basicomm23.interfaces.Interaction>`.
+
+La classe **MqttConnection**:
+
+- Costituisce una specializzazione della classe astratta :ref:`Connection<unibo.basicomm23.utils.Connection>`
+  che fornisce metodi per l'uso di un broker MQTT.
+- Possiede una coda: ``BlockingQueue<String> blockingQueue = new LinkedBlockingDeque<String>(10)``
+- Ha un campo ``String clientId`` che identifica il client corrente.
+- Ha un campo ``MqttClient client`` che rappresenta il client MQTT.
+
+
+Procederemo evidenziando  diversi livelli di astrazione permessi da **MqttConnection**:
+
+#. un :ref:`prino livello<MqttConnection - livello 1>` si basa sull'idea di steabilire una connessione con il broker MQTT (che permette 
+   l'invio di messaggi con il metodo **publish**) e di usare una **subscribe** esplcita a una topic per ricevere messaggi
+   di tipo :slidekp:`String`,   in modo asincrono, avvalendosi di un *handler* che inmplemanta la classe :ref:`IApplMsgHandlerMqtt`.
+#. un :ref:`secondo livello<MqttConnection - livello 2>`  si basa sull'idea di usare la classe **MqttConnection** come una risorsa logica di connessione ,
+   utlizzabile con i metodi *send* e *receive/receiveMsg*.      
+   I metodi *receive* sono bloccanti, in quanto il chiamanate attende sulla coda di messaggi interna  (blockingQueue)
+   che viene popolata dall'handler di tipo  `MqttConnectionCallback` associato con una subscribe alla topic di input 
+   (*infoIN*)
+   specificata nel costruttore  della forma ``new MqttConnection( name, MqttBroker, "infoIN", "infoOUT" )``.
+#. un :ref:`terzo livello<MqttConnection - livello 3>` consiste nel vedare la classe **MqttConnection** come una 
+   implementazione dell'astrazione
+   :ref:`Interaction<unibo.basicomm23.interfaces.Interaction>`, usando messaggi di tipo :slidekp:`IApplMessage`.     
+
+ 
+--------------------------------------------
+MqttConnection - livello 1
+--------------------------------------------
+
+Questo livello prevede l'uso del metodo **publish** da parte del sender e l'uso di una subscribe esplcita a una topic
+da parte del receiver, che riceve messaggi :slide3:`di tipo String`
+in modo asincrono, avvalendosi di un handler che inmplemanta la classe :ref:`IApplMsgHandlerMqtt`.
+
+
+Questo uso della classe **MqttConnection** si può vedere nella classe :slide3:`WSConwaygui` del progetto ``conwaygui``
+che usa un handler custom di nome ``MqttConnCallback``.
+
+.. code::
+
+    MqttconnReceiverNoBlocking mqttConn.subscribe( topic, this   );
+    MqttconnSenderString
+
+
+--------------------------------------------
+MqttConnection - livello 1b
+--------------------------------------------
+
+Si usano IApplMessage e publish
+
+
+:slide3:`Esempio` di uso 'naive' della classe **MqttConnection** - Progetto ``mqttdemo``
+
+.. image:: ./_static/img/Architectures/MqttconnSendRec.jpg
+    :align: center
+    :width: 60%
+
+.. list-table:: 
+    :widths: 50,50
+    :width: 100%
+
+    * -  SENDER
+      -  RECEIVER
+
+    * -  
+        .. code::
+        
+           public class MqttconnSender 
+      - 
+         
+        .. code::
+        
+           mqttConn = new MqttConnection(   );
+           mqttConn.connect("sender", "tcp://localhost:1883");
+
+           ... 
+           mqttConn.publish( "unibo/conn",  msg );
+
+    * -  
+        .. code::
+        
+           public class MqttconnReceiver
+      -  
+        
+        .. code::
+        
+           mqttConn = new MqttConnection(   );
+           mqttConn.connect("receiver", "tcp://localhost:1883");
+           mqttConn.subscribe( "unibo/conn"   );
+           ... 
+           String message  = mqttConn.receiveMsg();
+
+
+--------------------------------------------
+MqttConnection - livello 2
+--------------------------------------------
+
+:slide3:`Esempio` di uso della classe **MqttConnection** vista come risorsa - Progetto ``mqttdemo``
+
+
+.. image:: ./_static/img/Architectures/MqttconOUTIN.jpg
+    :align: center
+    :width: 60%
+
+.. list-table:: 
+    :widths: 50,50
+    :width: 100%
+
+    * -  SENDER
+      -  RECEIVER
+
+    * -  
+        .. code::
+        
+           public class MqttconnresourceSender 
+      - 
+         
+        .. code::
+        
+           mqttConn = new MqttConnection(  name, MqttBroker, "infoIN", "infoOUT" ); 
+           
+
+           ... 
+           mqttConn.send(  msg );
+
+    * -  
+        .. code::
+        
+           public class MqttconnresourceReceiver
+      -  
+        
+        .. code::
+        
+           mqttConn = new MqttConnection(name, MqttBroker, "infoOUT", "infoIN" ); 
+  
+           String message        = mqttConn.receiveMsg();
+           //OPPURE
+           IApplMessage msgInput = mqttConn.receive();  //ereditata da Connection
+
+Questo uso della classe **MqttConnection** si può vedere anche nella classe :slide3:`Life` del progetto ``conwaygui``.
+
+
+--------------------------------------------
+MqttConnection - livello 3
+--------------------------------------------
+
+Uso di :ref:`Interaction<unibo.basicomm23.interfaces.Interaction>`
+
+
+
+
+
+ 

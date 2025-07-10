@@ -1,0 +1,536 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3
+
+.. _SpringBoot: https://spring.io/projects/spring-boot
+.. _Applicazione web: https://it.wikipedia.org/wiki/Applicazione_web    
+.. _WebappFrameworks: https://www.geeksforgeeks.org/top-10-frameworks-for-web-applications/
+.. _Springio: https://spring.io/
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _Node.js: https://nodejs.org/it/
+.. _Express: https://expressjs.com/it/
+.. _CleanArchitecture: https://clevercoder.net/2018/09/08/clean-architecture-summary-review
+.. _Buster: https://www.raspberrypi.com/news/buster-the-new-version-of-raspbian/
+.. _Bullseye: https://www.raspberrypi.com/news/raspberry-pi-os-debian-bullseye/
+.. _REST : https://en.wikipedia.org/wiki/Representational_state_transfer
+.. _HATEOAS: https://en.wikipedia.org/wiki/HATEOAS
+.. _BannerTool: https://manytools.org/hacker-tools/ascii-banner/
+.. _jQuery: https://www.w3schools.com/jquery/default.asp
+.. _Thymeleaf: https://www.thymeleaf.org/
+.. _SpringMVCModel: https://www.baeldung.com/spring-mvc-model-model-map-model-view
+.. _Introduzione a Spring Boot: https://azure.microsoft.com/it-it/resources/cloud-computing-dictionary/what-is-java-spring-boot/
+
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _SockJs: https://openbase.com/js/sockjs/documentation#what-is-sockjs
+.. _Bootstrap: https://getbootstrap.com/
+.. _jsdelivr: https://www.jsdelivr.com/
+.. _WebJars: https://mvnrepository.com/artifact/org.webjars
+.. _WebJarsExplained: https://www.baeldung.com/maven-webjars 
+.. _WebJarsDocs: https://getbootstrap.com/docs/5.1/getting-started/introduction/
+.. _WebJarsExamples: https://getbootstrap.com/docs/5.1/examples/
+.. _WebJarsContainer: https://getbootstrap.com/docs/5.1/layout/containers/
+.. _Heart-beating: https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
+
+
+.. _springIntro23: ../../../../springIntro23 
+.. _HIControllerDemo: ../../../../springIntro23/src/main/java/unibo/springIntro23/HIControllerDemo.java
+
+
+==================================
+SpringBootIntro25
+==================================  
+
+ 
+
+
+:slide:`Una prima applicazione`
+
+--------------------------------------------
+Un Controller applicativo
+--------------------------------------------
+
+L'introduzione di un Controller può essere utile per offire più funzionalità, come ad esempio
+la possibilità di trasferire immagini.
+
+:slide1:`Un controller più evoluto`
+
+
+++++++++++++++++++++++++++++++++
+HIControllerAppl
+++++++++++++++++++++++++++++++++
+
+Commentiamo l'annotazione ``@Controller`` in :ref:`HIControllerDemo` e definiamo un nuovo controller.
+
+.. code::
+
+    import org.springframework.ui.Model
+
+    @Controller
+    //@RequestMapping("/Api")
+    public class HIControllerAppl {
+        @Value("${spring.application.name}")
+        String appName;
+
+    @GetMapping("/")
+    public String homePage(Model model) {
+        model.addAttribute("arg", appName);
+        return "GuiNoImages";
+    }
+    @GetMapping("/img")
+    public String textOnly(Model model) {
+        model.addAttribute("arg", appName);
+        return "GuiAlsoImages";
+    }
+
+
+:slide1:`Una pagina per inviare messaggi`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+GuiNoImages.html
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In **resource/templates** inseriamo un file simile a :ref:`index.html<Il file index.html>`, 
+che include anche campi i cui valori
+possono essere fissati dal controller (grazie a `Thymeleaf`_) mediante  il Model.
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+  
+  * - .. code::
+
+        <html xmlns:th="http://www.thymeleaf.org">
+        <head>
+            <title>GuiNoImages</title>
+        </head>
+
+        <body>
+        <h1>GuiNoImages</h1>
+        <p>Welcome to 
+        <b><span th:text="${arg}">Our Arg</span></b>.</p>
+        <textarea id="messageArea" 
+          name="messageArea" rows="10" cols="60">
+        </textarea>
+
+        <div>
+            <p>Type a message and hit send:</p>
+            <input id="inputmessage"/>
+            <button id="sendMessage">Send</button>
+        </div>
+
+        <script src="../wsminimal.js"></script>
+        </body>
+        </html>
+  
+    - .. image:: ./_static/img/Spring/GuiNoImages.png
+         :width: 100%
+
+
+:slide1:`Una pagina per inviare anche immagini`
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+GuiAlsoImages.html
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Il file ``GuiAlsoImages.html`` definisce una pagina HTML che permette, oltre all'invio e ricezione di 
+testi, il trasferimento di immagini.
+
+
+.. list-table::
+  :widths: 55,45
+  :width: 100%
+  
+  * - Questo file:
+  
+      - fa uso di Bootstrap_, una libreria  utile per realizzare pagine web reattive e 
+        mobile-first, con HTML, CSS e JavaScript; la libreria usa il preprocessore CSS 
+        scritto in Ruby denominato ``Sass`` (*Syntactically Awesome Style Sheets*)
+      - utilizza :ref:`Lo script wsalsoimages.js`
+      - presenta all'utente:
+        
+        - pulsanti per la (dis)connessione alla WS (``URL=ws://<ServerIP>:8085/socket``)
+        - pulsanti per l'invio di testi e di immagini
+        - un'area di output per la visualizzazione di informazioni inviate dal server
+  
+    - .. image:: ./_static/img/Spring/GuiAlsoImages.png
+         :width: 100%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Struttura generale del file GuiAlsoImages.html
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. code:: html
+
+  <html>
+  <head>
+  <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/webjars/jquery/jquery.min.js"></script>
+  <title>GuiAlsoImages</title>
+  </head>
+    <body>
+    <div id="main-content" class="container-fluid pt-3">
+      <h1>GuiAlsoImages</h1>
+      <!-- Connessione/Disconnessione alla WebSocket -->
+      <!-- Inserzione di testi e immagini            -->
+      <!-- Area di output testuale                   -->
+      <!-- Area per le immagini                      -->
+    </div>
+    </body>
+
+Notiamo la necessità dell'uso di un WebJarsContainer_ come elemento-base del layout Bootstrap.
+
+:slide2:`La libreria Bootstrap`
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Bootstrap  e webJars
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+L'uso di Bootstrap_ avviene attraverso i WebJars_, introducendo in *build.gradle* le seguenti 
+nuove dipendenze:
+
+.. code:: 
+
+	implementation 'org.webjars:webjars-locator-core'
+	implementation 'org.webjars:bootstrap:5.1.3'
+	implementation 'org.webjars:jquery:3.6.0'
+
+I :blue:`WebJar` (che non sono legati a Spring) sono dipendenze lato client impacchettate in file JAR.
+Per approfondire, si veda: WebJarsDocs_ e WebJarsExamples_.
+
+:slide2:`Campi connect/disconnect`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Connessione/Disconnessione alla WebSocket
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * - La parte di pagina relativa alla (dis)connessione:
+  
+      .. image:: ./_static/img/Spring/connectGui.PNG 
+         :align: center
+         :width: 100%
+     
+      Si veda anche (su :ref:`wsalsoimages<Lo script wsalsoimages.js>`): 
+      
+      :ref:`Funzioni di (dis)connessione su webSocket`
+
+      .. ref:`Funzioni di creazione della WebSocket`
+  
+    - viene prodotta come segue:
+
+      .. code::  
+
+        <div class="row">   
+         <div class="col-md-6">
+          <form class="form-inline">
+            <div class="form-group">
+              <label for="connect">WebSocket connection:</label>
+              <button id="connect" class="btn btn-default" 
+                        type="submit">Connect</button>
+              <button id="disconnect" class="btn btn-default" 
+                        type="submit" disabled="disabled">Disconnect
+              </button>
+            </div>
+          </form>
+         </div>
+        </div>
+
+
+:slide2:`Campi di invio testi/immagini`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Inserzione di testi e immagini
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * - La parte di pagina relativa ai pulsanti di invio:
+  
+      .. image:: ./_static/img/Spring/inputGui.PNG 
+         :align: center
+         :width: 100%
+     
+      Si veda anche: 
+      
+      :ref:`Funzioni di gestione pulsanti`
+
+      .. :ref:`Funzioni di invio su WS`
+  
+    - viene prodotta come segue:
+
+      .. code::  
+ 
+        <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+            <div class="form-group">
+                <label for="inputmsg">Input (text)</label>
+                <input type="text" id="inputmsg" 
+                        class="form-control" placeholder="Input here...">
+            </div>
+            <button id="sendmsg" 
+                class="btn btn-default" type="submit">Send text</button>
+            </form>
+        </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+            <form class="form-inline">
+            <div class="form-group">
+                <label for="myfile">Input (image)</label>
+                <input type="file" id="myfile" name="myfile" 
+                        class="form-control" accept="image/*"/>
+            </div>
+            <button id="sendImage" 
+                class="btn btn-default" type="submit">Send Image</button>
+            </form>
+            </div>    
+        </div>  
+
+
+:slide2:`Aree di visualizzazione`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Area di output
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * - La parte di pagina relativa all'area di output:
+  
+      .. image:: ./_static/img/Spring/outputGui.PNG 
+         :align: center
+         :width: 100%
+     
+      Si veda anche: 
+      
+      :ref:`Funzioni di invio su WS`
+  
+    - viene prodotta come segue:
+
+      .. code::  html
+
+        <div class="row">
+         <div class="col-md-12">
+            <table id="conversation" class="table table-striped">
+             <thead>
+              <tr>
+                 <th>Output Area</th>
+               </tr>
+             </thead>
+             <tbody id="output">
+             </tbody>
+            </table>
+         </div>
+        </div>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Area delle immagini
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * - La parte di pagina relativa all'area delle immagini:
+  
+      .. image:: ./_static/img/Spring/imageGui.PNG 
+         :align: center
+         :width: 100%
+     
+      Si veda anche: 
+      
+      :ref:`Aggiornamento aree di output`
+  
+    - viene prodotta in modo simile a quanto fatto in :ref:`index.html<Il file index.html>`:
+
+      .. code::  html
+ 
+        <h5>Image area</h5>
+        <hr/>
+            <p id="imageArea"></p>
+
+      Ciò in quanto si intende aggiornare quest'area ad ogni immagine.
+
+:slide1:`Nuove funzioni in JS`
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Lo script wsalsoimages.js
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Lo script  ``wsalsoimages.js`` utilizza :ref:`jQuery` per realizzare funzioni:
+
+- per la connessione/disconnessione mediante WebSocket: :ref:`Funzioni di (dis)connessione su webSocket`;
+- per permettere all'utente di inserire messaggi e immagini da inviare al server mediante WebSocket:
+  :ref:`Funzioni di gestione pulsanti`;
+- per visualizzare informazioni ricevute dal server: :ref:`Aggiornamento aree di output`.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Riferimenti a oggetti della pagina
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. code:: js
+
+    var socket;  //set by connect() called by the enduser
+    var sockConnected = false;
+    const imageWindow = document.getElementById("imageArea");
+    const fileInput   = document.getElementById("myfile");
+
+Gli elementi della pagina  ``imageArea`` e ``myfile`` sono ovviamwnte quelli definiti nel file
+:ref:`GuiAlsoImages.html<Inserzione di testi e immagini>`.
+
+:slide2:`Connessione/Disconnessione`
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Funzioni di (dis)connessione su webSocket
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Al caricamento della pagina si vuole sia attivo il solo pulsante **Connect**, che va disattivato 
+(a favore di *Disconnect*) una volta premuto.
+ 
+La creazione della WebSocket è accompagnata dalla definizione di callback relativi
+alla apertura della socket e alla ricezione di messaggi dal server. 
+
+.. code:: js
+
+    function connect(){
+        var host     = document.location.host;
+        var pathname =  "/"; 	//document.location.pathname;
+        var addr     = "ws://" + host  + pathname + "socket"  ;
+   
+        // Assicura che sia aperta un unica connessione
+        if(socket !== undefined && socket.readyState !== WebSocket.CLOSED){
+             console.log("Connessione WebSocket già  stabilita");
+        }
+ 
+        socket            = new WebSocket(addr);
+        socket.binaryType = "arraybuffer";
+
+        socket.onopen = function (event) {
+        	setConnected(true);
+            addMessageToWindow("Connected");
+        };
+        //RICEZIONE di messaggi dal server
+        socket.onmessage = function (event) {
+            if (event.data instanceof ArrayBuffer){ //Image
+                setImageInWindow(event.data);
+            } else {
+                addMessageToWindow(`${event.data}`);
+            }
+        }
+        socket.onclose = function (event) {
+            alert("onclose event=" + event.reason)
+            connect(); //AUTOMATIC RECONNECTION...
+        }
+    }//connect
+
+    function disconnect() { setConnected(false); }
+
+    function setConnected(connected) {
+        $("#connect").prop("disabled", connected);
+        $("#disconnect").prop("disabled", !connected);
+        $("#output").html("");
+    }
+
+:slide2:`Gestione dei pulsanti`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Funzioni di gestione pulsanti
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ 
+.. code:: js
+
+    $(function () {
+        $("form").on('submit', function (e) { e.preventDefault(); });
+        $( "#connect" ).click(function() { connect(); });
+        $( "#disconnect" ).click(function() { disconnect(); });
+        $( "#sendmsg" ).click(function() { sendMessage($("#inputmsg").val());});
+        $( "#sendImage" ).click(function() {let f = fileInput.files[0]; sendMessage(f);});
+    });
+
+- ``$(function () { ... })`` è uno short-hand per invocare una funzione dopo che tutti gli elementi del DOM
+  della pagina sono stati caricati, ed equivale a:
+
+    .. code::
+
+        $(document).ready(function() { ... });
+
+- ``e.preventDefault()`` viene usato per evitare che un click su un pulsante inneschi 
+  la navigazione verso l’URL da parte del browser. 
+  
+  In sua assenza, il server riinivierebbe la pagina, perdendo così gli aggiornamenti sulle aree di output.
+ 
+
+.. Un click su un pulsante di invio di un form – inizializza l’invio dello stesso al server.
+
+:slide2:`Invio messaggi su WS`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Funzioni di invio su WS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. code:: js
+
+    function sendMessage(message) {
+        if( socket == null || ! sockConnected ) alert("Please connect ...");
+        else socket.send(message);
+    }
+  
+
+:slide2:`Output`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Aggiornamento aree di output
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Ricordando :ref:`Riferimenti a oggetti della pagina`:
+
+.. code:: js
+
+        
+    function addMessageToWindow(message) {
+        $("#output").append("<tr><td>" + message + "</td></tr>");
+     }
+
+
+    function setImageInWindow(image) {
+        let url = URL.createObjectURL(new Blob([image]));
+        //Usando DOM
+        //imageWindow.innerHTML = `<img src="${url}"/>`
+        //Usando jQuery
+        $("#imageArea").html(`<img src="${url}"/>`);
+    }    
+
+
+    //Volendo appendere una immagine nella outputArea ...
+    function addImageToWindow(image) {
+        let url = URL.createObjectURL(new Blob([image]));
+        $("#output").append("<tr><td>" + 
+            `<img src="${url}"/>` + "</td></tr>");
+    }
+
+
+
+
+

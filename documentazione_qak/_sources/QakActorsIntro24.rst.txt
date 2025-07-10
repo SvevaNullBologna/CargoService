@@ -1,0 +1,811 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta    
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3  
+.. role:: slidekp
+
+
+.. _User_story: https://en.wikipedia.org/wiki/User_story
+.. _JUnit: https://junit.org/junit4/
+.. _JFX: https://twiki.di.uniroma1.it/pub/Metod_prog/RS_L17/lezione17.html
+
+
+.. _helloworld0.qak: ../../../../helloworldqak24/src/helloworld0.qak
+.. _qakicons: ../../../../helloworldqak24/qakicons
+.. _Arch_helloworld0.py: ../../../../helloworldqak24/Arch_helloworld0.py
+.. _helloworld0arch.png: ../../../../helloworldqak24/helloworld0arch.png
+.. _build2024.gradle: ../../../../helloworldqak24/build2024.gradle
+
+.. _main.resources: ../../../../helloworldqak24/src/main/resources
+.. _utils: ../../../../helloworldqak24/src/main/resources/utils
+
+.. _DisplayCodedQak.kt: ../../../../helloworldqak24/src/main/resources/utils/DisplayCodedQak.kt
+
+=============================================
+QakActorsIntro24 
+=============================================
+
+:slide3:`Progetto helloworldqak24`
+
+
+----------------------------------------
+Creazione di un nuovo progetto
+----------------------------------------
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+
+  * - **1) Creazione del progetto con git**
+  
+      #. imposto una directory di lavoro per il corso (ad esempio **issLab24**) e mi posiziono in essa
+      #. Creo la directory ``unibolibs``, che conterrà le librerie (file ``.jar``) da noi sviluppate.
+         Per il momento, inserisco le seguenti librerie:
+
+          :blue:`unibo.basicomm23-1.0.jar,  uniboInterfaces.jar, 2p301.jar,  unibo.qakactor23-5.0.jar`
+      #. creo la directory ``helloworldqak24`` e mi posiziono in essa
+      #. eseguo ``gradle init`` e rispondo: :remark:`1 2 default default`
+      #. importo in Eclipse il progetto gradle 
+      #. aggiungo la **natura Java** al progetto
+      #. aggiungo  **source folder**: di nome :blue:`src`
+      #. creo in **src** un file :blue:`qak` (di nome, ad esempio ``helloworld0.qak``) 
+    -  
+       A questo punto Eclipse dovrebbe presentare la finestra:     
+
+      .. image::  ./_static/img/Qak/qakStarting.png
+          :align: center 
+          :width: 100% 
+  
+  * - **2) Definizione del modello** `helloworld0.qak`_
+
+      #. scrivo il contenuto del file **qak**  (ad esempio `helloworld0.qak`_) e salvo.
+         Tra le :ref:`risorse generate<Qak codice e risorse generate>`
+         vi sono:
+
+         - il file  :blue:`build2024.gradle`
+         - i files :blue:`sysRules.pl` e :blue:`helloworld0.pl` essendo ``helloworld0`` il nome del **System** nel modello.
+      
+      #. copio il contenuto del  file `build2024.gradle`_ nel file :blue:`build.gradle`
+         ( o eliminare questo e ridenominare il precedente. Il file ``build2024.gradle`` verrà rigenerato al prossimo
+         salvataggio del modello).
+      #. eseguo ``gradlew eclipse`` per fissare le librerie
+      #. eseguo :
+
+        .. code::
+          
+            gradlew build -x test (per escludere i test, se ci sono)
+            gradlew run
+
+    - 
+  
+      .. image::  ./_static/img/Actors24/helloworld0.PNG
+          :align: center 
+          :width: 80% 
+  * - *3) Creazione della immagine** `helloworld0.qak`_
+
+      #. copio le icone `qakicons`_ per la creazione della immagine della architettura del sistema
+      #. eseguo (usando Python 3.11.3):``Python`` `Arch_helloworld0.py`_  per ottenere
+         l'immagine della architettura del sistema
+
+    - 
+        Immagine `helloworld0arch.png`_  della architettura del sistema
+ 
+
+..       #. inserisco codice ( Java e/o Kotlin) di utilità usato nel modello entro la directory :blue:`resources`
+
+
+
+ 
+
+ 
+
+----------------------------------------
+helloworld0
+----------------------------------------
+
+:slide1:`QActor come componente autonomo`
+
+Definiamo il  `modello` di un sistema composto da un solo componente (actor) che opera in modo autonomo scrivendo 
+*Hello world* sul dispositivo standard di output. Ricodiamo che:
+
+:slide2:`Modello` 
+
+- Descrizione di un sistema che pone in primo piano (foreground) aspetti ritenuti rilevanti 
+  lasciando sullo sfondo (background) aspetti ritenuti trascurabili (anche se essenziali per il funzionamento).
+- Ovviamente la definizione di un insieme di aspetti ritenuti essenziali dipende dal punto di vista.
+- Per questo un sistema può essere associato a più di un modello.
+
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - **helloworld0.qak**
+  
+      #. definizione del :ref:`Contesto<QakActors24: il contesto>` in cui opera l'actor
+      #. definizione dell'actor, che opera cone un :ref:`FSM<it.unibo.kactor.ActorBasicFsm.kt>`
+      #. stato iniziale dell'actor, che viene eseguito appena 
+         l'actor è creato della :ref:`Qak infrastructure`
+  
+    -
+      .. code::
+
+        System helloworld0
+
+        /*1*/Context ctxhello ip [host="localhost" port=8000] 
+
+        /*2*/QActor worker context ctxhello{
+        /*3*/State s0 initial{
+            println("Hello world") color magenta
+          }
+        } 
+
+:slide2:`Commento finale`
+
+- Questo primo esempio mostra come si possa scrivere il comportamento di un attore qak 
+  usando anche solo codice kotlin all'interno di un unico stato
+- Come detto in :ref:`Quadro generale`, questo modo di procedere non frutta le capacità
+  espressive sintetiche del :ref:`Linguaggio qak`.
+
+----------------------------------------
+helloworld1
+----------------------------------------
+:slide1:`QActor che usa un device custom`
+
+Definiamo il modello di un sistema composto da un solo componente (actor) che opera come 
+:ref:`helloworld0` scrivendo anche su un dispostivo custom introdotto dall'application designer come POJO-JFX.
+
+Il dispositivo custom:
+
+-  è definito in Kotlin nella directory `utils`_ entro `main.resources`_.
+-  si basa su librerie `JFX`_, di cui si tiene già conto nel file `build2024.gradle`_ generato dalla :ref:`Qak software factory`.
+
+
++++++++++++++++++++++++++++++++++
+Perchè il display
++++++++++++++++++++++++++++++++++
+
+Al momento, i dettagli costruttivi del dispositivo (descritti più avanti, nella sezione :ref:`DisplayObj`)
+possono essere ignorati; basta sapere che questo dispositivo è  
+implementato in Java o in Kotlin e che:
+
+- espone un :slide2:`Factory method` ``create`` che costruisce un oggetto :slide2:`Singleton`
+  (si veda :ref:`design patterns`)
+- implementa il metodo:
+
+   .. code::
+
+       public void write( String s ) //In kotlin: fun write(s: String?)
+- opera in modo che la :slide2:`chiusura della finestra`  :slide2:`termina l'applicazione`.
+
+In questa fase, il :ref:`DisplayObj` ci serve per enfatizzare la differenza tra i concetti di **actor** e **object** e per 
+fare esempi sulle loro possibili relazioni.
+
+
+.. list-table:: 
+  :widths: 65,35
+  :width: 100%
+  
+  * - **helloworld1.qak**
+
+      #. Invocazione di codice Kotlin per creare una istanza (*singleton*) del Display
+      #. Invocazione del metodo di scrittura su Display
+
+      .. image:: ./_static/img/Actors24/displayhello1.PNG
+          :align: center
+          :width: 80%
+   
+    -
+      .. code::
+
+        System helloworld1
+
+        Context ctxhello 
+                ip [host="localhost" port=8001] 
+
+        QActor worker context ctxhello{
+          [# 
+        /*1*/ val d = utils.DisplayObj.create() 
+          #]
+          State s0 initial{
+            println("Hello world") color magenta
+            [# 
+        /*2*/  d.write("Hello world again!") 
+            #]
+          }
+        }
+
+:slide2:`Commento finale`
+
+- Questo  esempio mostra come si possano (ri)usare all'interno di un attore qak oggetti convenzionali
+  costruiti grazia ad opportune  librerie. 
+   
+ 
+----------------------------------------
+helloworld2
+----------------------------------------
+
+:slide1:`Interazione a messaggi con CodedQActor`
+
+Introduciamo nel sistema un :ref:`CodedQActor<Attori coded>` che incapsula il Display e 
+che gestisce un  `dispatch` della forma:
+
+      ``Dispatch out:out(S)``
+
+interpretandolo come comando per scrivere  sul Display.
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - 
+      
+      **helloworld2.qak**
+      
+      #. Dichiarazione del dispatch di comando 
+      #. Dichiarazione che nel contesto esiste l'actor di nome ``display``, codificato in Koltin
+      #. Nome della classe (user-defined)  `DisplayCodedQak.kt`_ che realizza il :ref:`CodedQActor<Attori coded>`
+      #. ``delay`` per dare il tempo al dispositivo JFX di formarsi
+      #. Invio di un  `dispatch` di comando a ``display``
+      #. Invio di un altro  `dispatch` di comando a ``display``
+
+
+
+      .. image:: ./_static/img/Actors24/displayhello2.PNG
+          :align: center
+          :width: 80%
+
+
+    -
+      .. code::
+
+        System helloworld2
+        /*1*/Dispatch out : out(TERM) 
+
+        Context ctxhello 
+                 ip [host="localhost" port=8002] 
+
+        /*2*/CodedQActor display context ctxhello
+        /*3*/     className "DisplayCodedQak"
+
+        QActor worker context ctxhello{
+          State s0 initial{
+        /*4*/ delay 1500 
+            println("Hello world") color magenta 		 
+        
+        /*5*/forward display -m out:out(hello_again)
+        
+            [# val OutMsg = "hello hello again" #]
+        /*6*/forward display -m out:out($OutMsg)
+          }
+        } 
+
+  * -  
+      **Immagine generata**
+  
+      La :ref:`Qak software factory` genera codice Python che costruisce in modo automatico una immagine 
+      grafica dell'architettura del sistema.
+
+    -
+      .. image:: ./_static/img/Actors24/displayhello2Arch.PNG
+        :align: center
+        :width: 80% 
+
+
+++++++++++++++++++++++++++++++++++++++++
+DisplayCodedQak.kt
+++++++++++++++++++++++++++++++++++++++++
+
+Il :ref:`CodedQActor<Attori coded>` ``display`` istanza di questa classe, specializza la classe :ref:`it.unibo.kactor.ActorBasic.kt`,
+che agisce in modo :ref:`message driven<Comportamento di un attore>`,
+cioè elabora in modo ``FIFO`` i messaggi che la :ref:`Qak infrastructure` inserisce sulla sua coda di input.
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - 
+      **DisplayCodedQak.kt** (in *resources*)
+
+      #. Il :ref:`CodedQActor<Attori coded>` è una specializzazione della classe :ref:`ActorBasic<it.unibo.kactor.ActorBasic.kt>` 
+         (definita nella :ref:`Qak infrastructure`).
+      #. Creazione di una istanza (*singleton*) del Display che viene ora incapsulata nel :ref:`CodedQActor<Attori coded>`
+      #. Metodo invocato per ogni nuovo messaggio 
+         :ref:`IApplMessage<unibo.basicomm23.interfaces.IApplMessage>` inserito nella coda dell'actor. 
+    
+    - 
+      .. code::
+
+        import it.unibo.kactor.ActorBasic
+        import unibo.basicomm23.interfaces.IApplMessage
+        import unibo.basicomm23.utils.CommUtils
+        import kotlinx.coroutines.runBlocking
+        import kotlinx.coroutines.GlobalScope
+        import kotlinx.coroutines.CoroutineScope
+
+        class DisplayCodedQak( name:String ): 
+        /*1*/              ActorBasic( name ){
+        /*2*/val display = utils.DisplayObj.create()     
+
+        /*3*/override suspend fun actorBody(msg:IApplMessage){
+          if(msg.msgId()=="out") 
+                  display.write(msg.msgContent())
+          }
+        }
+
+
+:slide2:`Commento finale`
+
+Questo  esempio mostra:
+
+- come definire ed usare un attore scritto in kotlin a partire dalle classi definite nella :ref:`Qak infrastructure`
+- come un attore possa tradurre messaggi (di comando) in chiamate a metodi di oggetti convenzionali
+
+
+
+----------------------------------------
+helloworld3
+----------------------------------------
+
+:slide1:`display come QActor applicativo`
+
+Facciamo 'emergere' il comportamento del Display a livello di modello, rendendo esplicita
+la gestione del ``Dispatch out:out(TERM)`` che prima risultava *sommersa* in 
+:ref:`DisplayCodedQak.kt`.
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+
+  * -  
+      **Immagine generata**
+  
+      L'immagine grafica dell'architettura del sistema ottenuta dal modello è ora quella di figura.
+
+      Si noti il cambio della icona rispetto al caso :ref:`helloworld2`
+
+    -
+      .. image:: ./_static/img/Actors24/displayhello3Arch.PNG
+        :align: center
+        :width: 80% 
+
+  
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - **helloworld3.qak: display**
+ 
+      #. Invocazione di codice Kotlin per creare una istanza (singleton) del Display
+      #. Transizione allo stato ``handleout`` per gestire il dispatch ``out``
+      #. Accesso al messaggio di ingresso mediante unificazione Prolog 
+      #. Valore di ingresso come argomento ``0`` del payload del messaggio (``payloadArg(0)``)
+      #. Invocazione del metodo di scrittura su Display
+  
+    -
+      .. code::
+
+        System helloworld3
+        Dispatch out  : out(TERM) 
+
+        Context ctxhello ip [host="localhost" port=8003] 
+
+        QActor display context ctxhello{
+          [# 
+        /*1*/val d = utils.DisplayObj.create() 
+          #]
+          State s0 initial{            
+          }
+        /*2*/Transition t0 whenMsg out -> handleout
+          
+          State handleout{
+        /*3*/onMsg( out:out(TERM)){
+              [# 
+        /*4*/   val OutMsg = payloadArg(0) #]  
+        /*5*/   d.write("$OutMsg") 
+              #]
+            }            
+          }
+        }
+
+  * - **helloworld3.qak: worker**
+ 
+     
+      #. delay per dare il tempo al ``display`` di formarsi
+      #. comando di scrittura sullo standard output
+      #. comando di scrittura al ``display``
+  
+    -
+       .. code::
+        
+         QActor worker context ctxhello{
+           State s0 initial{
+        /*1*/delay 1500
+        /*2*/println("Hello world") color magenta 		 
+        /*3*/forward display -m out:out(hello_again)
+          }
+        } 
+
+:slide2:`Commento finale`
+
+Questo  esempio mostra come un attore qak espresso in :ref:`Linguaggio qak` possa rendere esplicito un comportamento in precedenza
+realizzato da una parte 'sommersa' del sistema.
+ 
+ 
+
+
+----------------------------------------
+helloworld3 withobj
+----------------------------------------
+
+:slide1:`display come QActor withobj`
+
+In molte situazioni può essere conveniente :slide2:`rendere esplicito il fatto che un actor incapsula un oggetto`,
+in modo che non sia più necessario scrivere codice Kotlin e che la presenza di un oggetto incapsulato
+risulti visibile nella icona dell'actor.
+
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+
+  * - 
+      Questo obiettivo viene raggiunto usando la clausola ``withobj`` nella 
+      :ref:`dichiarazione dell'actor<Attori normali>`.
+
+      **Immagine generata**
+  
+      L'immagine grafica dell'architettura del sistema ottenuta dal modello è ora quella di figura.
+
+    -
+      .. image:: ./_static/img/Actors24/displayhello3withobjArch.PNG
+        :align: center
+        :width: 80% 
+
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - **helloworld3.qak withobj**
+ 
+      #. Dichiarazione dell'actor ``display``
+      #. con clausola ``withobj`` che specifica il nome dell'oggetto e il :ref:`metodo per crearlo<Perchè il display>`
+      #. eliminazione del codice Kotlin, che viene ora generato dalla :ref:`Qak software factory`.
+          
+    -
+      .. code::
+
+        System helloworld3
+        Dispatch out  : out(TERM) 
+
+        Context ctxhello ip [host="localhost" port=8003] 
+
+        /*1*/QActor display context ctxhello 
+        /*2*/    withobj d using "utils.DisplayObj.create()"{
+          
+        /*3*///[# val d = utils.DisplayObj.create() #]
+          State s0 initial{   
+            ...         
+         }
+        } 
+
+:slide2:`Commento finale`
+
+Questo  esempio mostra l'idea che gli attori possano incapsulare oggetti convenzionali 
+possa semplificare il codice (la creazione degli oggetti) ed evidenziare l'incapsulamento
+nella immagine della architettura.
+
+
+
+
+----------------------------------------
+helloworld4
+----------------------------------------
+
+:slide1:`display come QActor observable`
+
+Un QActor ha la proprietà di essere **observable** da un altro actor o da un componente esterno al sistema
+(:slide2:`alieno`).
+
+In questa versione del sistema,
+l'attore ``display`` opera come **observer** dell'actor ``worker`` e visualizza sul Display embedded
+gli aggiornamenti che ``worker`` invia  tramite un dispatch che l'*observer* dichiara di voler
+gestire col nome ``info``.
+
+
+.. ``info:info(SOURCE,TERM)``
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+  
+  * - **helloworld4.qak: display come osbserver**
+
+      #. :blue:`observeResource worker msgid info` (si veda :ref:`Operazioni relative alla osservabilità`): 
+         
+         l'attore *display* opera come observer dell'actor *worker* che riceve aggiornamenti
+         tramite il dispatch ``info:info(SOURCE,TERM)``
+      #. *display*  può visualizzare un aggiormaneto usando la variabile ereditata :slide2:`currentMsg`
+         (si veda :ref:`Parti ereditate`)
+         che referenzia il messaggio gestito nello stato corrente
+      #. *display*  può selezionare il contenuto del messaggio corrente usando la unificazione Prolog
+         e il metodo ereditato :ref:`payloadArg(N)<payloadArg>`  
+
+    -
+      .. code::
+
+        System helloworld4        
+        Dispatch info : info(SOURCE,TERM) 
+
+        Context ctxhello ip [host="localhost" port=8004] 
+
+        QActor display context ctxhello 
+              withobj d using "utils.DisplayObj.create()"{
+          State s0 initial{
+        /*1*/observeResource worker msgid info
+          } 
+          Transition t0 whenMsg info -> handleinfo
+          
+          State handleinfo{
+            printCurrentMessage
+            println("$currentMsg") color blue
+        /*2*/[# 
+            d.print( currentMsg.toString() )  
+            d.print( "$currentMsg" )  
+            d.print( currentMsg.msgContent().toString() )  
+            d.print( "${currentMsg.msgContent()}" )  		 
+            #]
+            onMsg( info:info(SOURCE,TERM)){
+              [# val Source = payloadArg(0) 
+                val infoMsg = payloadArg(1)	
+                val M      = "$infoMsg from $Source"			
+              #]
+              [# d.write( M ) #]
+            }		
+          }
+          Transition t0 whenMsg info -> handleinfo
+        }
+
+  * - **helloworld4.qak: worker come observable**
+ 
+     
+      #. delay per dare il tempo al ``display`` di formarsi
+      #. emissione di informazione osservabile
+      #. emissione di informazione osservabile
+  
+      .. L'informazione osservabile può essere osservata anche da :slide2:`alieni`. Per un esempio si veda
+    -
+       .. code::
+        
+        QActor worker context ctxhello{
+          State s0 initial{
+            [# var n = 0 #]
+        /*1*/delay 1500
+        /*2*/updateResource [# "hello_${n++}" #]	
+            delay 2000	 
+        /*3*/updateResource [# "hello_${n++}" #]
+          }	 
+        } 
+
+.. list-table:: 
+  :widths: 60,40
+  :width: 100%
+
+  * - 
+       
+
+      **Immagine generata**
+  
+      L'immagine grafica dell'architettura del sistema ottenuta dal modello è ora quella di figura.
+
+
+      ``info`` è il nome del dispatch con cui  ``display``  
+      dichiara di voler gestire le informazioni emesse da  ``worker``.
+
+
+
+    -
+      .. image:: ./_static/img/Actors24/displayhello4.PNG
+        :align: center
+        :width: 80% 
+
+
+----------------------------------------
+DisplayObj
+----------------------------------------
+
+ 
+
+
+:slide1:`Output device custom in JFX`
+
+Il dispositivo custom è definito in Kotlin nella directory `utils`_ entro `main.resources`_.
+
+.. nel file :slide3:`utils.DisplayObj.kt` della 
+
+.. list-table:: 
+  :widths: 50,50
+  :width: 100%
+  
+  * - **Parte statica della classe**  
+
+      #. Definizioni dei componenti
+      #. Factory method che crea una istanza del dispositivo come singleton
+      #. Invocazione del metodo ``initialize`` del dispositov all'interno di un nuovo Thread
+         per evitare il blocco del chiamante la *create*
+  
+    -
+      .. code::
+
+        package utils
+
+        import javafx.application.Application
+        import javafx.event.ActionEvent
+        import javafx.event.EventHandler
+        import javafx.stage.Stage
+        import javafx.scene.layout.GridPane
+        import javafx.scene.Scene
+        import javafx.scene.control.Button
+        import javafx.scene.control.TextArea
+        import javafx.scene.text.Text
+        import unibo.basicomm23.utils.CommUtils
+
+        class DisplayObj : Application() {
+            protected var stage: Stage? = null
+
+        companion object {
+        /*1*/   protected var launched = false
+                protected var outarea: TextArea? = null
+                protected var outtext: Text? = null
+                protected var myButton: Button? = null
+                protected var created = false
+                protected var display: DisplayObj? = null
+                
+        /*2*/public fun create() : DisplayObj{
+              if( ! created ) {
+                    val d   = DisplayObj()
+                    display = d
+                    created = true;
+        /*3*/  kotlin.concurrent.thread(start = true) {
+                  d.initialize( ) 
+                } 
+              }else CommUtils.outred(
+                   "WARNING: display already created")
+                  return display!!
+              }
+            }
+          ...
+        }
+
+  * - **Inizializzazione del device JFX**
+
+      
+      #. Inizializzazione alla costruzione, che invoca il metodo statico ``launch`` che attiva 
+         l'applicazione JavaFX, che crea un JavaFX Application Thread, 
+         in cui è invocato il metodo ``start``
+      #. Definizione del metodo *start* che crea la scena
+      #.  Definizione del metodo ``stop``, invocato alla chiusra della finestra
+  
+    -
+      .. code::
+
+
+        /*1*/fun initialize() {
+                if (!launched) {
+                    launch(*arrayOf())
+                    launched = true
+                }
+             }
+
+        /*2*/ override fun start(primaryStage: Stage) {
+                stage = primaryStage
+                setOutArea()
+                createScene(stage)
+            }
+
+         /*3*/override fun stop() {
+                System.exit(0)
+            }
+
+  * - **Creazione della scena**
+
+      
+      #.  Definizione dei componenti
+      #.  Creazione della scena
+  
+    -
+      .. code::
+
+        /*1*/protected fun setOutArea() {
+                outarea = TextArea()
+                outarea!!.prefColumnCount = 15
+                outarea!!.prefHeight = 280.0
+                outarea!!.prefWidth = 600.0
+                outarea!!.setWrapText(true)
+                myButton = Button("Clear")
+                myButton!!.onAction=EventHandler { 
+                  _: ActionEvent? -> outarea!!.text=""
+                }
+            }
+
+        /*2*/protected fun createScene(stage: Stage?) {
+                val root = GridPane()
+                root.add(outarea, 0, 0)
+                root.add(myButton, 0, 1)
+                val scene = Scene(root, 600.0, 300.0)
+                stage!!.title = "actorgui"
+                stage.scene = scene
+                stage.show()
+                stage.isAlwaysOnTop = true
+            }
+
++++++++++++++++++++++++++++++++++++++++++
+Metodo print
++++++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+  :widths: 40,60
+  :width: 100%
+
+
+  * - **print**
+
+      
+      #.  Il metodo ``print`` visualizza su *outarea* la stringa data come argomento
+    -
+      .. code::
+
+        /*1*/fun print(s: String?) {
+                if (s == null) return    //defensive
+                while (outarea == null){ //defensive
+                    Thread.sleep(500L)
+                    CommUtils.outred("WARNING: display non yet started")
+                }  
+                outarea!!.appendText("""$s""".trimIndent())
+                outarea!!.appendText("\n")
+            }
+
++++++++++++++++++++++++++++++++++++++++++
+Metodo write
++++++++++++++++++++++++++++++++++++++++++
+
+.. list-table:: 
+  :widths: 40,60
+  :width: 100%
+
+  * - **write**
+
+      #.  Il metodo ``write`` visualizza su *outarea* una stringa data della forma
+
+          .. code::
+
+              show( CONTENT )
+              out( CONTENT )
+  
+        mostrando solo il valore di :blue:`CONTENT`
+
+    -
+      .. code::
+        
+          /*2*/fun write(s: String?) {
+                if (s == null) return    //defensive
+                while (outarea == null){ //defensive
+                    Thread.sleep(500L)
+                }  
+                var outs = s.replace("show(", "").replace("out(", "")
+                val i = outs.lastIndexOf(")")
+                if (i >= 0) outs = outs.substring(0, i)
+                outarea!!.appendText("""$outs""".trimIndent())
+                outarea!!.appendText("\n")
+            }
+        }
+
+ 

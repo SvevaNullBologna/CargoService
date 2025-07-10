@@ -1,0 +1,235 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta       
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3   
+.. role:: slide4    
+.. role:: slidekp
+
+===================================
+Microservizi
+===================================
+
+.. list-table:: Motivazioni all'uso dei microservizi in ambiente industriale
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Motivazione
+     - Descrizione
+   * - Scalabilità
+     - Permette di scalare specifici servizi in base alla domanda, ottimizzando le risorse.
+   * - Manutenibilità
+     - Ogni servizio è indipendente, facilitando aggiornamenti e manutenzione senza impatti globali.
+   * - Resilienza
+     - I guasti di un microservizio non compromettono l'intero sistema, migliorando l'affidabilità.
+   * - Deployment Continuo
+     - Consente di implementare nuove funzionalità senza downtime, grazie a CI/CD.
+   * - Flessibilità Tecnologica
+     - Permette l'uso di linguaggi e tecnologie differenti per ogni microservizio.
+   * - Efficienza Operativa
+     - Riduce i tempi di sviluppo e rilascio grazie alla modularità e all'automazione.
+   * - Integrazione con IoT e Big Data
+     - Facilita l'integrazione con sensori industriali e analisi dati avanzate.
+
+-----------------------------------------
+Motivazioni all’uso dei microservizi  
+-----------------------------------------
+
+Le motivazioni che spingono le aziende industriali verso i microservizi sono molteplici e spesso legate alla necessità di gestire sistemi complessi e scalabili, migliorare la resilienza, accelerare l’innovazione, e supportare la trasformazione digitale. L’architettura a microservizi offre la flessibilità necessaria per rispondere a queste sfide, permettendo alle aziende di adattarsi più facilmente alle evoluzioni del mercato e alle esigenze operative.
+
+
+.. list-table::
+    :widths: 30,70
+    :header-rows: 1
+    :width: 100%
+ 
+    * - Motivazione
+      - Descrizione
+    * - :slide4:`Scalabilità e Prestazioni`
+      - Le aziende industriali spesso gestiscono sistemi di produzione e automazione che richiedono una scalabilità elevata per supportare un numero crescente di sensori, macchine, impianti o clienti. L'architettura monolitica può diventare inefficiente quando i sistemi crescono in termini di carico e complessità.
+ 
+        :blue:`Microservizi`: Permettono di scalare singoli componenti (servizi) indipendentemente, senza dover scalare l'intera applicazione. Ciò è utile quando alcuni servizi, come l'elaborazione dei dati dei sensori o l'analisi in tempo reale, richiedono più risorse rispetto ad altri. Questo riduce i costi e ottimizza l'uso delle risorse.
+
+    * - :slide4:`Manutenibilità e Aggiornamento`
+      - I sistemi industriali tendono a diventare molto complessi e possono richiedere aggiornamenti continui per adattarsi a nuove tecnologie o standard di settore. La manutenzione di una grande applicazione monolitica può essere difficile e costosa, con rischi di downtime elevati.
+  
+        :blue:`Microservizi`: Consentono di aggiornare e mantenere singoli componenti senza interrompere l'intero sistema. Le aziende possono effettuare modifiche e aggiornamenti a singoli servizi in maniera più rapida e con minori rischi, migliorando la produttività e riducendo il rischio di guasti durante gli aggiornamenti.
+ 
+    * - :slide4:`Sviluppo autonomo e Time-to-Market`
+      - In ambito industriale, le aziende spesso necessitano di sviluppare nuove funzionalità in tempi rapidi per rispondere a nuove richieste del mercato, integrare nuovi macchinari o tecnologie, o offrire nuove soluzioni ai clienti. Gli approcci monolitici rallentano lo sviluppo perché richiedono la coordinazione tra più team su un'unica base di codice.
+
+        :blue:`Microservizi`: Permettono ai team di sviluppo di lavorare in parallelo su servizi separati, con cicli di sviluppo indipendenti. Questo riduce i tempi di rilascio delle nuove funzionalità, migliorando il time-to-market delle innovazioni, e consente alle aziende di rispondere più rapidamente alle esigenze del settore.
+
+
+    * - :slide4:`Flessibilità Tecnologica`
+      - Le aziende industriali spesso utilizzano una vasta gamma di tecnologie e strumenti, che vanno dai sistemi legacy agli impianti moderni basati su IoT (Internet of Things) o AI. Una singola tecnologia o piattaforma potrebbe non essere adatta per tutti i casi d'uso. 
+
+        :blue:`Microservizi`: Consentono di utilizzare diversi stack tecnologici per servizi diversi, permettendo alle aziende di scegliere la tecnologia più adatta per ogni componente del sistema. Questo offre una grande flessibilità e consente di integrare più facilmente nuovi strumenti o tecnologie all'interno dell'architettura aziendale.
+
+    * - :slide4:`Resilienza e Tolleranza ai Guasti`
+      - Le aziende industriali richiedono un'alta affidabilità nei loro sistemi, poiché anche brevi interruzioni nei processi produttivi possono causare perdite significative. In un'applicazione monolitica, un errore in un singolo componente può bloccare l'intero sistema.
+
+        :blue:`Microservizi`: Migliorano la resilienza poiché i servizi sono isolati e l'errore di un singolo servizio non comporta necessariamente il fallimento dell'intero sistema. Questo approccio permette di costruire architetture più robuste e con capacità di recupero automatico (self-healing), minimizzando l'impatto di eventuali guasti.
+
+    * - :slide4:`Supporto per la Digital Transformation`
+      - La trasformazione digitale è una priorità per molte aziende industriali, che puntano a modernizzare i loro impianti e processi tramite automazione, IoT, AI e analisi avanzata dei dati. Un'architettura monolitica può essere difficile da adattare a queste esigenze, limitando l'integrazione di nuove tecnologie.
+
+        :blue:`Microservizi`: Facilitano l'integrazione di nuovi paradigmi tecnologici come l'IoT, l'Industria 4.0 e la manutenzione predittiva. Offrono un'architettura flessibile per gestire grandi quantità di dati in tempo reale e permettono alle aziende di implementare strategie di trasformazione digitale in modo più efficace.
+
+    * - :slide4:`Facilità di Deployment e Automazione`
+      - L'automazione e il deployment continuo sono fondamentali per aziende che gestiscono complessi sistemi produttivi distribuiti in diverse località. La configurazione e il deployment di una grande applicazione monolitica possono essere lenti e complessi.
+
+        :blue:`Microservizi`: Si adattano bene agli approcci DevOps e CI/CD (Continuous Integration/Continuous Deployment). Permettono di automatizzare il deployment di singoli servizi e di gestire in modo efficiente l'infrastruttura distribuita tramite container e orchestratori come Docker e Kubernetes. Ciò accelera il rilascio di nuove versioni e migliora l'efficienza operativa.
+
+    * - :slide4:`Conformità e Regolamentazioni`
+      - Le industrie devono spesso rispettare normative complesse (es. norme di sicurezza o ambientali) che possono variare a seconda della regione o del mercato. L'aggiornamento di un'applicazione monolitica per garantire la conformità in più giurisdizioni può essere difficile e rischioso.
+
+        :blue:`Microservizi`: Consentono alle aziende di implementare logiche di conformità e requisiti regolatori specifici solo nei servizi necessari, senza dover modificare l'intero sistema. Questo facilita l'adattamento delle applicazioni alle normative locali e alle regole settoriali.
+
+    * - :slide4:`Monitoraggio e Analisi in Tempo Reale`
+      - Il monitoraggio in tempo reale è cruciale per le aziende industriali che gestiscono processi produttivi, dove il rilevamento immediato di guasti o inefficienze può prevenire danni o interruzioni.
+
+        :blue:`Microservizi`: Facilitano il monitoraggio dettagliato di ogni servizio e componente, offrendo una maggiore visibilità sui processi. I microservizi possono essere monitorati in modo indipendente, permettendo di analizzare i problemi in tempo reale e migliorare le prestazioni del sistema globale.
+
+    * - :slide4:`Gestione delle Dipendenze e Interoperabilità`
+      - In ambito industriale, le applicazioni devono spesso integrarsi con una varietà di sistemi legacy, impianti di produzione, robotica, sensori e strumenti di terze parti. Integrare queste dipendenze in un'applicazione monolitica può essere complesso e richiede un approccio monolitico pesante. 
+
+        :blue:`Microservizi`: Ogni servizio può gestire la propria integrazione con strumenti e tecnologie specifiche, riducendo la complessità e migliorando l'interoperabilità tra sistemi diversi. L'uso di API ben definite facilita l'integrazione e la comunicazione tra i vari componenti.
+ 
+
+-----------------------------------------
+Problematiche dei microservizi 
+-----------------------------------------
+
+I microservizi ntroducono anche diverse problematiche e sfide rispetto all’approccio monolitico tradizionale basato su POJO.
+
+.. list-table::
+    :widths: 30,70
+    :header-rows: 1
+    :width: 100%
+ 
+    * - Problematica
+      - Descrizione
+    * - :slide4:`Gestione della complessità`
+      - - Con i POJO (monolitico): In un’architettura monolitica, tutti i componenti risiedono nello stesso processo, il che semplifica la gestione della complessità interna. Le interazioni tra oggetti e componenti avvengono attraverso semplici chiamate di metodo e la gestione degli errori è più lineare.
+
+        - Con i microservizi: La complessità aumenta perché ogni microservizio è un’entità separata, e la comunicazione tra loro deve avvenire tramite chiamate di rete (HTTP, gRPC, messaggistica, ecc.). Questo introduce problemi di latenza, gestione degli errori distribuiti e coordinamento delle dipendenze tra i servizi.
+    * - :slide4:`Comunicazione distribuita`
+      - - Con i POJO: Le interazioni tra i componenti avvengono tramite invocazioni di metodi locali, che sono rapide e sicure, senza il rischio di fallimenti di rete.
+
+        - Con i microservizi: La comunicazione tra i microservizi avviene tramite la rete, il che comporta latenza, errori di rete, timeout, e problematiche legate alla serializzazione/deserializzazione dei dati. Questo richiede anche la gestione delle API e protocolli di comunicazione, introducendo ulteriori livelli di complessità. Inoltre, è necessario implementare meccanismi di retry, circuit breaker, e gestione delle fallimenti parziali.
+    * - :slide4:`Consistenza dei dati`
+      - - Con i POJO: I dati sono gestiti in un database comune all’interno di un’applicazione monolitica. È possibile garantire consistenza transazionale in modo relativamente semplice utilizzando transazioni ACID.
+
+        - Con i microservizi: Ogni microservizio potrebbe avere il proprio database, il che rende difficile garantire la consistenza transazionale globale (es. le transazioni distribuite). I microservizi spesso adottano modelli di consistenza eventuale attraverso la propagazione asincrona degli eventi o l’uso di saghe. Questo introduce complessità nella gestione dei dati e nella coerenza dei sistemi.
+    * - :slide4:`Gestione delle dipendenze e orchestrazione`
+      - - Con i POJO: Tutte le classi e i componenti risiedono nello stesso ambiente di runtime, e le dipendenze tra di loro possono essere gestite attraverso un gestore delle dipendenze (come Maven o Gradle).
+
+        - Con i microservizi: Ogni microservizio è un’entità separata con le sue dipendenze. Questo può portare a problemi di compatibilità delle versioni tra servizi diversi. Inoltre, è necessario un sistema di orchestrazione per coordinare l’avvio, lo scaling, la gestione e l’aggiornamento di tutti i servizi, spesso con l’aiuto di strumenti come Kubernetes o Docker.
+    * - :slide4:`Gestione dello stato`
+      - - Con i POJO: Lo stato viene gestito in memoria o attraverso il database centralizzato, ed è facile mantenere lo stato condiviso tra diversi componenti dell’applicazione.
+
+        - Con i microservizi: I microservizi dovrebbero essere stateless o mantenere uno stato isolato, poiché la gestione dello stato distribuito è complessa. Se un microservizio ha bisogno di gestire lo stato, deve fare affidamento su sistemi di storage distribuito o cache distribuita, il che introduce ulteriori complessità e sfide nella coerenza dello stato.
+    * - :slide4:`Deployment e monitoraggio`
+      - - Con i POJO: In un’applicazione monolitica, il deployment è semplice: si distribuisce un singolo artefatto (es. un file .war o .jar) su un server. Il monitoraggio è anch’esso più semplice perché tutte le informazioni sullo stato del sistema sono in un unico posto.
+
+        - Con i microservizi: Ogni microservizio ha il proprio ciclo di vita di deployment e potrebbe essere distribuito indipendentemente. Questo richiede orchestrazione automatizzata, gestione delle versioni e coordinamento per evitare downtime. Inoltre, il monitoraggio diventa più complesso: è necessario tracciare il comportamento di ciascun microservizio, le loro dipendenze e le interazioni tra loro, spesso utilizzando strumenti come Prometheus, ELK stack o Jaeger per il tracing distribuito.
+    * - :slide4:`Gestione degli errori e tolleranza ai guasti`
+      - - Con i POJO: Gli errori e le eccezioni possono essere gestiti in modo centralizzato, e in un ambiente monolitico è più facile fare rollback completo o ripristinare uno stato coerente in caso di guasti.
+
+        - Con i microservizi: Gli errori possono verificarsi in punti diversi del sistema, e devono essere gestiti a livello di ogni microservizio. Il fallimento di un servizio può non impattare l’intero sistema, ma i fallimenti parziali (ad es. un servizio chiave che non risponde) devono essere gestiti attentamente per evitare che il sistema vada in crash o degradi le performance. Tecniche come il circuit breaker, bulkhead pattern e retry sono essenziali per garantire la resilienza dell’architettura.
+    * - :slide4:`Test e debugging`
+      - - Con i POJO: Il testing di un’applicazione monolitica è relativamente semplice. Si possono eseguire test unitari e di integrazione sull’intero sistema in un unico ambiente. Il debugging è diretto, poiché tutte le classi e i componenti sono parte dello stesso processo.
+
+        - Con i microservizi: Il testing diventa più complicato, poiché è necessario testare non solo i singoli servizi (test unitari) ma anche le interazioni tra di essi (test di integrazione e contratti). Il debugging di un sistema distribuito è molto più difficile a causa della natura asincrona e della comunicazione tra processi separati. Tecniche come il contract testing e l’uso di strumenti di tracing distribuito diventano fondamentali.
+    * - :slide4:`Sicurezza`
+      - - Con i POJO: La sicurezza può essere gestita a livello di applicazione centralizzata, utilizzando autenticazione e autorizzazione in un unico punto.
+        - Con i microservizi: Ogni microservizio potrebbe richiedere un proprio sistema di sicurezza, o deve integrarsi in un framework di sicurezza distribuito (ad es. OAuth, JWT). Questo introduce complessità nella gestione delle credenziali, autenticazione tra microservizi, e nella protezione dei dati durante le comunicazioni. La gestione della sicurezza deve essere implementata in maniera consistente su tutti i servizi.
+    * - :slide4:`Sovraccarico infrastrutturale`
+      - - Con i POJO: Le risorse di calcolo, memoria e archiviazione sono generalmente centralizzate in un’unica applicazione. La gestione delle risorse è relativamente semplice, poiché tutte le componenti condividono lo stesso ambiente.
+        - Con i microservizi: Ogni microservizio richiede un proprio ambiente di esecuzione, che può comportare un aumento significativo del carico infrastrutturale. Ad esempio, potrebbero essere necessari più container, database separati, logging distribuito e capacità di gestione delle risorse. Questo può aumentare i costi operativi e richiede un’architettura cloud ben progettata per scalare in modo efficiente.
+
+-----------------------------------------
+Progettazione dei microservizi 
+-----------------------------------------
+
+- Richardson: https://microservices.io/index.html
+ 
+- Richardson Understanding Microservices: https://microservices.io/microservices/2020/02/04/jfokus-geometry-of-microservices.html
+
+- Richardson Microservice architecture patern languages: https://microservices.io/patterns/index.html
+   
+- Richardson Decomposizione per sottodominio: https://microservices.io/patterns/decomposition/decompose-by-subdomain.html : 
+      
+- Richardson Microservice Architecture: https://microservices.io/patterns/microservices.html :  
+- Api Gateway, Service Discovery, Circuit Breaker, Event Sourcing, CQRS, Saga, etc. 
+- Il concetto di :blue:`aggregator`. Un possibile riferimento 
+  https://medium.com/nerd-for-tech/design-patterns-for-microservices-aggregator-pattern-99c122ac6b73
+
+
++++++++++++++++++++++++++++++++++++++++
+Tematche sul progetto dei microservizi
++++++++++++++++++++++++++++++++++++++++
+
+#. API Gateway
+#. Service catalogs and orhestrators
+#. Microservices aggregators
+#. Microservices patterns (MicroservicePatternLanguage.pdf Richardson)
+#. Circuit Breaker
+#. Service Discovery
+#. Load Balancing
+
+#. Bulkhead Pattern
+#. Retry
+#. Saga Pattern
+#. Event Sourcing
+#. CQRS
+#. Distributed Tracing
+#. Monitoring and Logging
+#. Security
+#. Deployment Automation
+#. Testing Strategies
+#. Continuous Integration/Continuous Deployment (CI/CD)
+#. DevOps Culture
+
+
+
+-----------------------------------------
+Nanoservizi 
+-----------------------------------------
+Un nanoservizio rappresenta un’evoluzione più radicale del concetto di microservizio. La differenza principale sta nella granularità. Un nanoservizio è ancora più piccolo e svolge un compito molto più specifico di un microservizio. Spesso si occupa di un’unica operazione o di una singola responsabilità molto limitata.
+
+
+.. list-table::
+    :widths: 30,70
+    :header-rows: 1
+    :width: 100%
+ 
+    * - Caratteristica
+      - Descrizione
+    * - :slide4:`Responsabilità limitatissima`
+      - Un nanoservizio è progettato per svolgere un singolo compito atomico, come la convalida di un campo di input, la gestione di una richiesta HTTP o l’invio di una singola notifica.
+    * - :slide4:`Dimensioni ridotte`
+      - Il codice e la logica di un nanoservizio sono minimi, riducendo la complessità e rendendoli facilmente manutenibili, ma solo in contesti molto specifici.
+    * - :slide4:`Estrema modularità`
+      - I nanoservizi portano all’estremo la filosofia della modularità e della separazione delle responsabilità.
+    * - :slide4:`Sovraccarico di comunicazione`
+      - Poiché i nanoservizi sono estremamente piccoli, richiedono molta più comunicazione tra loro rispetto ai microservizi, il che può aumentare il traffico di rete e la latenza.
+    * - :slide4:`Manutenzione e distribuzione complicata`
+      - Sebbene siano facili da manutenere, la distribuzione e l’orchestrazione di una vasta quantità di nanoservizi può diventare molto complessa.
+
+I Nanoservizi:
+
+- Potrebbero essere usati in contesti in cui si vogliono implementare operazioni estremamente semplici e modulari, ad esempio in un’architettura serverless.
+
+- Si adattano bene quando si ha bisogno di risposte rapide a eventi specifici, come la convalida di campi o la gestione di eventi atomici.
+
+- La loro complessità di gestione (soprattutto in fase di orchestrazione e comunicazione) li rende meno adatti a progetti di grandi dimensioni o in team più tradizionali.
+
+- Possono essere utili per i dispositivi IoT edge, ovvero dispositivi con capacità limitate o che devono operare in ambienti con poche risorse (ad esempio, dispositivi a bassa potenza, sensori remoti, ecc.). minimizzando il carico di elaborazione, permettendo operazioni più mirate ed efficienti.
+

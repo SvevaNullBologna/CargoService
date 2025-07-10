@@ -1,0 +1,44 @@
+.. iss22working documentation master file, created by
+   sphinx-quickstart on Wed Nov  3 11:11:44 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+
+.. https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+
+
+
+iss25Material
+==========================================
+
+.. toctree::
+   :maxdepth: 5 
+   
+   ISS2025
+   CorsoISS2025
+   CriteriValutazioneISS2025
+   OrganizzareLaValutazioneFinale
+   Intro2024
+   Principi
+   Primipassioperativi25
+   ConwayLife25
+   SpringBootIntro
+   MQTTConnection
+   ConwayLife25AdAttori
+   QakActors25
+   QakActors25Demo
+   QakActors24Intro24
+   History
+   Libri
+   Studenti2025
+   Video25
+   Microservizi
+
+   cargosystem25
+   cargoserviceM2M
+   cargoserviceM2MGui
+   Cargo24
+   ConwayLife25
+   Appunti
+
+

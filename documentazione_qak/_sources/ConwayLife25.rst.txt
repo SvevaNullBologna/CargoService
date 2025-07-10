@@ -1,0 +1,1179 @@
+.. role:: red
+.. role:: blue
+.. role:: silde2
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3
+.. role:: slide4
+.. role:: slidekp
+.. role:: worktodo 
+
+.. _Gioco della vita: https://it.wikipedia.org/wiki/Gioco_della_vita
+
+.. _SpringBoot: https://spring.io/projects/spring-boot
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+
+.. _IOutDev.java: ../../../../conway25Java/src/conway/IOutDev.java
+.. _Life.java: ../../../../conway25Java/src/conway/Life.java
+.. _LifeController.java: ../../../../conway25Java/src/conway/LifeController.java
+.. _ConwayOutput.java: ../../../../conway25Java/src/conway/devices/ConwayOutput.java
+.. _ConwayInputMock.java: ../../../../conway25Java/src/conway/devices/ConwayInputMock.java
+.. _MainConway.java: ../../../../conway25Java/src/conway/MainConway.java
+
+.. _build.gradle: ../../../../conwaygui/build.gradle
+.. _guipage.html: ../../../../conwaygui/src/main/resources/templates/guipage.html
+.. _LifeLocal: ../../../../conwaygui/src/main/java/conwayLifeLocal/LifeLocal.java
+.. _LifeControllerLocal: file:///C:/Didattica2025/qak25/conwaygui/src/main/java/conway/LifeController.java
+.. _ConwayOutput: file:///C:/Didattica2025/qak25/conwaygui/src/main/java/conway/devices/ConwayOutput.java
+
+
+.. _OutInMqtt: file:///C:/Didattica2025/qak25/conwaygui/src/main/java/conwayMqtt/devices/OutInMqtt.java
+
+.. _WSConwayguiLifeLocal: file:///C:/Didattica2025/qak25/conwaygui/src/main/java/unibo/disi/conwaygui/ws/WSConwayguiLifeLocal.java
+.. _WSConwayguiLifeMqtt: file:///C:/Didattica2025/qak25/conwaygui/src/main/java/unibo/disi/conwaygui/ws/WSConwayguiLifeMqtt.java
+
+ 
+ 
+.. _Dockerfile for conwaygui: file:///C:/Didattica2025/qak25/conwaygui/Dockerfile
+.. _IntroDocker: file:///C:/Didattica2024/qak24/iss24Material/docs/_build/html/_static/IntroDocker23.html
+
+.. _conway.qak: file:///C:/Didattica2025/qak25/conwayqak/src/conway.qak
+.. _LifeCoreAgain: file:///C:/Didattica2025/qak25/conwayqak/src/main/java/LifeCoreAgain.java
+ 
+.. _OutInMqttForactor: file:///C:/Didattica2025/qak25/conwayqak/src/main/java/OutInMqttForactor.java
+
+.. _conwayactors.qak: file:///C:/Didattica2025/qak25/conwayactorsqak/src/conwayactors.qak
+.. _conwaycellsqak.qak: file:///C:/Didattica2025/qak25/conwaycellsqak/src/conwaycells.qak
+.. _conwaymaster.qak: file:///C:/Didattica2025/qak25/conwaymasterqak/src/conwaymaster.qak
+
+.. _activatecells_9.bat: file:///C:/Didattica2025/qak25/conwaycellsqak/activatecells_9.bat
+.. _docker-compose-cells9.yml: file:///C:/Didattica2025/qak25/conwaycellsqak/docker-compose-cells9.yml
+
+.. _Automa a stati finiti : https://it.wikipedia.org/wiki/Automa_a_stati_finiti
+
+===================================
+ConwayLife25
+===================================
+:ref:`ConwayLife25: Obiettivi e fasi del lavoro`
+
+Parte I: da JavaScript a Java
+
+#. :ref:`ConwayLife25: il core e la griglia`
+#. :ref:`ConwayLife25 in JavaScript`
+
+   - :ref:`conway25JavaScript project`
+#. :ref:`ConwayLife25 in Java`
+
+   - :ref:`conway25Java project`
+#. :ref:`ConwayLife25 una GUI per Java`
+
+   - :ref:`conwaygui project`
+#. :ref:`ConwayLife25: un microservizio Java`
+
+   - :ref:`conwaygui service deployment`
+#. :ref:`conwaygui standalone`
+
+   - :ref:`conwayguialone project`
+
+Parte II: verso gli attori
+
+#. :ref:`ConwayLife25 il controller come actor`
+ 
+Parte III: celle come attori locali
+
+#. :ref:`Progetto conwayactorsqak`
+
+Parte IV: celle come attori distribuiti
+
+#. :ref:`Progetto conwaycellsqak`
+#. :ref:`Progetto conwaymasterqak`
+
+-------------------------------------------
+ConwayLife25: Obiettivi e fasi del lavoro
+-------------------------------------------
+Il `Gioco della vita`_ è un automa cellulare sviluppato dal matematico inglese *John Horton Conway* nel 1970
+e costituisce un modello matematico utilizzato per studiare :slide3:`sistemi complessi`.
+
+La previsione del comportamento a lungo termine del Gioco della Vita è un problema 
+che ha affascinato matematici e informatici per decenni e, nonostante numerosi studi, 
+non esiste ancora una soluzione definitiva e generale, a causa
+
+- :blue:`Complessità esponenziale`: Il numero di possibili configurazioni di una griglia di celle aumenta in modo esponenziale con la dimensione della griglia stessa. Questo rende impraticabile un'analisi esaustiva di tutte le possibili evoluzioni, anche per griglie di dimensioni moderate.
+- :blue:`Comportamento caotico`: Piccole variazioni nella configurazione iniziale possono portare a risultati completamente diversi nel lungo periodo, rendendo difficile stabilire delle leggi generali che governino l'evoluzione del sistema.
+- :blue:`Emergenza`: Dal semplice insieme di regole del gioco emergono comportamenti complessi e imprevedibili, come la formazione di strutture stabili, oscillanti o in continua evoluzione.
+
+Anche con una griglia finita, prevedere il comportamento a lungo termine di una configurazione iniziale rimane un problema complesso. 
+Il numero di possibili configurazioni, anche se finito, può essere enorme, rendendo impraticabile un'analisi esaustiva.
+
+Inoltre, a differenza di molti altri sistemi fisici, il Gioco della Vita :remark:`non è sempre reversibile`. 
+Ciò significa che, data una configurazione finale, non è sempre possibile risalire univocamente alla configurazione iniziale 
+che l'ha generata. Molte configurazioni finali possono avere più configurazioni iniziali che portano allo stesso risultato.
+
+Dunque, determinare la configurazione iniziale che porta a una data configurazione finale nel Gioco della Vita 
+è un problema molto complesso e, in generale, non esiste una soluzione algoritmica efficiente. 
+
+.. Tuttavia, la ricerca in questo campo continua e potrebbero emergere nuovi strumenti e tecniche che ci permetteranno  di affrontare questo problema in modo più efficace.
+
+Nonostante le difficoltà, sono stati fatti numerosi progressi nella comprensione del Gioco della Vita, che includono
+la *Classificazione delle configurazioni* (*still life*, *oscillatori*, *spaceship*, ...)  e *Teoremi parziali*
+
+Il `Gioco della vita` viene qui usato come applicazione di riferimento per realizzare un sistema software 
+per passi successivi, introducendo ad ogni passo qualche nuova caratteristica che rende il sistema via
+via :slide3:`più complicato`.
+
+++++++++++++++++++++++++++++++
+Sistema Complesso
+++++++++++++++++++++++++++++++
+
+- **Molte parti con interazioni imprevedibili**: Un sistema complesso è più simile a un ecosistema, dove molte entità interagiscono in modo non lineare e le loro interazioni possono portare a comportamenti emergenti e difficili da prevedere.
+- **Difficile da ridurre a parti isolate**: Le parti di un sistema complesso sono interconnesse in modo così stretto che è difficile isolarle e analizzarle singolarmente senza perdere informazioni cruciali.
+- **Comportamento emergente**: Il comportamento complessivo del sistema non può essere completamente compreso analizzando le singole parti, ma emerge dalle interazioni tra di esse.
+
+++++++++++++++++++++++++++++++
+Sistema Complicato
+++++++++++++++++++++++++++++++
+
+- **Molte parti, ma interazioni prevedibili**: Un sistema complicato è come un grande puzzle con molti pezzi. Ogni pezzo ha una funzione specifica e le interazioni tra i pezzi sono ben definite e prevedibili.
+- **Risolvibile con analisi dettagliata**: Se analizziamo a fondo ogni parte di un sistema complicato e le loro interazioni, possiamo comprendere il sistema nel suo insieme e prevedere il suo comportamento.
+
+
+:slide4:`Obiettivi Parte I: da JavaScript a Java`
+
+- procedere in modo bottom-up usando linguaggi noti (JavaScript e Java) per 
+  realizzrae il gioco `Conway Life`_>  (si veda anche `Conway Life play`_>) 
+- impostare il prodotto in modo che possa 'evolvere' mediante aggiunte progressive di funzionalità
+  e senza modifiche a quanto è stato già realizzato e testato richiamandosi ad alcuni principi-base
+  delle costruzione del sowftare
+- realizzare una pagina HTML che funga da dispostivo di input-ouput capace di interagire con un
+  server via WebSocket
+- trasformare il prodtto in un :ref:`microservizio<Microservizi>` a sè 
+  stante, capace di comunicare con l'applicazione mediante scambio di messaggi usando MQTT fruibile in rete usando SpringBoot
+- distribuire il prodotto come immagine Docker. 
+  Il microservizio diventa un sistema software di cui occcorre consoscere solo la :ref:`Vista esterna`.
+- considerare la GUI come dispositivo evoluto di I/O e realizzarla come un :ref:`microservizio<Microservizi>` a sè 
+  stante, capace di comunicare con l'applicazione mediante scambio di messaggi usando MQTT
+  e opportuni astrazioni di comunicazione (custom) 
+
+:slide4:`Obiettivi Parte II: dagli Oggetti agli Attori`
+
+- reimpostare l'applicazione Java come un agente (Actor) intronsecamente capace di interagire con 
+  il mondo esterno mediante scambio di messaggi, senza dover ricorrere a SpringBoot
+- introdurre il linguaggio (DSL) custom `qak` per la definizione di attori e per la loro interazione
+
+
+:slide4:`Obiettivi Parte III: Celle come attori locali`
+
+-  il sistema viene impostato come un modello espresso in Linguaggio qak 
+
+
+:slide4:`Obiettivi Parte IV: Celle come come attori distribuiti`
+
+- il sistema viene costruito usando N computer fisici, su ciacuno dei quali attivare una cella
+- l'uso di un linguaggio di modellazione agevola il refacorting del sistema in quando 
+  che 'nasconde' i dettagli di implementazione del sistema
+  e permette di concentrarsi sulle interazioni 'ad alto livello' tra le parti del sistema
+
+ 
+---------------------------------------
+ConwayLife25: il core e la griglia
+---------------------------------------
+
+#. Il punto di partenza è il 'cuore' del gioco, cioè la logica di calcolo delle celle vive e morte. 
+   Per questo calcolo è essenziale il concetto di **stato** di una cella e il concetto di **vicinato** di una cella.
+#. Lo stato di una cella può essere **vivo** o **morto** e viene modificato in base al numero di celle vive nel 
+   suo vicinato, secondo le seguenti regole:
+
+   - Una cella viva con meno di due celle vive adiacenti muore (per isolamento).
+   - Una cella viva con due o tre celle vive adiacenti sopravvive alla generazione successiva.
+   - Una cella viva con più di tre celle vive adiacenti muore (per sovrappopolazione).
+   - Una cella morta con esattamente tre celle vive adiacenti diventa una cella viva (per riproduzione).
+#. L'insieme delle celle forma concettualmente una griglia bidimensionale infinita, ma per ovvie ragioni, 
+   noi faremo riferimento a una griglia finita di dimensione ``NxN``, con ``3<=N<=10``.
+#. In una griglia infinita, il vicinato di una cella è costituito dalle ``8`` celle adiacenti 
+   (orizzontali, verticali e diagonali). Nel nostro caso di griglia finita, il **vicinato** di una cella 
+   potrebbe avere anche solo (ai bordi)  ``3`` o ``5`` celle. 
+#. In una prima fase, partiremo rappresentateremo la griglia come una matrice ``NxN`` di celle. Il vicinato di una cella può essere stabilito in base agli indici della componente
+   della  matrice che rappresenta la cella.
+#. In una seconda fase, la rappresentazione matriciale sarà usata solo per la **rappresemtazione esterna** della griglia 
+   (in una pagina HTML) mentre ogni cella sarà costruita come un agente autonomo che scambia informazioni con
+   le altre celle mediante scambio di messagggi.
+
+-----------------------------------------
+ConwayLife25 in JavaScript
+-----------------------------------------
+
+:slide3:`Progetto conway25JavaScript`: realizzazione in JavaScript,
+che permette la visualizzazione e il controllo della griglia all'interno in una pagina ``HTML``
+senza l'uso di alcun server.  
+La pagina propone anche pulsanti per avviare, fermare e terminare il gioco ed è organizzata come un
+insieme di funzioni raggruppate in diversi file:
+   
+
+.. list-table::
+    :widths: 40,60
+    :width: 100%
+    
+    * - 
+        .. image::  ./_static/img/conway/conwayjs.jpg
+           :align: left 
+           :width: 100%  
+      -  
+        - ``conwayGuiData.js``: definisce le strutture-dati della GUI
+        - ``life.js``: definisce  funzioni per la gestione della griglia e del gioco
+        - ``lifecontroller.js``: definisce funzioni per il controllo del gioco e lo configura
+        - ``conwayGuiData.js``: definisce le struttre-dati della GUI
+        - ``conwayOutput.js``: definisce funzioni per visualizzare lo stato delle celle
+        - ``conwayInput.js``: definisce funzioni per l'input dell'utente
+        - :ref:`conway.html`: la pagina HTML che contiene la GUI
+
++++++++++++++++++++++++++++++
+conway.html
++++++++++++++++++++++++++++++
+
+.. code::
+
+      <html>
+      <head>
+          <meta charset = "UTF-8" />
+          <title>The Game of Life</title>
+          <link rel="stylesheet" href="life.css">
+      </head>
+      <body>
+
+      <!-- sezione di OUTPUT -->
+      <div id="gridContainer">
+      </div>
+
+      <!-- sezione di INPUT  -->
+      <div class="controls">
+          <button id="start">Start</button>
+          <button id="clear">Clear</button>
+      </div>
+
+      </body>
+      <script src="conwayGuiData.js"></script>
+      <script src="life.js"></script>           <!-- logica del gioco -->
+      <script src="lifecontroller.js"></script> <!-- configurazione e controllo -->
+      <script src="conwayInput.js"></script>
+      <script src="conwayOutput.js"></script>
+      </html>
+
++++++++++++++++++++++++++++++
+conway25JavaScript project
++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 25,75
+    :width: 100%
+    
+    * - Costruzione del progetto
+      - - nella directory **conway25JavaScript** eseguire: ``gradle init 1 2 - -`` 
+        - ``package conway25Js`` con i file ``js`` e :ref:`conway.html`
+    * - Esecuzione del prodotto
+      - Apertura del file :ref:`conway.html` in un browser
+
+---------------------------------------
+ConwayLife25 in Java 
+---------------------------------------
+
+:slide3:`Progetto conway25Java`: realizzazione in Java di classi che svolgono i ruoli dei file della
+soluzione JavaScript. Le dipendenze tra le classi sono visualizzate nel diagramma seguente:
+
+
+
+.. list-table::
+    :widths: 40,60
+    :width: 100%
+    
+    * - 
+        .. image::  ./_static/img/conway/conwayjava.jpg
+           :align: left 
+           :width: 100%  
+      -  
+        - :ref:`IOutDev.java<IOutDev interface>`: contratto per la visualizzazione dello stati di una cella 
+        - `Life.java`_: definisce  funzioni per la gestione della griglia e del gioco
+        - `LifeController.java`_: definisce funzioni per il controllo del gioco
+        - `ConwayOutput.java`_: implementa ``IOutDev.java`` su *System.out*
+        - `ConwayInputMock.java`_: simula l'input dell'utente per la configurazione iniziale
+
+
++++++++++++++++++++++++++++++
+IOutDev interface
++++++++++++++++++++++++++++++
+
+`IOutDev.java`_ è definito dalla logica applicativa e deve essere implementato in modo opportuno
+per visualizzare una cella, senza che la logica applicativa si debba occupare dei dettagli di come farlo.
+
+.. code::
+
+    public interface IOutDev {
+      public void displayCell(String msg);
+    }
+
+In quesat versione, la visualizzazione delle celle è fatta su ``System.out`` dal componente ``ConwayOutput``.
+
+Nel seguito, introdurremo modi pìù evoluti per visualizzare le celle, ma senza modificare il codice di
+`LifeController`_ e di `Life`_.
+
++++++++++++++++++++++++++++++
+conway25Java project
++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 25,75
+    :width: 100%
+    
+    * - Costruzione del progetto
+      - Inizializzazione
+        
+        - nella directory **conway25Java** eseguire: ``gradle init 1 2 - -`` 
+        - aggiunta *Java nature* 
+        - aggiunta *sourcefolder src* 
+        - definito il :ref:`build.gradle<build.gradle e Main di conway25Java>`
+        - eseguito  ``gradlew eclipse``
+        
+        Parte applicativa
+         
+        - aggiunto ``package conway`` con i file ``java`` dell'applicazione,
+          incluso :ref:`Main di conway25Java<build.gradle e Main di conway25Java>` 
+        - aggiunto ``package conway.devices`` con i file ``java`` dei dispositivi di I/O
+    * - Esecuzione del prodotto
+      -  - ``gradlew run``  o da Eclipse
+
+ 
++++++++++++++++++++++++++++++++++++++++
+build.gradle e Main di conway25Java
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * - :slide3:`build.gradle`
+
+        .. code::
+
+            plugins {
+                        id 'application'
+                        id 'java'
+                        id 'eclipse'
+            }               
+            version '1.0'
+            java {
+              toolchain.languageVersion.set(
+                    JavaLanguageVersion.of(17))
+            }
+            repositories {
+              mavenCentral()
+              flatDir {   dirs '../unibolibs'	 }
+            }
+            sourceSets.main.java.srcDirs = ['src']
+            dependencies {
+            }
+            application {
+              mainClassName    = 'conway.MainConway'
+            }          
+
+      - `MainConway.java`_
+
+        .. code::
+
+          public class MainConway  {
+              
+              public static void main(String[] args) {             
+              
+                //configureTheSystem
+                  Life life           = new Life( 3,3 );
+                  LifeController cc   = new LifeController(life);   
+                  ConwayInputMock cim = new ConwayInputMock(cc,life);
+                
+                //start the system
+                  cim.simulateUserControl();
+                  
+              }
+          }
+        
+        Si noti che in questa versione :remark:`non vi sono dipendenze`   da librerie esterne a Java 
+
+
+
+-------------------------------------------------------
+ConwayLife25 una GUI per Java 
+-------------------------------------------------------
+
+
+:slide3:`Progetto conwaygui`: realizzazione di una pagina ``HTML`` che funga da dispostivo di input-ouput
+evoluto per l'applicazione :ref:`ConwayLife25 in Java` .
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+        .. image::  ./_static/img/conway/conwaygui.jpg
+           :align: left 
+           :width: 100%  
+      - La pagina HTML svolge il ruolo di: 
+        
+        - un :slide3:`dispositivo di input`, in quanto permette a un utente umano di settare lo stato iniziale delle celle
+          e di inviare comandi di gestione dell'applicazione con i pulsanti ``start/stop/exit``.        
+        - un :slide3:`dispositivo di output`, in quanto permette di visualizzare lo stato della griglia
+
+        I files relativi alla sua realizazione sono:
+
+        - :ref:`guipage.html`: pagina HTML
+        - `WSConwayguiLifeMqtt`_: gestione delle WebSocket lato server
+        - :ref:`iomap.js`: mappa con le celle
+        - :ref:`commsocket.js`: gestione della WebSocket lato client
+
+
++++++++++++++++++++++++++++++
+conwaygui project
++++++++++++++++++++++++++++++
+
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - Costruzione del progetto
+        
+        conoscere quanto riportato in :ref:`SpringBootInit25`
+        e l'uso di  https://start.spring.io/.
+
+        verificare la presenza della directory :slide3:`unibolibs` nella directory di lavoro ISS2025,
+        e, se non presente, crearla e copiarvi dentro le librerie necessarie
+      - 
+      
+        Inizializzazione
+          
+        - nella directory **conwaygui** eseguire: ``gradle init 1 2 - -`` e poi :
+        - aggiunta *Java nature* 
+        - aggiunta *sourcefolder src* 
+        - scrivere :ref:`build.gradle<conwaygui build.gradle>` con le :remark:`opportune dipendenze`
+        - eseguire  ``gradlew eclipse``
+
+        Parte applicativa
+                 
+        - aggiunto ``package conway`` con i file ``java`` dell'applicazione, con alcune modifiche ma **senza Main**
+        - aaggiunto ``package conway.devices`` con il file ``ConwayOutput.java`` del dispositivo di output
+      
+        Parte Spring
+          
+        - definito il controller ``ConwayGuiControllerLifeLocal``
+        - definita parte :remark:`static`
+        - definito in **src/main/reources/templates** il file :ref:`guipage.html` 
+        - definito ``WebSocketConfiguration`` che implementa ``WebSocketConfigurer`` per la gestione delle WebSocket (WS)
+        - definito ``WSConwayguiLifeLocal`` che estende ``AbstractWebSocketHandler`` per la gestione dei messaggi
+          ricevuti sulla WS e per trasmettare messaggi sulla WS
+
+    * - Esecuzione del prodotto
+      - ``gradlew bootrun``  
+
+
++++++++++++++++++++++++++++++++++++++
+conwaygui build.gradle
++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * - `build.gradle`_
+
+        Si noti:
+
+        - :remark:`flatDir` in **repositories**
+        - le dipendenze da SpringBoot 
+        - le dipendenze per le WebSocket
+        - le dipendenze da librerie UNIBO
+ 
+      - Le librerie UNIBO 
+        
+        - sono nella directory :slide3:`unibolibs` 
+        - servono per l'utility **CommUtils** e per la gestione dela comunicazioni via WebSocket.
+
++++++++++++++++++++++++++++++++++++++
+guipage.html  
++++++++++++++++++++++++++++++++++++++
+
+.. literalinclude:: ///C:/Didattica2025/qak25/conwaygui/src/main/resources/templates/guipage.html
+   :language: html
+
+.. view-source:file:///C:/Didattica2025/qak25/conwaygui/src/main/resources/templates/guipage.html
+
+.. list-table::
+    :widths: 60,40
+    :width: 100%
+    
+    * - `guipage.html`_
+ 
+        .. code::  
+
+          <!DOCTYPE html>
+          <html xmlns:th="http://www.thymeleaf.org">
+          <head><title>Welcome</title></head>
+              <link rel="stylesheet" href="mapstyle.css">
+              <script src="commsocket.js"></script>
+              <script src="outarea.js"></script>
+          <body>
+            <h1>Welcome to the conwaygui</h1>
+            <p>Application name=<b><span th:text="${arg}">Still unknown</span></b>.</p>    
+          <hr/>	
+          
+          <!--  INPUT AREA-->		 				
+            <button onClick="sendCmdToServer('start'); return false">START</button>
+            <button onClick="sendCmdToServer('stop');  return false">STOP</button>
+            <button onClick="sendCmdToServer('exit');  return false">EXIT</button>
+                  
+
+          <!--  OUTPUT AREA -->
+            <ol id="msgslist"></ol>
+
+          <!-- MAP AREA -->
+              <div >
+                <h3 class="text-center">Life Grid Map - starts in (1,1)</h3>
+                <div id="map" class="grid"></div>
+              </div>
+
+          <script src="iomap.js"></script>
+          </body>
+          </html>
+
+
+      - Il file si trova in ``src/main/resources/templates``. Si noti:
+
+        - la notazione :remark:`th:text="${arg}"` legata a Theymeleaf
+        - :remark:`PULSANTI` che invocano *sendCmdToServer*
+        - :remark:`OUTPUT AREA` (**msgslist**) in cui vengono visualizzati i messaggi inviati dal server
+        - :remark:`MAP AREA` (**map**)in cui vengono visualizzate le celle
+        - l'ordine in cui vengono caricati i file ``js``
+      
+        Si veda:
+        
+        -  :ref:`commsocket.js`: funzioni di comunicazione via WS
+        -  :ref:`outarea.js`: funzioni di gestone della OUTPUT AREA
+        -  :ref:`iomap.js`: funzioni di gestione della mappa delle celle
+  
++++++++++++++++++++++++++++++++++++++
+commsocket.js  
++++++++++++++++++++++++++++++++++++++
+
+ 
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+        .. code::
+
+            var socketToGui = null;
+
+            //OUTPUT
+            function sendCmdToServer(cmd) {
+              socketToGui.send(cmd);
+            }
+
+            //CREAZIONE DELLA CONNESSIONE WEBSOCKET DELLA GUI
+            function createSocketForGui(){
+              socketToGui = new WebSocket('ws://localhost:7110/wsupdates');  
+                socketToGui.onopen = function(event) {
+                  console.log("socketToGui onopen event="+event)
+                };
+                socketToGui.onmessage = function(event) {  
+                  handleWsMessage(event)
+                };
+                socketToGui.onclose = function(event) {
+                  console.log("--- socketToGui CLOSEEEE "+event)
+                };		 
+                socketToGui.addEventListener("error", (event) => {
+                  console.log("socketToGui error: ", event);
+                });
+            }
+
+            //CREATE
+            createSocketForGui();
+
+      - Contiene le funzioni che creano la web socket di comunicazione con il
+        server e la trasmissione-ricezione di messaggi.
+
+        .. image::  ./_static/img/conway/conwayguimqtt.PNG
+           :align: center 
+           :width: 60%  
+        
+        - Ricezione messaggi: :ref:`commsocket handleWsMessage`
+        - Trasmissione messaggi: :ref:`commsocket sendCmdToServer`
+        - Lato server: `WSConwayguiLifeMqtt`_
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+commsocket handleWsMessage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Funzione che gestisce i messaggi ricevuti dalla GUI.
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+
+        .. code::
+
+            function handleWsMessage(event){
+                const message = event.data;
+                if (message.startsWith("cell(")) {
+                  // Estrae la posizione e il colore
+                  const [_, x, y, v] = 
+                      message.match(/cell\((\d+),(\d+),([^)]+)\)/);
+                  updateCellColor(parseInt(x), parseInt(y), parseInt(v));
+                }
+                else {
+                  var list = document.getElementById("msgslist")
+                  const li = document.createElement('li');
+                  li.setAttribute("name", "product")
+                  li.appendChild(document.createTextNode(message))
+                  list.appendChild(li);			 
+                }
+            }
+
+      - 
+         - forma del msg: ``cell(i,j,v)``
+         - updateCellColor: in :ref:`iomap.js`
+         - msgslist: in :ref:`guipage.html`
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+commsocket sendCmdToServer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Funzione che invia messaggi dalla GUI al server.
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+
+        .. code::
+
+            function sendCmdToServer(cmd){
+              socketToGui.send(cmd);
+            }
+
+      - 
+         La funzione è chiamata da :ref:`iomap createMapRep`
+
++++++++++++++++++++++++++++++++++++++
+iomap.js  
++++++++++++++++++++++++++++++++++++++
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+iomap createMapRep
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+
+        .. code::
+
+          const mapContainer = document.getElementById("map");  
+          mapContainer.innerHTML = '';             
+            
+          function createMapRep(){
+          for( let i=1; i<=20; i++ ){
+              for( let j=1; j<=20; j++ ){
+                  const cellElement = document.createElement("div");
+                  cellElement.classList.add("cell");
+                  cellElement.classList.add("live");
+                  cellElement.id = `cell-${i}-${j}`;
+                  cellElement.addEventListener('click', function() {
+                     sendCmdToServer(""+cellElement.id);  
+                  });
+                  mapContainer.appendChild(cellElement);
+          }//for
+          }//for
+          }//createMapRep
+
+          function updateCellColor(newX, newY,color){ ... }
+          
+          createMapRep();
+      -  Contiene le funzioni che creano e gestiscono la rappresentazione
+         della celle in forma di matricce ``NxN`` che funge da dispositivo di input/output.
+
+         - La funzione è invocata al termine del caricamento del file 
+         - La forma del msg inviato al server usando :ref:`sendCmdToServer<commsocket sendCmdToServer>`: ``cell-i-j``
+         - La funzione :ref:`iomap updateCellColor` è invocata da :ref:`commsocket handleWsMessage`
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+iomap updateCellColor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+
+        .. code::
+
+          function updateCellColor(newX, newY,color) {
+            const newRobotCell = 
+              document.getElementById(`cell-${newY}-${newX}`);
+            if( newRobotCell.classList.contains("live") ){
+              newRobotCell.classList.remove("live");
+            }
+            else if( newRobotCell.classList.contains("dead") ){
+              newRobotCell.classList.remove("dead");
+            }
+            if (color == 1) {
+              newRobotCell.classList.add("dead");
+            }else if (color == 0) {
+              newRobotCell.classList.add("live");
+            }
+          }
+
+      - 
+        - modifica il colore della cella modificando lo stile
+        - viene invocata da :ref:`commsocket handleWsMessage`
+
+
+
+
++++++++++++++++++++++++++++++++++++++
+outarea.js  
++++++++++++++++++++++++++++++++++++++
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+outarea addItem
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+.. list-table::
+    :widths: 30,70
+    :width: 100%
+    
+    * - 
+        .. code::
+
+          function addItem(item){
+            var list = document.getElementById("msgslist")	
+            const li = document.createElement('li');
+            li.appendChild(document.createTextNode(item))
+            list.appendChild(li);			 
+          }
+                
+
+      - Contiene le funzioni che gestiscono l'OUTPUT AREA (``"msgslist"``)  
+        definita in :ref:`guipage.html`, in cui vengono visualizzati i messaggi inviati dal server 
+
+        - aggiunge un elemento alla lista dei messaggi inviati dal server
+
+
+----------------------------------------------------
+ConwayLife25: un microservizio Java 
+----------------------------------------------------
+
+A questo punto, inseriamo il codice delll'applicazione :ref:`ConwayLife25 in Java` entro 
+il :remark:`package conwayLifeLocal`
+e usiamo le `WebSocket`_ come strumento per l'aggiornamento 
+dinamico della pagina ``HTML`` (**output**) e come strumento per l'invio di comandi (**input**) all'applicazione Java.
+
+Il codice Java inserito come parte integrante del servizio:
+
+- ha la stessa struttura introdotta in :ref:`ConwayLife25 in Java`
+- elimina ogni dispositivo di input, in quanto i comandi-utente vengono inviati tramite WebSocket
+- definisce un dispositivo di output ``ConwayOutput`` che implementa :ref:`IOutDev interface` inviando messaggi
+  alla pagina HTML tramite WebSocket
+
+In questo modo abbiamo un primo microservizio.
+
+ .. list-table::
+    :widths: 60,40
+    :width: 100%
+    
+    * -  
+
+        .. image::  ./_static/img/conway/conwayguilocal.jpg
+          :align: center 
+          :width: 100%  
+      - 
+      
+         - `LifeController`_: esegue  i comandi inviati da ``WSConwayguiLifeLocal`` 
+         - `LifeLocal`_: esegue la logica del gioco, come in precedenza
+         - `OutDev`_: usa ``WSConwayguiLifeLocal`` per visualizzare 'on the fly' lo stato di una cella
+         - `WSConwayguiLifeLocal`_:  Estende  *AbstractWebSocketHandler*  di *org.springframework.web.socket.handler*.
+           Fa update delle pagine (metodo *broadcastToWebSocket*) quando invocato da `OutDev`_.  
+
+++++++++++++++++++++++++++++++++++++++++++++
+conwaygui service deployment
+++++++++++++++++++++++++++++++++++++++++++++
+
+.. #. **Commentare l'annotazione @Controller** in ConwayGuiControllerLifeMqtt
+.. #. Porre l'annotazione :slide3:`@Controller in ConwayGuiControllerLifeLocal`
+.. #. Porre :slide3:`workWithMqtt=false in WebSocketConfiguration`
+
+Il deployment del servizio può avvenire mediante una :slide2:`immagine Docker` che può
+essere creata ed eseguita con i seguenti comandi (si veda anche `IntroDocker`_):
+
+ .. list-table::
+    :widths: 40,60
+    :width: 100%
+    
+    * -  
+         .. code::
+
+            docker  build -t conwayguilifelocal:1.0 .
+      - costruisce una immagine docker di nome ``conwayguilifelocal:1.0`` usando il file 
+        `Dockerfile for conwaygui`_    
+    * -  
+         .. code::
+
+            docker run -it --rm --name conwayguilife -p7110:7110 
+              --network cargo-network 
+              --env "MQTTBROKER_URL=tcp://mosquitto:1883" 
+              conwayguilifelocal:1.0   
+
+      - esegue l'immagine creando un nuovo container
+   
+
+----------------------------------------------------
+conwaygui standalone
+----------------------------------------------------
+:slide3:`Progetto conwayguialone`: in questa
+:slide2:`seconda versione` del sistema, usiamo `SpringBoot`_ per realizzare la GUI 
+**solo come 'dispositivo evoluto di I/O**.  In particolare: 
+   
+- la GUI ha la possibilià di scambiare informazioni con il mondo esterno usando un :slide3:`broker MQTT`
+   
+- l'applicazione :ref:`ConwayLife25 in Java` viene lasciata separata; essa potrà utilizzare la GUI avvaledosi di una  
+  :slidekp:`implementazione di IOutDev` capace di comunicare via ``MQTT`` con la GUI.
+
+
+
+
+.. image::  ./_static/img/conway/conwayguiseqdiagr.jpg
+  :align: center 
+  :width: 100%  
+
+++++++++++++++++++++++++++++++++++++++++++++++++
+Astrazioni di comunicazione
+++++++++++++++++++++++++++++++++++++++++++++++++
+
+La interazione via ``MQTT`` potrebbe essere realizzata facendo :ref:`Uso diretto della libreria Paho`, 
+e delle operazioni *publish/subscribe*.
+
+Noi riterremo invece più opportuno costruire, con la **libreria Paho**, :slide2:`astrazioni di comunicazione` di più
+alto livello, quali  :ref:`Interconnessione`. I supporti di riferimento sono le classi  :ref:`MqttInteraction`,
+:ref:`MqttConnection25`, rese disponibili dalla  :slide3:`libreria unibo.basicomm23`.
+
+
+.. list-table::
+    :widths: 15,35,50
+    :width: 100%
+    
+    * - **Componente**
+      - **Ruolo e Tipo**    
+      - **Note**
+    * - `Life`_
+      - Logica del game in Java   
+      - Ha un riferimento a *OutInMqtt* per fare il display delle celle.
+        Le sue operazioni sono invocate da `LifeController`_
+    * - `LifeController`_
+      - Controllo del game in Java   
+      - Riceve comandi (``start/stop/exit``)  dalla GUI  mediante `OutInMqtt`_ e usa `Life`_.
+    * - `OutInMqtt`_
+      - Dispositivo di I/O in Java   
+      - Interagisce con le pagine HTML vie MQTT usando :ref:`MqttConnection25` perchè l'uso di una *receiveMsg* bloccante
+        è accettabile.
+
+        In alternativa potrebbe usare :ref:`MqttConnectionBase` ( e :ref:`MqttConnectionCallbackForReceive`)
+    * - `WSConwayguiLifeMqtt`_
+      - Gestione in Java di informazioni da/a pagina HTML    
+      - Estende  *AbstractWebSocketHandler*  di *org.springframework.web.socket.handler*.
+        Usa :ref:`MqttConnection25` per inviare comandi a  `LifeController`_ e per fare update delle pagine
+        (metodo *broadcastToWebSocket*)  cone le informazioni ricevute da  `LifeController`_.  
+
+
+Riportiamo il codice di `LifeController`_ e di `OutInMqtt`_ per chiarire il ruolo di ciascuno.
+
+- :slide3:`Lato GUI` l'applicazione SpringBoot usa :ref:`MqttConnection25` per:
+
+  - inviare sulla toopic :slidekp:`life`, i comandi dell'utente al `LifeController`_    
+  - ricevere dalla topic :slidekp:`guiin`, lo stato delle celle dalla griglia
+
+- :slide3:`Lato applicazione Java`: il dispositivo :slidekp:`OutIn` viene sostituito da un dispositivo :ref:`OutInMqtt` che 
+  invia messaggi di aggiornamento dello stato di una cella sulla topic :slidekp:`guiin`.
+
++++++++++++++++++++++++++++++++++++++++++++++
+LifeController.java
++++++++++++++++++++++++++++++++++++++++++++++
+
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+        .. code::
+
+            public class LifeController {
+                private int generationTime = 1000;
+                private  Life life;
+                private IOutDev  outindev;
+                protected boolean running = false;
+                protected int i = 0;
+                
+                public LifeController(Life game){  
+                    this.life = game;
+                    //configureTheSystem
+                    life.createGrids();
+                    outindev  = new OutInMqtt(this); 
+                }
+                    
+                protected void play() {
+                  new Thread() {
+                  public void run() {			
+                    while( running ) {
+                      try {
+                        TimeUnit.MILLISECONDS.sleep(generationTime);
+                        life.computeNextGen(outindev);
+                        CommUtils.outblue("---------Epoch ---- "+i++ );
+                      } catch (InterruptedException e) {
+                        e.printStackTrace();
+                      }
+                    }
+                  }
+                  }.start();
+                }
+
+        
+            //Converte  
+            public void elabMsg(String message) { 
+            ...
+            }
+          }
+      
+      -  Il controller:
+      
+         - configura il sistema;
+         - esegue il metodo :slide3:`play`, quando invocato da :ref:`elabMsg<LifeController elabMsg>`,
+           attivando un Thread;
+         - usa la variabile :slide3:`running` come stato di controllo, che viene
+           modificato dalle azioni ``start/stop`` inviate dalla GUI, come specificaa in 
+           :ref:`elabMsg<LifeController elabMsg>`.
+
++++++++++++++++++++++++++++++++++++++++++++++
+LifeController elabMsg
++++++++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+        .. code::
+
+            public void elabMsg(String message) {
+              if( message.equals("start")) {
+                if( running ) return; //start sent while running
+                running = true;
+                play();
+              }else if( message.equals("stop")) {
+                running = false;
+              }else if( message.equals("exit")) {
+                System.exit(0);
+              }else if( message.startsWith("cell")) {
+                String[] parts = message.split("-");
+                int y = Integer.parseInt(parts[1]);
+                int x = Integer.parseInt(parts[2]);
+                life.switchCellState(x-1,y-1);
+                int cellState = life.getCellState(x-1, y-1);
+                    String msg = "cell(" + x + "," + y + ","+ cellState + ")";
+                    outindev.displayCell(msg);
+              }
+            }
+     
+      -  I comandi inivati dalla gui sono interpretati effettuando azioni lcoali.
+
++++++++++++++++++++++++++++++++++++++++++++++
+OutInMqtt.java
++++++++++++++++++++++++++++++++++++++++++++++
+
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+        .. code::
+
+          package conwayMqtt.devices;
+          ...
+
+          public class OutInMqtt {
+
+            public OutInMqtt( LifeController LifeController ) {
+              this.lifeontroller = LifeController;
+                mqttConn = new MqttConnection25( 
+                  name , "tcp://localhost:1883", "lifein", "guiin" );
+                activateReceive();
+            }
+            
+            @Override
+            public void displayCell(String msg) {
+              try {
+                mqttConn.forward(msg);
+              } catch (Exception e) { ...  }		
+            }
+
+            public void activateReceive() {
+               new Thread() {
+                public void run() {
+                  try {
+                    while (true) {
+                      String msg = mqttConn.receiveMsg();
+                      lifeontroller.elabMsg(msg);
+                    }	
+                  } catch (Exception e) { ...  }
+                }
+              }.start();		
+            }
+          }
+
+      -  I messaggi ricevuti sono conandi inviati dalla GUI.
+
+
++++++++++++++++++++++++++++++++++++++++
+conwayguialone project
++++++++++++++++++++++++++++++++++++++++
+
+.. #. **Commentare l'annotazione @Controller** in ConwayGuiControllerLifeLocal 
+.. #. Porre l'annotazione :slide3:`@Controller in ConwayGuiControllerLifeMqtt`
+.. #. Porre :slide3:`workWithMqtt=true in WebSocketConfiguration`
+
+In questa versione, l'applicazione deve essere attivata a parte. Per facilitare la sperimentazione,
+si introduce una versione dell'applicazione nel package **conwayLifeMqtt** del progetto **conwayguialone**.
+
+#. Eseguire :slide3:`MainConway.java` del package **conwayLifeMqtt**
+
+-------------------------------------------------
+Una ottimizzazione basata su comunicazioni via WS
+-------------------------------------------------
+
+Una ottimizzazione del sistema precedente potrebbe essere realizzata usando le `WebSocket`_ per la comunicazione.
+In particolare, ``LifeController`` potrebbe creare una implementazione :ref:`OutWs` di :ref:`IOutDev` che usa le WebSocket per 
+inviare informazioni alla GUI:
+
+.. image::  ./_static/img/conway/conwayguiseqdiagrwithWS.jpg
+  :align: center 
+  :width: 100%  
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+        .. code::
+
+            public class LifeController {
+              ...                
+                public LifeController(Life game){  
+                    this.life = game;
+                    //configureTheSystem
+                    life.createGrids();
+                    /*1*/ new OutInMqtt(this); 
+                    /*2*/ outindev  = new OutWS(this);
+                }
+             ...
+
+      -  
+         :slidekp:`/*1*/`: attiva :ref:`OutInMqtt.java` per la sola ricezione
+
+         :slidekp:`/*2*/` inizializza la variabile **outindev** con un'istanza di :ref:`OutWS`, 
+         che usa le WebSocket per inviare informazioni alla GUI.
+
++++++++++++++++++++++++++++++++++++++
+OutWs
++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+        .. code::
+
+          public class OutWs implements IOutDev{
+          private Interaction connwws;
+
+            public OutWs() {
+          /*1*/ connwws = ConnectionFactory.createClientSupport(
+                  ProtocolType.ws, "localhost:7110", "wsupdates");
+            }
+            @Override
+            public void displayCell(String msg) {
+              try {
+          /*2*/ connwws.forward(msg);
+              } catch (Exception e) { ... }		
+            }
+
+          }
+      -  
+         :slidekp:`/*1*/`: crea una :ref:`unibo.basicomm23.ws.WsConnection`  
+
+         :slidekp:`/*2*/` invia il messaggio alla GUI in modo *fire-and-forget*
+         (si veda :ref:`unibo.basicomm23.interfaces.Interaction`)
+
+
+Va osservato pero che questa ottimizzazione :slide2:`crea una dipendenza`, in quanto il dispositivo
+deve conoscere l'indirizzo IP della GUI.
+
+-------------------------------------------------
+Una ottimizzazione per MQTT
+-------------------------------------------------
+
+Il componente `OutInMqtt`_ viene creato sia per ricevere sia per trasmettere.
+La fase di trasmissione può essere ottimizzata **accumulando** per ogni 'epoch'  tutti i messaggi 
+di update delle celle
+che cambiano di stato e inviando  una sola volta l'insieme di questi messaggi.
+
+Ovvimente, lato GUI, la funzione :ref:`commsocket handleWsMessage` deve essere modificata per gestire la lista 
+di comandi.
+
+
+++++++++++++++++++++++++++++++++++++
+Realizzazione della GUI (toremoove)
+++++++++++++++++++++++++++++++++++++
+
+Per la realizzazione, useremo `SpringBoot`_ in due modi diversi, costruendo due diversi tipi di sistema.
+
+#. Una prima versione (:ref:`ConwayLife25: un microservizio Java`) segue un approccio tradizionale, intergrando
+   l'applicazione Java entro `SpringBoot`_. In questo modo costruiremo un primo microservizio, con un approccio
+   progettuale di tipo :slidekp:`top down`.
+
+#. Una seconda versione (:ref:`conwaygui`) usa `SpringBoot`_ per realizzare la GUI
+   come 'dispositivo evoluto di I/O'. In particolare: 
+   
+  - la GUI ha la possibilià di scambiare informazioni con il mondo esterno usando un broker MQTT.
+   
+  - l'applicazione Java viene lasciata separata; essa potrà utilizzare la GUI avvaledosi di una  
+    :slidekp:`implementazione di IOutDev` capace di comunicare via ``MQTT`` con la GUI.
+
+  In questo modo potremo sperimentare la costruzione di un sistema in modo :slidekp:`bottom up`, usando due microservizi
+  interagenti tra loro.

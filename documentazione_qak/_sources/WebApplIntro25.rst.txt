@@ -1,0 +1,237 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3
+
+.. _SpringBoot: https://spring.io/projects/spring-boot
+.. _Applicazione web: https://it.wikipedia.org/wiki/Applicazione_web    
+.. _WebappFrameworks: https://www.geeksforgeeks.org/top-10-frameworks-for-web-applications/
+.. _Springio: https://spring.io/
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _Node.js: https://nodejs.org/it/
+.. _Express: https://expressjs.com/it/
+.. _CleanArchitecture: https://clevercoder.net/2018/09/08/clean-architecture-summary-review
+.. _Buster: https://www.raspberrypi.com/news/buster-the-new-version-of-raspbian/
+.. _Bullseye: https://www.raspberrypi.com/news/raspberry-pi-os-debian-bullseye/
+.. _REST : https://en.wikipedia.org/wiki/Representational_state_transfer
+.. _HATEOAS: https://en.wikipedia.org/wiki/HATEOAS
+.. _BannerTool: https://manytools.org/hacker-tools/ascii-banner/
+.. _jQuery: https://www.w3schools.com/jquery/default.asp
+.. _Thymeleaf: https://www.thymeleaf.org/
+.. _SpringMVCModel: https://www.baeldung.com/spring-mvc-model-model-map-model-view
+.. _Introduzione a Spring Boot: https://azure.microsoft.com/it-it/resources/cloud-computing-dictionary/what-is-java-spring-boot/
+
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+.. _SockJs: https://openbase.com/js/sockjs/documentation#what-is-sockjs
+.. _Bootstrap: https://getbootstrap.com/
+.. _jsdelivr: https://www.jsdelivr.com/
+.. _WebJars: https://mvnrepository.com/artifact/org.webjars
+.. _WebJarsExplained: https://www.baeldung.com/maven-webjars 
+.. _WebJarsDocs: https://getbootstrap.com/docs/5.1/getting-started/introduction/
+.. _WebJarsExamples: https://getbootstrap.com/docs/5.1/examples/
+.. _WebJarsContainer: https://getbootstrap.com/docs/5.1/layout/containers/
+.. _Heart-beating: https://stomp.github.io/stomp-specification-1.2.html#Heart-beating
+
+
+.. _springIntro23: ../../../../springIntro23 
+.. _HIControllerDemo: ../../../../springIntro23/src/main/java/unibo/springIntro23/HIControllerDemo.java
+
+
+==================================
+WebApplIntro25
+==================================  
+
+
+
+Lo sviluppo di una `Applicazione web`_ -> non può presceindere dall'uso di uno dei numerosi framework disponibili (si veda ad
+esempio `WebappFrameworks`_ ->). 
+
+Per il nostro legame con Java, può essere opportuno, per ora, fare 
+riferimento a `Springio`_ ->. Tuttavia, una adeguata alternativa potrebbe essere l'uso di framework basati su 
+`Node.js`_ ->. ed `Express`_ ->.
+
+Sappiamo che l'uso di un framework aiuta a risolvere problemi ricorrenti in un dominio e 
+impone precise regole per l'introduzione di componenti applicativi 
+nel contesto dello schema architetturale che il framework utilizza per supportare le sue funzionalità.
+
+ 
+
+-------------------------------------
+Applicazioni Web: Concetti base
+-------------------------------------
+
+Nel caso dei framework nel dominio delle applicazioni Web, troviamo un insieme di concetti e modi di operare comuni:
+
+- l'uso di un WebServer (spesso Apache Tomcat) che rimane nascosto al livello applicativo;
+- l'uso di una infrastruttura che abilita le comunicazioni Client-Server mediante il protocollo HTTP 
+  e gli schemi REST di interazione;
+- la possibilità di definire componenti applicativi 'innestabili' nel framework secondo precisi meccanismi. 
+  `SpringBoot`_ -> si basa principalmente sul meccanismo delle :ref:`Annotazioni` Java;
+- il concetto di :blue:`Controller` come elemento-base per la gestione dei messaggi;
+- l'uso di tools che agevolano la creazione dinamica di pagine HTML a partire da template con 'parametri'
+  che possono essere fissati dal :blue:`Controller`;
+- l'abilitazione all'uso delle WebSocket per interazioni asincrone con i Client  
+
+Lo schema di funzionamento può essere riassunto come segue:
+
+#. un operatore umano usa un Browser per collegarsi  (:blue:`Human-Machine interaction` :slide1:`HMI`) via HTTP 
+   a una certa porta di un nodo remoto, usata come porta di ingresso dal WebServer
+#. l'infrastruttura del framework effettua una prima gestione del messaggio in arrivo in modo da confezionare
+   oggetti computazionali (richieste e/o risposte) da trasferire ad opportuni metodi del :blue:`Controller` 
+   per agevolare la stesura del codice di gestione da parte dell'Application Designer. Spesso la perte infrastrutturale
+   è organizzata secondo una **pipeline** che permette all'Application Designer di introdurre parti di elaborazione
+   a questo livello
+#. i metodi del :blue:`Controller` realizzano la gestione dei messaggi in funzione dei i 'verbi' HTTP (GET,PUT,POST,DELETE) 
+   con cui sono stati inviati e prepara una pagina HTML di risposta, sfruttando opportuni template predefiniti di pagine.
+
++++++++++++++++++++++++++++++++++
+Modello della pagina
++++++++++++++++++++++++++++++++++
+
+   I :brown:`parametri dei template` vengono fissati utilizzando un **Modello della pagina** secondo un classico  
+   :slide2:`schema Model View Controller`.
+
+   In `SpringBoot`_ ->, il modello fornisce attributi utilizzati per il rendering delle viste: si veda
+   `SpringMVCModel`_ ->.
+   
+#. il :blue:`Controller` restituisce la pagina alla parte infrastruttrale che l'aveva chiamato, la quale provvede a inviare
+   la pagina al Client che aveva effettuato la richiesta HTTP;
+#. se l'operatore umano è sostituito da una macchina  si parla di :blue:`Machine-To-Machine` (:slide1:`M2M`) interaction.
+   I messaggi vengono girati a un :blue:`Controller` specializato per inviare ripsoste in forma di dati, molto spesso 
+   in formato XML o JSon.
+
+
+---------------------------------------
+Architettura del WebServer
+---------------------------------------
+
+Dal punto di vista architetturale, l'organizzazione interna del codice del WebServer dovrà essere ispirata ai principi della
+`CleanArchitecture`_.
+
+:slide1:`CleanArchitecture`
+
+.. csv-table::  
+    :align: center
+    :widths: 50,50
+    :width: 100% 
+    
+    .. image:: ./_static/img/Architectures/cleanArchCone.jpg,.. image:: ./_static/img/Architectures/cleanArch.jpg
+
+In accordo al principio della `inversione delle dipendenze <https://en.wikipedia.org/wiki/Dependency_inversion_principle>`_ ->:
+
+- :remark:`I componenti di alto livello non devono dipendere da componenti di livello più basso.`
+
+
+ Il concetto di :blue:`inversione` non significa che i livelli di livello inferiore dipendano direttamente dai livelli di livello superiore.
+ Entrambi i livelli dovrebbero dipendere da :blue:`astrazioni` (*interfacce*) che espongono il comportamento richiesto 
+ dai livelli di livello superiore.
+
+
+Con queste premesse, il compito che ci attende è, in generale, quello di realizzare la parte 
+**Presenter**,  in modo da continuare a tenere separati i casi d'uso dall'interfaccia utente.
+
+:slide1:`Componenti-base`
+
+Come ogni applicazione `SpringBoot`_ ->, gli elementi salienti sono:
+
+- :slide2:`Il Controller`: Un WebServer Controller che si occupa della Human-Interaction  (che di norma denomineremo **HIController**) 
+  che presenta all'end user una pagina HTML.
+- :slide2:`La pagina HTML`: Una pagina HTML  che include campi il cui valore può essere definito attraverso
+  un oggetto ``org.springframework.ui.Model`` che viene trasferito a  ``HIController`` dalla infrastruttura
+  Spring e gestito mediante la Java template engine ``Theamleaf``.
+- :slide2:`Funzioni JavaScript`: Un file JavaScript  che include funzioni utili per la gestione della pagina lato client.
+- :slide2:`Le WebSocket`: l'suo  delle `WebSocket`_ ->, per l'aggiornamento automatico della pagina 
+  da parte del server. 
+  Per poter utilizzare le `WebSocket`_ ->,  `SpringBoot`_ -> richiede l'introduzione Un componente  
+  che implementa l'interfaccia ``WebSocketConfigurer`` 
+  di  *org.springframework.web.socket.config.annotation*. 
+  Per un esempio, si veda :ref:`Configurazione con WebSocketConfigurer`.
+
+
+
+
+--------------------------------------------------------
+Flask vs Spring Boot: What are the differences?
+--------------------------------------------------------
+
+Flask and Spring Boot are two popular frameworks used for building web applications. Let's explore the key differences between Flask and Spring Boot.
+
+#. **Language and Framework Compatibility**: Flask is a microframework for Python, allowing developers to have more control over the application structure. On the other hand, Spring Boot is built on top of the Java Spring framework, providing a full-stack solution for Java web development.
+
+#. **Scope and Features**: Flask is known for its simplicity and lightweight nature, making it a popular choice for small to medium-sized applications. It provides only the essential features for web development, allowing developers to choose and add additional libraries or components as per their requirements. Spring Boot, on the other hand, comes with a wide range of features and integrations out-of-the-box, making it suitable for large-scale enterprise applications.
+
+#. **Deployment and Containerization**: Flask applications can be deployed using any web server that supports the WSGI protocol, such as Apache or Nginx. Flask also provides a built-in development server for quick testing. Spring Boot, on the other hand, includes an embedded Tomcat or Undertow server, allowing application deployment as a standalone executable JAR file. This makes it easier to package and deploy Spring Boot applications as Docker containers.
+
+#. **Community Ecosystem**: Flask has a smaller but active community, with a wide range of third-party libraries and extensions available through the Flask extension registry. However, compared to Spring Boot, the ecosystem for Flask is relatively smaller. Spring Boot has a large and mature community, with extensive documentation, tutorials, and a vast number of libraries available through Spring's official repository.
+
+#. **Testing and Integration**: Flask provides a testing framework that makes it easy to write unit tests for applications. It also integrates well with third-party testing libraries like pytest and nose. Spring Boot, on the other hand, offers a comprehensive testing framework with support for unit testing, integration testing, and end-to-end testing. Spring Boot also has strong support for integration with popular testing frameworks like JUnit and Mockito.
+
+#. **Database and ORM**: Flask provides support for various ORM (Object-Relational Mapping) libraries like SQLAlchemy and peewee, allowing developers to work with different databases. Spring Boot, on the other hand, has built-in support for the Spring Data JPA library, which offers seamless integration with different database technologies through the Hibernate ORM. Spring Boot also provides support for NoSQL databases like MongoDB through Spring Data MongoDB.
+
+In summary, Flask is a lightweight and flexible framework for Python web development, while Spring Boot provides a full-stack solution for Java web development, with a wide range of features and integrations. Flask is often preferred for smaller projects or when the developers require more control and flexibility, while Spring Boot is suitable for large-scale enterprise applications with more extensive out-of-the-box functionality.    
+
+
+
+-----------------------------------------------
+Installate tyk
+-----------------------------------------------
+https://tyk.io/: The universal API management tool for REST, GraphQL, gRPC and Async APIs
+
+
++++++++++++++++++++++++++++++++
+Installare wget in Windows
++++++++++++++++++++++++++++++++
+
+.. code::
+
+  winget install wget
+
+
+++++++++++++++++++++++++++++++++++++++++++++++
+Installo tyk con docker
+++++++++++++++++++++++++++++++++++++++++++++++
+
+Riferimento dato nel libro **Machine-Learning-in-Microservices** (pg.164).
+
+Usando cygwin64
+mi metto in *C:/Didattica2024/qak24/WebGuiOutput/src/main/resources/flask* ed eseguo 
+quanto riportato in https://tyk.io/docs/tyk-oss/ce-docker/
+
+.. code::
+
+  # WARNING, THIS WILL REMOVE ALL VOLUMES
+  docker volume rm $(docker volume ls -q)
+
+  #
+  docker container prune 
+  docker volume prune
+
+
+  //Step 1 - Create a network
+  docker network create tyk
+
+  //Step 2 - Deploy Redis into the network, with the 6379 port open
+  docker run -itd --rm --name tyk-redis --network tyk -p 127.0.0.1:6379:6379 redis:4.0-alpine
+
+  //Step 3 - Next, let’s download a JSON tyk.conf configuration file
+  wget https://raw.githubusercontent.com/TykTechnologies/tyk-gateway-docker/master/tyk.standalone.conf
+
+  //Step 4 - Run the Gateway, mounting the conf file into the container
+  docker run \
+  --name tyk_gateway \
+  --network tyk \
+  -p 8080:8080 \
+  -v C:/Didattica2024/qak24/WebGuiOutput/src/main/resources/flask/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf \
+  -v C:/Didattica2024/qak24/WebGuiOutput/apps:/opt/tyk-gateway/apps \
+  docker.tyk.io/tyk-gateway/tyk-gateway:latest
+
+ 
+  curl localhost:8080/hello
+  {"status":"pass","version":"v4.0.0","description":"Tyk GW",
+   "details":{"redis":{"status":"pass","componentType":"datastore",
+   "time":"2024-08-06T15:41:08Z"}}}

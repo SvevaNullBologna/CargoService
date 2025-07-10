@@ -1,0 +1,9 @@
+#version: '3'
+services:
+  conwaygui:
+    image: docker.io/natbodocker/conwayguilifelocal:1.0
+##    image: conwayguilifelocal:1.0
+    ports:
+      - "7110:7110"
+
+## docker-compose -f conwaygui.yaml -p conwaygui up   

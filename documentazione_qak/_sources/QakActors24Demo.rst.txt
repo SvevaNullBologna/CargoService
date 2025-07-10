@@ -1,0 +1,2191 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3  
+.. role:: slidekp
+
+.. _Automa a stati finiti : https://it.wikipedia.org/wiki/Automa_a_stati_finiti
+.. _Microservizi : https://microservices.io/
+
+.. _Akka actor model: https://doc.akka.io//docs/akka/current/typed/guide/actors-motivation.html
+.. _Hewitt: https://en.wikipedia.org/wiki/Carl_Hewitt#Actor_model
+.. _Kotlin: https://kotlinlang.org/
+.. _kotlinUnibo: ../../../../../it.unibo.kotlinIntro/userDocs/LabIntroductionToKotlin.html
+
+.. _Eclipse Xtext: https://www.eclipse.org/Xtext/download.html
+.. _Qak syntax: ./_static/Qactork.xtext
+.. _Uso di Prolog: ./_static/LabQakPrologUsage2021.html
+.. _shortcut: ./_static/LabQakPrologUsage2021.html#shortcut
+.. _Xtext: https://www.eclipse.org/Xtext/: https://www.eclipse.org/Xtext/
+.. _Moore machine: https://it.wikipedia.org/wiki/Macchina_di_Moore
+.. _Coroutine context and dispatchers: https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html
+.. _FSMKotlin: ./_static/FSMKotlin.html
+.. _tuProlog: http://amsacta.unibo.it/5450/7/tuprolog-guide.pdf
+.. _PrologUsage: ./_static/LabQakPrologUsage2020.html
+
+.. _Reactive programming: https://en.wikipedia.org/wiki/Reactive_programming
+.. _Observer: https://en.wikipedia.org/wiki/Observer_pattern
+.. _Iterator: https://en.wikipedia.org/wiki/Iterator_pattern
+.. _Functional programming: https://en.wikipedia.org/wiki/Functional_programming
+
+.. _build2022.gradle: ./_static/build2022.gradle
+
+.. _newSingleThreadContext: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/new-single-thread-context.html
+.. _newFixedThreadPoolContext: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/new-fixed-thread-pool-context.html
+
+
+
+=============================================
+QakActors24Demo
+=============================================
+ 
+Primi esempi in :ref:`QakActorsIntro24` (:slide3:`Progetto helloworldqak24`)
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  *
+    -  :ref:`helloworld0`
+    -  Modello di un sistema composto da un solo actor che opera in modo autonomo scrivendo *Hello world* 
+       sul dispositivo standard di output 
+  *
+    -  :ref:`helloworld1`
+    -  Sistema che opera come :ref:`helloworld0` scrivendo su un dispositivo custom di output
+       introdotto dall’application designer come :ref:`POJO-JFX<DisplayObj>`
+        
+  *
+    -  :ref:`helloworld2`
+    -  Introduciamo nel sistema un :ref:`CodedQActor<Attori coded>` che incapsula il :ref:`DisplayObj`  
+       realizzato con JavaFX 
+  *
+    -  :ref:`helloworld3`
+    -  Facciamo ‘emergere’ il comportamento del Display a livello di modello 
+  *
+    -  :ref:`helloworld3 withobj`
+    -  Renderiamo esplicito il fatto che un actor incapsula un oggetto 
+       
+
+
+:slide3:`Progetto qakdemo24` : Esempi di uso di :ref:`QakActors24` (i primi esempi sono in :ref:`QakActorsIntro24`)
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+
+
+
+  *
+    -  :ref:`democodedqactor.qak`
+    -  Sistema basato su istanze di un attore codificato in Kotlin, ciascuna delle quali emette un evento.
+       Si evidenzia la opportunità di introdurre un linguaggio di modellazione.
+  *
+    -  :ref:`demo0.qak`
+    -  Interzioni con messaggi **dispatch, event**. 
+  *
+    -  :ref:`demoguards.qak`
+    -  Uso di guardie sulle tranzioni. 
+  *
+    -  :ref:`demorequest.qak`
+    -  Interazione **request-reponse**.
+  *
+    -  :ref:`demoasktocaller.qak`
+    -  Un attore chiamato ad eseguire una richiesta, chiede dati ulteriori al chiamante. 
+  *
+    -  :ref:`demoresource.qak`
+    -  Creazione incrementale di un sistema, a partire da un core stand-alone.
+  *
+    -  :ref:`demodelegate.qak`
+    -  Sistema con un *server* che delega la gestione di alcuni tipi di messaggio (tra cui richieste) a un altro attore. 
+  *
+    -  :ref:`democreate.qak`
+    -  Sistema in cui due produttori, reati dinamicamnete, inviano richieste a un consumatore che delega 
+       un tipo di richiesta a un altro attore, creato dinamicamente allo scopo.
+  *
+    -  :ref:`demomqttimplicit.qak`
+    -  Sistema con attori che fanno **publish/subscribe** sulla topic di un **mqtt broker** dichiarato 
+       a livello di sistema, con connessione automatica alla creazione di ogni attore.
+  *
+    -  :ref:`demomqttexplicit.qak`
+    -  Sistema con attori che fanno **publish/subscribe** sulla topic di un **mqtt broker** dichiarato 
+       a livello di attore, con connessione esplicita da parte dell'attore.
+  *
+    -  :ref:`demostreams.qak`
+    -  Sistema con attori che reagiscono a dati inviati attraverso **eventi-stream**.
+  *
+    -  :ref:`demointerrupt.qak`
+    -  Gestione di un evento con transizione a uno stato che opera come una interrupt-routine.
+  *
+    -  TODO
+    -  Sistema (ping-pong) formato da attori allocati su due contesti.
+
+
+:slide1:`Esempio CodedQActor`
+
+-----------------------------------------
+democodedqactor.qak
+-----------------------------------------
+
+Questo esempio introduce tre istanze di un attore :ref:`workactor<codedActor.workactor>` codificato in Kotlin,
+ciascuna delle quali emette un evento.
+
+.. list-table::
+  :widths: 40,60
+  :width: 100%
+
+  * - .. image:: ./_static/img/Qak/Archworkactorcoded.png
+          :align: center
+          :width: 100% 
+    - **Modello del sistema**.
+  
+      .. code::
+
+          System  qakdemo24
+          Dispatch start   : start( ARG )
+          Event alarm      : alarm( DATA )    
+          
+          Context ctxdemocodedqactor ip [host="localhost" port=8065]
+
+          CodedQActor w1 context ctxdemocodedqactor className "codedActor.workactor"
+          CodedQActor w2 context ctxdemocodedqactor className "codedActor.workactor"
+          CodedQActor w3 context ctxdemocodedqactor className "codedActor.workactor"
+
+          QActor datahandler context ctxdemocodedqactor{...}
+
+++++++++++++++++++++++++++
+datahandler
+++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 60,460
+  :width: 100%
+
+  * -
+      .. code::
+
+          QActor datahandler context ctxdemocodedqactor{
+          [# var StartTime = 0L #]
+            State s0 initial { 	  
+              printCurrentMessage 
+          /*1*/[# val cpus = 
+                Runtime.getRuntime().availableProcessors() #]
+              println("cpus= $cpus") color red
+          /*2*/forward w1 -m start : start(do)
+          /*3*/forward w2 -m start : start(do)
+          /*4*/forward w3 -m start : start(do)
+            }   
+            Transition t0 
+              whenEvent alarm -> handleAlarm
+            
+            State handleAlarm { 
+              printCurrentMessage color blue
+              [# var Elapsed = 0L #]
+          /*5*/setDuration Elapsed from StartTime
+          /*6*/memoCurrentTime StartTime
+              println("$name alarm after $Elapsed") color cyan
+            }
+          Transition t0 
+          /*7*/whenTime 2500 -> end  
+          /*8*/whenEvent alarm -> handleAlarm
+                
+            State end{
+              [# var Elapsed = 0L #]
+            /*9*/setDuration Elapsed from StartTime
+              println("$name ENDS duration=$Elapsed") 
+            } 
+          }  
+
+    - 
+      #. Acquisizione del numero di CPU disponibili
+      #. Invio di richiesta ``start`` a ``w1``
+      #. Invio di richiesta ``start`` a ``w2``
+      #. Invio di richiesta ``start`` a ``w3``
+      #. Caloclo, usando :ref:`setDuration<Operazioni con il tempo>` del tempo trascorso prima della percezione 
+         dell'evento ``alarm``
+      #. Memorizzazione del tempo corrente
+      #. Attesa di ``2500`` msec. Se non arriva l'evento ``alarm`` si va allo stato end e si termina
+      #. Attesa di un evento ``alarm``
+
+
+
+
+++++++++++++++++++++++++++++++++++
+codedActor.workactor
+++++++++++++++++++++++++++++++++++
+
+
+
+.. list-table::
+  :widths: 35,65
+  :width: 100%
+
+  * - Il codice di ``workactor``, scritto in Koltin, è il seguente:
+  
+      .. code::
+
+        class workactor(name:String):
+        /*1*/      ActorBasic(name,
+        /*2*/                 confined=true){
+        var i = 0
+          override suspend fun actorBody(msg:IApplMessage){
+        /*3*/if( msg.msgId() == "start"){
+              workStep(   )
+            }else
+             CommUtils.outgreen("$name|received  $msg ")
+          }
+          
+          suspend fun workStep(    ){
+            i++		
+            val alarm=CommUtils.buildEvent(
+                           name,"alarm","alarm$name-$i")
+          /*4*/emit( alarm )
+            if( i == 3 ) terminate()
+            else {
+              delay( 2000L   )
+              forward("start", "start(do)" , name )
+            }
+          }
+        } 
+    - 
+     
+      #. La classe ``workactor`` estende :ref:`ActorBasic<it.unibo.kactor.ActorBasic.kt>` e ridefinisce il metodo ``actorBody``.
+      #. Il valore  ``confined=true`` trasferito al costruttore  implica che le istanza di questa classe
+         sono  attivate usando il dispatcher `newSingleThreadContext`_ -> che utilizza solo 1 Thread.
+         (si veda `Coroutine context and dispatchers`_ ->).
+
+         Ponendo :``confined=false`` (valore di default), viene usato il dispatcher 
+         `newFixedThreadPoolContext`_ ->, che gestisce gli attori attivando  tanti thread quante 
+         le CPU disponibili.
+      #. Attivazione del metodo ``workStep`` in risposta a un messaggio ``start``. 
+      #. Il metodo ``workStep`` emette un evento ``alarm`` e, dopo un certo numero di iterazioni, termina.
+
+:remark:`Codice vs. modelli`
+
+- notiamo che il ``workactor`` non esprime in modo evidente il tipo di informazione che emette come evento.
+  Si tratta infatti di codice vero e proprio e *non di un modello* ;
+- leggendo il codice, capiamo che l'evento emesso ha la forma ``alarm:alarm( DATA )`` e che corrisponde quindi 
+  a una dichiarazione Qak quale quella introdotta in :ref:`Modello del sistema<democodedqactor.qak>`:
+
+  .. code:: 
+
+    Event alarm : alarm( DATA )
+
+ 
+
+:slide1:`Esempio demo0`
+ 
+-----------------------------------------
+demo0.qak
+-----------------------------------------
+
+Questo esempio descrive un sistema rappresentato nella figura che segue:
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - .. image:: ./_static/img/Qak/Archdemo0.png
+          :align: center
+          :width: 80% 
+    - 
+       .. code::
+
+          System qakdemo24   
+            
+          Dispatch msg1 : msg1(ARG)       "da sender a demo0"
+          Dispatch msg2 : msg2(ARG) 		"da sender a demo0"
+          Event alarm   : alarm( KIND )    
+          
+          Context ctxdemo0 ip [host="localhost" port=8095]         
+            
+          QActor demo0 context ctxdemo0{ ... }
+          QActor perceiver context ctxdemo0{ ... }
+          QActor sender context ctxdemo0{ ... }
+
+      - :ref:`demo0<QActor demo0>` : definisce il modello eseguibile della  figura a sinistra
+      - ``sender``: attore che invia i messaggi gestiti da ``demo0`` e genera (opzionalmente) un evento
+      - ``perceiver``: attore che gestisce gli eventi emessi da ``sender``
+
+          
+++++++++++++++++++++++++++
+QActor demo0
+++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 40,60 
+  :width: 100%
+
+  * -       
+      .. code::
+
+        QActor demo0 context ctxdemo0{ 
+          State s0 initial { 	    
+        /*1*/ discardMsg Off  //discardMsg On
+        /*2*///[# sysUtil.logMsgs=true #]
+            println("myself=${myself.name}")
+            println("curState=${currentState.stateName}")
+            println("currentMsg=${currentMsg}")
+          }     
+        /*3*/Goto s1  	
+    
+          State s1{
+            printCurrentMessage
+          }
+          Transition t0 whenMsg msg1 -> s2
+                        whenMsg msg2 -> s3 
+    
+          State s2{ 
+            printCurrentMessage
+        /*4*/ onMsg( msg1:msg1(V)){
+        /*5*/ println("s2: msg1(${payloadArg(0)})")
+              delay 1000  
+            }
+          }
+        /*6*/Transition t0 whenMsg msg2 -> s3
+      
+          State s3{ 
+            printCurrentMessage 
+        /*7*/onMsg( msg2:msg2(1)){
+              println("s3: msg2(${payloadArg(0)})")
+            } 
+          }
+          Goto s1      
+        }
+
+      La fiura mostra  :blue:`demo0` come :ref:`FSM<Automi a stati finiti>`
+    - 
+      #. :ref:`discardMsg Off<Variabili interne importanti>`: i messaggi che non sono di interesse 
+         nello stato vengono conservati, mentre con ``discardMsg On``, essi vengono eliminati.
+      #. crea dei file di log dei messaggi ricevuti  
+      #. :ref:`EmptyTransition`  
+      #. :ref:`Accesso al contenuto dei messaggi`: esegue il body solo se il *messaggio corrente*  
+         ha identificatore ``msg1`` e il suo payload ``msg1(ARG)``
+         può essere **unificato** con il template della dichiarazione :slide3:`e`
+         con il template ``msg1(V)``.
+      #. :ref:`payloadArg`: accesso al valore di ``ARG``
+      #. :ref:`NonEmptyTransition`  
+      #. considera solo messaggi con ``msgId==msg2`` e payload ``msg2(1)`` 
+
+       
+      
+        .. image:: ./_static/img/Qak/demoDSL.png
+            :align: center
+            :width: 100%   
+
+++++++++++++++++++++++++++ 
+demo0 sender  
+++++++++++++++++++++++++++  
+    
+.. list-table::    
+  :widths: 55,45  
+  :width: 100%          
+
+  * - Il ``sender`` 
+      
+      #. invia un primo dispatch ``msg1`` a :ref:`QActor demo0`
+      #. invia un secondo dispatch ``msg1`` a :ref:`QActor demo0`
+      #. dopo un tempo ``DT`` transita di stato
+      #. invia un dispatch ``msg2`` a :ref:`QActor demo0`
+      #. azione condizionale
+      #. emette l'evento ``alarm``
+  
+      invia alcuni messaggi e genera un evento se ``emitEvents = true``. Si noti l'uso di 
+      :ref:`whenTimeVar<Timeout per transizioni>`.
+
+    -
+
+      .. code::
+ 
+          QActor sender context ctxdemo0{
+            [# var emitEvents = true 
+              var DT         = 1000L; 
+            #]
+            State s0 initial { 	
+              printCurrentMessage color black
+              println( "sender sends ... ") color green
+          /*1*/forward demo0 -m msg1 : msg1(1)
+              delay 300
+          /*2*/forward demo0 -m msg1 : msg1(2)
+            } 
+            Transition t0 
+          /*3*/ whenTimeVar  DT -> sendothermsgs
+            
+            State sendothermsgs{
+              println( "sender sends again ... ") color green
+          /*4*/forward demo0 -m msg2 : msg2(1)		  
+          /*5*/if [# emitEvents #] { 
+          /*6*&  emit alarm : alarm( fire )   
+              }
+          }
+
+++++++++++++++++++++++++++ 
+demo0 perceiver
+++++++++++++++++++++++++++  
+    
+.. list-table::    
+  :widths: 50,50  
+  :width: 100%          
+
+  * - Il ``perceiver``  
+
+      #. gestisce l’evento ``alarm``
+      #. :ref:`whenTime<Timeout per transizioni>` se scade un delay di ``100`` msec va a ``s2`` 
+      #. se prima dei ``100`` msec è stato emesso l'evento ``alarm`` rimande in ``s1``
+ 
+    -  
+
+      .. code:: java
+
+       QActor perceiver context ctxdemo0{
+          State s0 initial { 	
+            printCurrentMessage color black
+          }
+       /*1*/ Transition t0 whenEvent alarm->s1          
+          
+          State s1{
+            printCurrentMessage color magenta
+          }
+          Transition t0 
+        /*2*/ whenTime 100    -> s2  
+        /*3*/ whenEvent alarm- > s1    
+          
+          State s2{
+            println("perceiver BYE")
+          }
+       } 
+ 
+  
+++++++++++++++++++++++++++ 
+Analisi dei risultati
+++++++++++++++++++++++++++  
+
+:blue:`Output con discardMsg On` 
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * - Caso sender: ``emitEvents = false``   
+  
+      .. code::
+
+         sender sends ...
+         demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4) 
+         demo0 in s2 | msg(msg1,dispatch,sender,demo0,msg1(1),10) 
+         demo0 in s2 | msg1:msg1(1)
+         sender sends again ... 
+         demo0 in s3 | msg(msg2,dispatch,sender,demo0,msg2(1),13)
+         demo0 in s3 | msg2:msg2(1)
+         demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4) 
+          
+    - Questo caso evidenzia anche che:
+
+      una :ref:`EmptyTransition` è realizzata con emissione di un evento ``local_noMsg``; 
+      i messaggi in arrivo sono memorizzati in :ref:`msgQueueStore<La gestione dei messaggi>`
+  * - Caso sender:  ``emitEvents = true``
+  
+      .. code::
+
+        sender sends ...
+        demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4)  
+        demo0 in s2 | msg(msg1,dispatch,sender,demo0,msg1(1),10)  
+        demo0 in s2 | msg1:msg1(1)
+        sender sends again ... 
+        demo0 in s3 | msg(msg2,dispatch,sender,demo0,msg2(1),13)  
+        demo0 in s3 | msg2:msg2(1)
+        perceiver in s1 | msg(alarm,event,sender,none,alarm(fire),14)  
+        demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4)  
+        perceiver in s2 | msg(local_tout_perceiver_s1,
+                        event,timer,none,local_tout_perceiver_s1,15)
+        perceiver BYE
+          
+    - Questo caso evidenzia anche che:
+
+      lo scadere del :ref:`timeOut<Timeout per transizioni>` provoca l'emissione di un evento con indentificatore  ``local_tout_perceiver_s1``.
+
+:blue:`Output con discardMsg Off` 
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * - Caso sender: ``emitEvents = false``   
+  
+      .. code::
+ 
+        sender sends ... 
+        demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4)
+        demo0 in s2 | msg(msg1,dispatch,sender,demo0,msg1(1),10)
+        demo0 in s2 | s2:msg1:msg1(1)
+          %%%  ActorBasicFsm demo0 | added   
+          msg(msg1,dispatch,sender,demo0,msg1(2),11) in msgQueueStore
+        demo0 in s3 | msg(msg2,dispatch,sender,demo0,msg2(1),12)
+        demo0 in s3 | s3:msg2:msg2(1)
+        demo0 in s1 | msg(local_noMsg,event,demo0,none,noMsg,4)
+        demo0 in s2 | msg(msg1,dispatch,sender,demo0,msg1(2),11)
+        demo0 in s2 | s2:msg1:msg1(2)
+
+    - Si nota la memorizzazione in *msgQueueStore*
+
+
+:slide1:`Esempio demoguards`
+
+-------------------------
+demoguards.qak
+-------------------------
+ 
+Questo esempio è relativo all'uso delle guardie.
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - .. image:: ./_static/img/Qak/Archdemoguards.png
+          :align: center
+          :width: 70% 
+
+    -  
+       .. code::
+
+          System qakdemo24
+          Dispatch cmd   : cmd( ARG )
+          Event alarm    : alarm( DATA )   
+          
+          Context ctxdemoguards ip [host="localhost" port=8065]
+
+          QActor a1 context ctxdemoguards{...} 
+          QActor a2 context ctxdemoguards{...}
+
+
+++++++++++++++++++++++++++
+guards a1
+++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+       .. code::
+
+ 
+
+          QActor a1 context ctxdemoguards{
+          /*1*/[# var ready     = true
+             var end       = false	
+             fun check( v : String ) : Boolean{
+                return v =="cmd(continue)"
+            }
+          #]
+            State s0 initial { 	  
+              println("$name in s0 end=$end ready=$ready")  
+            }
+            /*2*/Goto end if [# end #] else s1
+            
+            State end{
+              println("$name BYE") color magenta
+              [# System.exit(0) #]
+            }
+            
+            State s1  { 	  
+                println("$name in s1 ready=$ready") color blue
+            }
+            Transition t0 
+            /*3*/whenEvent alarm and [# ready #]   -> handleAlarm  
+            /*4*/whenMsg cmd     and [# ready #]   -> handleCmd 
+            /*5*/whenMsg cmd     and [# ! ready #] -> checkCmd
+
+            State handleAlarm  { 	  
+              println("$name in handleAlarm ready=$ready") 
+            /*6*/ [# ready = false #]
+            }
+            Goto s1	
+
+            State handleCmd  { 	  
+              printCurrentMessage
+            /*7*/onMsg( cmd : cmd(end) ){
+                  [# end = true #]
+              }
+            }
+            /*8*/Goto end if [# end #] else s1	
+            
+            State checkCmd  { 	  
+              println("$name checks $currentMsg") color magenta
+            /*9*/[# ready = check( currentMsg.msgContent() ) #]
+            }
+            Goto s1
+          }
+
+    -
+
+      #. Variabili e funzioni booleane
+      #. :ref:`EmptyTransition` con guardia iniziale ``false``
+      #. Transizione allo stato di gestione dell'evento, con guardia ``ready==true``
+      #. Transizione allo stato di gestione del dispatch, con guardia ``ready==true``
+      #. Transizione allo stato di gestione del dispatch, con guardia ``ready==false``
+      #. La gestione dell'evento ``alarm`` imposta ``ready=false``
+      #. La gestione del dispatch ``cmd(end)`` imposta ``end=true``
+      #. :ref:`EmptyTransition` con guardia  ``end``
+      #. Gestione del dispatch ``cmd(continue)`` con guardia ``ready`` settata dalla funzione ``check``
+
+
+
+++++++++++++++++++++++++++
+guards a2
+++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * -  
+       .. code::
+
+          QActor a2 context ctxdemoguards{
+            State s0 initial { 	  
+            /*1*/forward a1 -m cmd : cmd(10)
+            /*2*/emit alarm:alarm(fire)
+            /*3*/forward a1 -m cmd : cmd(20)
+            /*4*/emit alarm:alarm(tsunami)
+            /*5*/forward a1 -m cmd : cmd(continue)
+            /*6*/forward a1 -m cmd : cmd(30)
+            /*7*/forward a1 -m cmd : cmd(end)
+            }
+          }
+
+    -
+
+      #. Invio di un dispatch ``cmd(10)`` a ``a1``, che viene gestito
+      #. Emissione di un evento ``alarm(fire)``, che viene gestito da ``a1``
+      #. Invio di un dispatch ``cmd(20)`` a ``a1``, che non viene gestito
+      #. Emissione di un evento ``alarm(tsunami)``, che non viene gestito da ``a1``
+      #. Invio di un dispatch ``cmd(continue)`` a ``a1``, che viene gestito
+      #. Invio di un dispatch ``cmd(30)`` a ``a1``, che viene gestito
+      #. Invio di un dispatch  ``cmd(end)`` a ``a1``, che viene gestito terminando il sistema
+
+
+
+:slide1:`Esempio demorequest`
+
+-------------------------
+demorequest.qak
+-------------------------
+ 
+Questo esempio è relativo alla interazione request-reponse.
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - .. image:: ./_static/img/Qak/Archdemorequest.png
+          :align: center
+          :width: 70% 
+    - Interazione :blue:`caller e called`
+      
+      .. image:: ./_static/img/Qak/demorequest.png
+          :align: center
+          :width: 100%   
+
+Messaggi e contesti:  
+
+ .. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - 
+      .. code::
+
+          System  -msglog qakdemo24 
+          Request r1 : r1(X)     
+          Reply   a1 : a1(X)     
+
+          Context ctxdemoreq ip [host="localhost" port=8010]    
+
+    - Il flag :blue:`-msglog` popola, a run time, un insieme di log-files relativi ai messaggi ricevuti nella directory ``logs``.
+
+
+
+++++++++++++++++++++++++++++++++++++++++++
+demorequest caller    
+++++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -  
+      .. code::
+
+         QActor caller context ctxdemoreq {
+            State init initial {
+              println("caller starts") color blue
+              delay 100 //give time to start called  
+          /*1*/request called -m r1 : r1(hello(world))
+            }
+            Goto work 
+            
+            State work{
+                //printCurrentMessage color blue
+            }
+          /*2*/Transition t0 whenReply a1 -> handleReply
+            
+            State handleReply{
+              printCurrentMessage color blue
+          /*3*/onMsg( a1:a1(ARG) ){
+                println("answer=${payloadArg(0)}") color blue
+                delay 1000  
+              } 	
+            }
+            Goto work	
+         }
+    - 
+      #.  invia una request ``r1`` con payload ``r1(hello(world))``
+          all'attore locale ``called`` 
+      #.  attende il messaggio di reply  ``a1``. 
+      #.  Si ricordi lo schema di :ref:`Accesso al contenuto dei messaggi`.
+
+      L'output è:
+      
+      .. code::
+         
+         answer=called_caller_hello(world)
+
+
+
+++++++++++++++++++++++++++++++++++++++++++
+demorequest called    
+++++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * -  
+  
+      .. code::
+
+        QActor called context ctxdemoreq {    
+            State init initial {
+              println("called waits ...") color green
+            }
+            Transition t0  
+              whenRequest r1 -> handleRequest
+          
+            State handleRequest{  
+              printCurrentMessage color green	 
+              onMsg( r1 : r1(X) ){  
+                [# val Answer="${currentMsg.msgSender()}_${payloadArg(0)}" #]
+                replyTo r1 with a1 : a1( $Answer )  
+              } 
+            } 
+            Goto init   
+        }   
+    - `called`` attende una richiesta e quindi invia al chiamante la reply  ``a1``
+      con payload 
+ 
+      .. code::
+      
+        a1(called_caller_hello(world)) 
+
+      Si noti l'uso di ``currentMsg`` per definire il paylod ``Answer`` della reply.
+
+
+:slide1:`Esempio demoasktocaller`
+
+-------------------------
+demoasktocaller.qak
+-------------------------
+Un attore  *caller* invia una richiesta ``r1`` a un attore *called* che,
+per rispondere, ha bisogno di altri dati. Per questa ragione, il *called* invia a sua volta una richiesta ``r2``
+per i dati mancanti al *caller* e, solo dopo avere ricevuto i dati stessi come risposta a ``r2``, elabora la richiesta ``r1`` 
+mandando infine la risposta per ``r1`` al *caller*. 
+
+.. code::
+
+    System /*-msglog  -trace */ qakdemo24
+ 
+    Request r1 : r1(X) "da caller a called"
+    Request r2 : r2(X) "da called a called"
+    Reply   a1 : a1(X) for r1
+    Reply   a2 : a2(X) for r2 
+
+Per realizzare questo tipo di interazione, linguaggio qak fornisce la primitiva :ref:`ask<Operazioni di messaggista punto a punto>`
+
++++++++++++++++++++++++++++++++++++
+demoasktocaller caller
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * -  
+  
+      .. code::
+
+          QActor caller context ctxask {
+            State init initial {
+              delay 500 //for called to be started
+          /*1*/request called -m r1 : r1(10)
+              //delay 1000
+          /*2*/request called -m r1 : r1(20)
+            }
+            Goto work 
+            
+            State work{
+              //println("	caller work")
+            }
+            Transition t0 
+          /*2*/    whenReply   a1 -> handleReply
+          /*3*/    whenReply   a2 -> handleReply
+          /*4*/    whenRequest r2 -> handleAskFromCalled
+            
+            State handleReply{
+          /*5*/ println("$name handleReply $currentMsg") color blue
+            }
+            Goto work 
+            
+            State handleAskFromCalled{
+          /*6*/onMsg( r2 : r2(X) ) {
+                println("	$name handles ask r2(${payloadArg(0)})")  
+                println("	$name replies with a2(90)")  
+          /*7*/ replyTo r2 with a2 : a2(90)
+              }
+            }
+            Goto work
+          } 
+   
+    -  
+       #. Invio prima richiesta ``r1``
+       #. Invio seconda richiesta ``r1``
+       #. Attesa risposta a ``r1``
+       #. Attesa risposta a ``r2``
+       #. Attesa richiesta dati  
+       #. Gestione delle reply dal *called*
+       #. Analisi della richiesat dati
+       #. Risposta alla rchiesta dati fatta dal *called*
+
++++++++++++++++++++++++++++++++++++
+demoasktocaller called
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 60,40
+  :width: 100%
+
+  * -  
+  
+      .. code::
+
+        QActor called context ctxask {
+        [# var RequestArg = "0" #]
+          State init initial {
+          }
+          Transition t0 
+        /*1*/ whenRequest r1 -> handleRequest
+          
+          
+          State handleRequest{
+        /*2*/onMsg( r1 : r1(10) ){
+              [# RequestArg = payloadArg(0) #]
+              println("	called receives the request r1($RequestArg)")  
+              println("	called askfor r2(theta)") color magenta
+        /*3*/ ask  r2 : r2(theta) forrequest r1  
+            }	
+        /*4*/onMsg( r1 : r1(20) ){	
+              [# RequestArg = payloadArg(0) #]
+              println("	called receives the request r1(${payloadArg(0)})")  
+              [# val R = "${RequestArg}_${payloadArg(0)}" #]
+        /*5*/ replyTo r1 with a1 : a1( $R   )  
+            }
+          } 
+          Transition t0
+        /*6*/whenTime 1000 -> init
+        /*7*/whenReply a2  -> answerAfterAsk
+
+          State answerAfterAsk{  
+        /*8*/onMsg( a2 : a2(X) ){ 
+              println("	called receives answer to ask a1(${payloadArg(0)})")  
+              [# val R = "${RequestArg}_${payloadArg(0)}" #]
+              println("	called replies to orginal request with a1($R)")  
+        /*9*/ replyTo r1 with a1 : a1( $R   )  
+            }
+          } 
+          Goto init   
+        }     
+    -  
+       #. Attesa della richiesta ``r1``
+       #. Caso della richiesta ``r1`` con  payload ``r1(10)``
+       #. Invio di richiesta dati al *caller* per richiesta con  payload ``r1(10)``
+       #. Caso della richiesta ``r1`` con  payload ``r1(20)``
+       #. Invio di risposta immediata a ``r1`` con payload ``r1(20)``
+       #. Attesa dei dati  richiesti
+       #. Dopo ``1 sec`` si ritiene conclusa la interazione con il *caller* (caso ``4``)
+       #. Gestione della reply del *caller*
+       #. Risposta alla prima richiesta ``r1`` del *caller*
+
+       Il punto ``6-7`` implica che il *called* decide di non gestire la richiesta ``r1(20)`` prima
+       di ricevere la risposta alla sua *ask* per ``r1(10)``.
+       La richiesta ``r1(20)`` viene quindi accodata in :ref:`msgQueueStore<La gestione dei messaggi>`
+
+
+
+
+
+
+
+
+:slide1:`Esempio ExternalQActor`
+
+-----------------------------------------
+demoresource.qak
+-----------------------------------------
+
+.. :slide2:`Progetto it.unibo.resourcecore` 
+
+Vi sono situazioni in cui un sistema si configura e si costruisce 'incrementalmente', partendo da un nucleo iniziale 
+e poi aggiungendo altri componenti, che interagiscono con il nucleo e tra loro sempre mediante scambio di messaggi.
+
+Supponiamo, come esempio, di introdurre come 'nucleo di base' un componente modellato come una singola risorsa/servizio.
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  *
+    -  Il sistema formato dalla sola :ref:`resourcecore` è descritto come segue:
+
+       .. code::
+
+        System resourcecore
+        
+        Request cmd        : cmd(X) //X=w|s|a|d|h
+        Reply   replytocmd : replytocmd(X)
+        Event    alarm     : alarm(V)
+
+        Context ctxresourcecore ip [host="localhost" port=8045]
+        
+        QActor resourcecore context ctxresourcecore{...}
+
+    - 
+       .. image:: ./_static/img/Qak/Archresourcecore.png
+          :align: center
+          :width: 100% 
+
++++++++++++++++++++++++++++++++++++++
+resourcecore
++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 45,55
+  :width: 100%
+
+  * - 
+      .. code::
+        
+        QActor resourcecore context ctxresourcecore{
+        /*1*/[# var ready = true #]
+          State s0 initial { 	  
+              println("$name waiting ... ") color blue  
+          }   
+          Transition t0  
+          /*2*/ whenRequest cmd and [# ready #]->handleRequestCmd
+          /*3*/ whenEvent   alarm -> handleAlarm 
+
+          State handleAlarm{
+            onMsg( alarm : alarm(on) ){
+              println("$name alarm on") color red
+          /*4*/[# ready = false #]
+            }
+            onMsg( alarm : alarm(off) ){
+              println("$name alarm off") color red
+          /*5*/[# ready = true #]
+            } 
+          }
+          Goto s0
+
+          State handleRequestCmd{
+            printCurrentMessage color blue
+            onMsg( cmd : cmd(X) ){
+              [# val ANSW = "answerFor_${payloadArg(0)}" #]
+          /*6*/replyTo cmd with replytocmd : replytocmd($ANSW) 
+            }		 		
+          }
+          Goto s0	
+        }     
+    -  
+      
+       #. ``ready`` variabile interna che controlla se il *resourcecore* è pronto a gestire una richiesta ``cmd``. 
+       #.  Attesa di una richiesta ``cmd`` nel caso la :ref:`Guardia` ``ready`` sia vera
+       #.  Attesa di un evento ``alarm``
+       #.  Nel caso di allarme ``on``, ``ready`` diventa **false**
+       #.  Nel caso di allarme ``off``, ``ready`` diventa **true**
+       #.  Risposta alla richiesta ``cmd`` con payload ``replytocmd(ANSW)``
+
+      I messaggi di richiesta ricevuti durante gli allarmi sono memorizzati in :ref:`msgQueueStore<La gestione dei messaggi>`
+      e gestiti ad allarme terminato.
+ 
+
+------------------------------
+demoaddtocore.qak
+------------------------------
+
+.. :slide3:`Progetto it.unibo.corecallers` 
+ 
+
+Supponiamo ora che un ulteriore componente QakActor :ref:`corecaller` voglia 'fare sistema' con :ref:`resourcecore`, inviando una richiesta
+alla risorsa ed emettendo un evento ``alarm(on)``. 
+
+Un altro componente :ref:`alarmoff`, emette, con un certo ritardo, l'evento ``alarm(off)``.
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * - 
+       .. code::
+
+        System qakdemo24
+        
+        Request cmd        : cmd(X) //X=w|s|a|d|h
+        Reply   replytocmd : replytocmd(X)
+        Event    alarm     : alarm(V)
+
+        Context ctxaddtocore     ip [host= "localhost" port=8038]
+        Context ctxresourcecore  ip [host= "127.0.0.1" port=8045]
+
+        ExternalQActor resourcecore context ctxresourcecore
+
+        QActor corecaller context ctxaddtocore{...}
+        QActor alarmoff context ctxaddtocore {...}
+
+      Si noti:
+
+      - la dichiarazione degli stessi tipi di messaggio di  :ref:`resourcecore`.
+      - il componente  :ref:`resourcecore`  è dichiarato :slide3:`external`: si veda :ref:`Attori external`.
+
+      :remark:`I messaggi sono il 'collante' del sistema`
+
+    - 
+       .. image:: ./_static/img/Qak/Archdemocorecallers.png
+          :align: center
+          :width: 100% 
+
++++++++++++++++++++++++++++++++++++++
+corecaller
++++++++++++++++++++++++++++++++++++++ 
+
+ .. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  *
+    -   
+
+       .. code::
+
+          QActor corecaller context ctxaddtocore{
+            [# var StartTime = 0L 
+              var Elapsed   = 0L
+            #] 
+            State s0 initial { 	  
+              printCurrentMessage  color blue       
+          /*1*/request resourcecore -m cmd : cmd(caller1) 
+          /*2*/memoCurrentTime StartTime
+            }   
+            Transition t0 
+               whenReply replytocmd -> handleReply 
+            
+            State handleReply{
+          /*3*/setDuration Elapsed from StartTime
+              println("$name handleReply Elapsed = $Elapsed ") 
+              println("$name handleReply: emit alarm(on)") 
+          /*4*/emit alarm : alarm(on)	 
+          /*5*/request resourcecore -m cmd : cmd(2) 
+          /*6*/request resourcecore -m cmd : cmd(3) 
+          /*7*/memoCurrentTime StartTime
+            }
+            Transition t0 
+          /*8*/ whenReply replytocmd -> handleReplyAgain 
+
+            State handleReplyAgain{
+              printCurrentMessage color blue
+          /*9*/ setDuration Elapsed from StartTime
+              println("$name handleReplyAgain Elapsed=$Elapsed")  
+            }
+            Transition t0 
+                whenReply replytocmd -> handleReplyAgain 
+          }  	
+    - 
+       #. Invio di richiesta ``cmd`` a :ref:`resourcecore`
+       #. Memorizzazione del tempo corrente: si veda :ref:`memoCurrentTime<Operazioni con il tempo>`
+       #. Tempo trascorso alla ricezione della risposta a ``cmd``
+       #. Emissione di evento ``alarm(on)``
+       #. Invio di nuova richiesta ``cmd`` a :ref:`resourcecore`
+       #. Invio di ulteriore  richiesta ``cmd`` a :ref:`resourcecore`
+       #. Attesa delle risposte
+       #. Tempo trascorso alla ricezione della risposta a ``cmd``
+
++++++++++++++++++++++++++++++++++
+alarmoff
++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * -  
+      .. code::
+
+          QActor alarmoff context ctxcorecaller1 {
+           State s0 initial { 	  
+              printCurrentMessage  color blue  
+          /*1*/delay 2000
+              println("$name alarmoff emit ") 
+          /*2*/emit alarm : alarm(off)	 			   
+           }   
+          } 	
+
+    - 
+        #. Attesa di ``2 sec``
+        #. Emissione di evento ``alarm(off)`` che deattiva l'allarme e consetne a :ref:`resourcecore` di tornare ``ready``
+ 
+ 
+ 
+
+
+
+
+:slide1:`Esempio Delegazione`
+
+--------------------------------------
+demodelegate.qak
+--------------------------------------
+
+- Il :ref:`server` gestisce il dispatch ``cmd`` e le richieste ``r1`` e ``r2``
+- Il server delega al :ref:`serverworker` la gestione del  dispatch ``cmd`` e della richieste ``r2``
+- Il :ref:`caller1` invia la richiesta ``r1`` e gestisce la risposta inviata direttamente dal :ref:`server`
+- Il :ref:`caller2` invia il dispatch ``cmd`` e la richiesta ``r2`` e gestisce la risposta inviata dal :ref:`serverworker`
+
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -   
+
+       .. code::
+
+          System  qakdemo24
+              
+          Request r1 : r1(X)
+          Reply rr1 : rr1(X) for r1
+          
+          Request r2 : r2(X)
+          Reply rr2 : rr2(X) for r2
+          
+          Dispatch cmd : cmd(X)
+
+          Context ctxdelegate ip [host="localhost" port=8045]
+
+           QActor server context ctxdelegate{ ... }
+           QActor serverworker context ctxdelegate{ ... }
+           QActor caller1 context ctxdelegate{ ... }
+           QActor caller2 context ctxdelegate{ ... }
+
+    -   
+        .. image:: ./_static/img/Qak/Archdemodelegate.png
+          :align: center
+          :width: 100%         
+        
+ 
+
+
+++++++++++++++++++++++++++++++++++++
+server
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **server**
+
+       .. code::
+
+          QActor server context ctxdelegate{
+            State s0 initial{
+              delay 200 
+          /*1*/ delegate r2 to serverworker   
+          /*2*/ delegate cmd to serverworker
+            } 
+            Goto work	
+            
+            State work{
+              println("$name working ...") color blue
+            }
+            Transition t0 
+          /*3*/   whenRequest r1 -> handle_r1
+            
+            State handle_r1{
+              printCurrentMessage color blue
+          /*4*/  replyTo r1 with rr1 : rr1(answer)
+            } 
+            Goto work
+          }
+
+    -   
+        #. Delega la gestione della request ``r2`` al :ref:`serverworker`
+        #. Delega la gestione del dispatch ``cmd`` al :ref:`serverworker`
+        #. Attesa della request ``r1``
+        #. Risposta alla request ``r1``
+
+++++++++++++++++++++++++++++++++++++
+serverworker
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **serverworker**
+
+       .. code::
+
+          QActor serverworker context ctxdelegate{
+            State s0 initial{
+              //delay 1000
+            }
+            Goto work
+            
+            State work{
+              
+            }
+            Transition t0 
+          /*1*/  whenRequest r2 -> handle_r2
+          /*2*/  whenMsg cmd -> handlecmd
+            
+            
+            State handle_r2{
+              printCurrentMessage color blue
+          /*3*/  replyTo r2 with rr2 : rr2(answer)
+            }
+            Goto work
+            
+            
+            State handlecmd{
+          /*4*/printCurrentMessage color blue
+            }
+            Goto work
+          } 
+            
+    -   
+        #. Attesa della request delegata ``r2``
+        #. Attesa del dispatch delegato ``cmd``
+        #. Risposta alla request delegata ``r2``
+        #. Gestion del dispatch delegato ``cmd``
+
+++++++++++++++++++++++++++++++++++++
+caller1
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **caller1**
+
+       .. code::
+
+          QActor caller1 context ctxdelegate{
+            State s0 initial{
+              delay 500
+              println("$name request r1") color green
+          /*1*/ request server -m r1 : r1(10)  
+            } 
+            Transition t0 
+          /*2*/ whenReply rr1 -> handleReply
+            
+            State handleReply{
+          /*3*/ printCurrentMessage color green
+            }
+          }
+
+            
+    -   
+        #. Invia la request ``r1`` al :ref:`server`
+        #. Attesa della risposta
+        #. Gestione della risposta
+
+++++++++++++++++++++++++++++++++++++
+caller2
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **caller2**
+
+       .. code::
+
+          QActor caller2 context ctxdelegate{
+            State s0 initial{
+              println("$name request r2")    color magenta
+          /*1*/ request server -m r2 : r2(a)  
+            }
+            Transition t0 
+          /*2*/ whenReply rr2 -> handleReply
+            
+            State handleReply{
+              printCurrentMessage color magenta
+              delay 1000
+              println("$name dispatch cmd")  color magenta
+          /*3*/ forward server -m cmd : cmd(stop)
+              delay 1500
+              [# System.exit(0) #]
+            }
+          }
+    - 
+
+       #. Invia la request ``r2`` al :ref:`server`
+       #. Attesa della risposta
+       #. Invio del dispatch ``cmd`` al :ref:`server`
+       #. Termina il sistema (per evitare che  rimanga attivo)
+
+
+
+:slide1:`Esempio Creazione`
+
+--------------------------------------
+democreate.qak
+--------------------------------------
+ 
+- Il :ref:`creator` crea due :ref:`producer`
+- Ogni :ref:`producer` invia una request ``distance``  e una request ``r2`` al :ref:`consumer`
+- Il :ref:`consumer` gestisce direttamente la  request ``distance``, ma delega la gestione 
+  della request ``r2`` al :ref:`consumerhelper` creato dinamicamente, 
+  usando la primitiva qak :ref:`delegateCurrentMsgTo<Operazioni di delegazione>`
+- Il :ref:`consumerhelper` gestisce la  request ``r2`` , invia la risposta al chiamante e termina
+
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -   
+       .. code::
+
+          System  qakdemo24
+
+          Request  distance : distance(D)
+          Reply distanceack : ack(D) for distance
+
+          Request r2 : r2(X)
+          Reply rr2  : rr2(X) for r2
+
+          Context ctxcreate ip [host="localhost" port=8045]
+
+          QActor creator context ctxcreate{ ... }
+          QActor producer context ctxcreate 
+                                      dynamicOnly{...}
+          QActor consumer context ctxcreate { ... }
+          QActor consumerhelper context ctxcreate 
+                                      dynamicOnly{...}
+ 
+    - 
+        .. image:: ./_static/img/Qak/Archdemocreate.png
+          :align: center
+          :width: 100% 
+
++++++++++++++++++++++++++++++++++++
+creator
++++++++++++++++++++++++++++++++++++
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **creator**
+
+       .. code::
+
+          QActor creator context ctxcreate{
+            State s0 initial{ 
+              delay 500 
+          /*1*/    create producer _"p1"
+          /*2*/    create producer _"p2"
+              delay 1000
+              [# System.exit(0) #]
+            }
+          }  
+
+ 
+    - 
+
+       #. Crea un producer usando la primitiva :ref:`create<Creazione dinamica di attori>` 
+       #. Crea un altro producer usando la primitiva :ref:`create<Creazione dinamica di attori>` 
+
++++++++++++++++++++++++++++++++++++
+producer
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **producer**
+
+       .. code::
+
+          QActor producer context ctxcreate dynamicOnly {
+            State s0 initial{ 
+              println("$name STARTS") color blue
+          /*1*/request consumer -m distance : distance($MyName)
+              delay 500
+          /*2*/request consumer -m r2:r2(10)
+            }
+            Transition t0 
+              whenReply distanceack -> handleAnswer
+              whenReply rr2         -> handleAnswer
+            
+            State handleAnswer{
+          /*3*/ printCurrentMessage color blue
+            }
+            Transition t0 
+              whenReply distanceack -> handleAnswer
+              whenReply rr2         -> handleAnswer
+          } 
+
+ 
+    - 
+
+       #. Invia la request ``distance`` al :ref:`consumer`
+       #. Invia la request ``r2`` al :ref:`consumer`
+       #. Gestisce le risposte
+
++++++++++++++++++++++++++++++++++++
+consumer
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **consumer**
+
+       .. code::
+
+          QActor consumer context ctxcreate {
+            State s0 initial{
+              println("$name STARTS") color green
+            }
+          /*1*/Transition t0  
+                whenRequest distance -> handleRequest
+                whenRequest r2       -> handleRequest
+            
+            State handleRequest{
+              printCurrentMessage color green
+              if [# currentMsg.msgId() == "r2" #]{               
+           /*2*/ delegateCurrentMsgTo consumerhelper 
+              }
+              onMsg( distance : distance(D)){
+                [# var D = payloadArg(0) #]
+            /*3*/ replyTo distance with distanceack : ack( $payloadArg(0) )
+              }		
+            }
+            /*4*/Transition t0  
+                  whenRequest distance -> handleRequest
+                  whenRequest r2       -> handleRequest
+          }
+
+    - 
+
+       #. Attesa delle richieste ``distance`` e ``r2``
+       #. Delega il messaggio corrente al :ref:`consumerhelper` se si tratta di una richiesta ``r2``
+       #. Invia la risposta alla richiesta ``distance`` 
+       #. Ccontinua ad attendere richieste
+
++++++++++++++++++++++++++++++++++++
+consumerhelper
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **consumerhelper**
+
+       .. code::
+
+          QActor consumerhelper context ctxcreate dynamicOnly {
+            State s0 initial{
+              println("$name STARTS") color green
+            }
+          /*1*/Transition t0 whenRequest r2 -> handle_r2
+            
+            State handle_r2{
+          /*2*/ replyTo r2 with rr2: rr2(answer)
+            }
+            Transition t0 whenRequest r2 -> handle_r2
+             
+          }
+ 
+    - 
+
+       #. Attende la richiesta ``r2`` delegatagli dal :ref:`consumer`
+       #. Gestisce la richiesta e invia la risposta
+
+:slide1:`Esempio MQTT esplicito`
+
+--------------------------------------
+demomqttexplicit.qak
+--------------------------------------
+
+
+
+-  L'actor :ref:`publisher(explicit)` si connette a un broker MQTT ed emette un evento sulla  topic ``sonardatatopic`` 
+   usando :ref:`publish<Operazioni di messaggista via MQTT>` 
+-  L'actor :ref:`subscriber(explicit)` si connette allo stesso broker MQTT e fa una  
+   :ref:`subscribe<Operazioni di messaggista via MQTT>` sulla topic ``sonardatatopic`` per ricevere l'evento
+
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -
+
+       .. code::
+
+          System qakdemo24          
+          Event sonardata : sonardata(D) 
+
+          Context ctxmqtt  ip [host="localhost" port=8920     ]
+
+          QActor publisher context ctxmqtt{ ... }
+          QActor subscriber context ctxmqtt{ ... }
+
+    - 
+
+      .. image:: ./_static/img/Qak/Archdemomqttexplicit.PNG
+                :align: center
+                :width: 70% 
+
+
++++++++++++++++++++++++++++++
+publisher(explicit)
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **publisher**
+
+       .. code::
+
+ 
+          QActor publisher context ctxmqtt{ 
+          
+            State s0 initial{
+          /*1*/  connectToMqttBroker "tcp://broker.hivemq.com:1883"
+          /*2*/  publish "sonardatatopic" -m sonardata : sonardata(10)
+            }   
+ 
+    - 
+
+       #. Si connette al broker  
+       #. Pubblica  un evento  sulla topic ``sonardatatopic``
+
+
++++++++++++++++++++++++++++++
+subscriber(explicit)
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **subscriber**
+
+       .. code::
+
+ 
+          QActor subscriber context ctxmqtt{ 
+          
+            State s0 initial{
+          /*1*/  connectToMqttBroker "tcp://broker.hivemq.com:1883"
+          /*2*/  subscribe "sonardatatopic"	
+            }   
+	        /*3*/Transition t0 whenEvent sonardata -> handlesonardata
+            
+            State handlesonardata{
+              ...
+            }
+ 
+    - 
+
+       #. Si connette al broker  
+       #. Si sottoscriver  alla topic ``sonardatatopic``
+       #. Attende l'evento
+
+:slide1:`Esempio MQTT implicito`
+
+--------------------------------------
+demomqttimplicit.qak
+--------------------------------------
+
+-  La **dichierazione di usare un broker MQTT** avviene :slide2:`a livello di Sistema`
+-  L'actor :ref:`publisher(implicit)` emette un evento usando :ref:`emit<Operazioni relative agli eventi>` 
+-  L'actor :ref:`subscriber(implicit)` percepisce l'evento usando :ref:`whenEvent<Operazioni relative agli eventi>` 
+
+
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -
+
+     .. code::
+
+          System qakdemo24       
+      /*1*/mqttBroker "broker.hivemq.com" : 1883 eventTopic "sonardatatopic"
+
+          Event sonardata : sonardata(D) 
+
+          Context ctxmqtt  ip [host="localhost" port=8920     ]
+
+          QActor publisher context ctxmqtt{ ... }
+          QActor subscriber context ctxmqtt{ ... }
+
+     #. Dichierazione di usare un broker MQTT 
+
+    - 
+      
+      
+      .. image:: ./_static/img/Qak/Archdemomqttimplicit.PNG
+                :align: center
+                :width: 85% 
+
++++++++++++++++++++++++++++++
+publisher(implicit)
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **publisher**
+
+       .. code::
+
+ 
+          QActor publisher context ctxmqtt{ 
+          
+            State s0 initial{
+          /*1*/  emit sonardata : sonardata(10)
+             }   
+ 
+    - 
+
+       #. Emette un evento
+  
+
+
++++++++++++++++++++++++++++++
+subscriber(implicit)
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **subscriber**
+
+       .. code::
+
+ 
+          QActor subscriber context ctxmqtt{ 
+          
+            State s0 initial{
+               ...
+            }   
+	        /*1*/Transition t0 whenEvent sonardata -> handlesonardata
+            
+            State handlesonardata{
+              ...
+            }
+ 
+    - 
+
+       #. Attende l'evento
+
+
+--------------------------------------
+Invio di dispatch via MQTT
+--------------------------------------
+
+Al momento, la capacità espressiva del linguaggio qak è  :slide2:`limitata alla pubblicazione di eventi`, 
+ma è possibile inviare dispatch usando MQTT nella versione implicita, operarando a basso livello.
+
+-  La **dichierazione di usare un broker MQTT** avvienea livello di Sistema
+-  L'actor :ref:`demomqttsender.qak` crea un dispatch e lo pubblica sulla topic dichiarata a livello di sistema
+-  L'actor :ref:`demomqttreceiver.qak` riceve il dispatch
+
++++++++++++++++++++++++++++++++++++
+demomqttsender.qak
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -
+
+     .. code::
+
+          System qakdemo24       
+      /*1*/mqttBroker "broker.hivemq.com" : 1883 eventTopic "sonardatatopic"
+
+          Dispatch cmd : cmd(D) 
+
+          Context ctxmqttsender  ip [host="localhost" port=8920     ]
+
+          QActor sender context ctxmqttsender{ ù
+            delay 1000 //La connessione MQTT richiede tempo ...
+            [#             
+      /*2*/   val msg = MsgUtil.buildDispatch(name, "cmd", "cmd(30)", "receiver")
+      /*3*/   val topic = sysUtil.getMqttEventTopic()
+      /*4*/   mqtt.publish(topic, msg.toString())
+            #]
+          }
+
+    - 
+
+       
+      **Operazioni di basso livello**
+
+      #. Dichierazione di usare un broker MQTT 
+      #. Creazione di un dispatch
+      #. Acquisizione della topic dichiarata a livello di sistema
+      #. Pubblicazione sulla topic dichiarata a livello di sistema
+
++++++++++++++++++++++++++++++++++++
+demomqttreceiver.qak
++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -
+
+     .. code::
+
+          System qakdemo24       
+      /*1*/mqttBroker "broker.hivemq.com" : 1883 eventTopic "sonardatatopic"
+
+          Dispatch cmd : cmd(D) 
+
+          Context ctxmqttreceiver  ip [host="localhost" port=8922  ]
+
+          QActor receiver context ctxmqttreceiver{
+            State s0 initial{
+              ...
+            }
+      /*2*/Transition t0 whenMsg cmd -> handlecmd
+            
+            State handlecmd{
+      /*3*/   onMsg( cmd : cmd(D)){
+                println("$name| cmd ${payloadArg(0)}") color magenta
+              }
+            }
+            Transition t0 whenMsg cmd -> handlecmd
+          }
+
+    - 
+ 
+      #. Dichierazione di usare un broker MQTT 
+      #. Attesa del dispatch
+      #. Gestione del dispatch
+
+ 
+
+
+
+
+
+:slide1:`Esempio DataStreamer`
+
+--------------------------------------
+demostreams.qak
+--------------------------------------
+
+-  Una sorgente :ref:`datasource` emette dati usando :ref:`emitlocalstream<Operazioni relative agli eventi>` 
+-  Gli eventi sono trasmessi solo ai subscribers locali :ref:`busy` e :ref:`filter`
+-  L'actor :ref:`filter` (ri)emette solo i dati inferiori a un certo valore
+-  L'actor :ref:`qasink` è interessato agli eventi filtrati e non a quelli originali
+
+.. list-table::
+  :widths: 50,50
+  :width: 100%
+
+  * -
+
+       .. code::
+
+          System qakdemo24          
+          Event  data : value(V)   "emesso da datasource "
+              
+          Context ctxmqtt ip [host="localhost" port=8045]
+
+         //Sorgente di eventi data
+          QActor datasource context ctxmqtt{ ... }         
+
+         //Propaga solo gli eventi data con valori inferiori a 40  
+          QActor filter context ctxmqtt{ ... }
+
+         //Interessato a data,  ma li considera solo dopo 3sec
+          QActor busy context ctxmqtt{ ... }
+
+         //Interessato a eventi data opportunamente filtrati  
+          QActor qasink context ctxmqtt{ ... }
+ 
+    - 
+
+      .. image:: ./_static/img/Qak/Archdemevstream.png
+                :align: center
+                :width: 100% 
+
+
++++++++++++++++++++++++++++++
+datasource
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **datasource**
+
+       .. code::
+
+           QActor datasource context ctxmqtt{
+            [# var N = 10 #]
+            State s0 initial{
+              delay 1000 
+            }
+            Goto work
+            
+            State work{
+              println("$name emitlocalstream $N") color green
+            /*1*/ emitlocalstream  data : value($N)
+              [# N = N + 10 #]
+              delay 500
+            }
+            /*2*/ Goto work  if [# N < 80 #] else endOWork
+            
+            State endOWork{
+              println("$name ENDS") color green
+            /*3*/ [# System.exit(0) #]
+            }
+            
+          }
+
+    - 
+
+       #. Usa la primsitiva :ref:`emitlocalstream<Operazioni relative agli eventi>` per emettere 
+          il dato corrente
+       #. Continua a emettere ogni ``500msec`` se il dato corrente non supera ``80``
+       #. Termina il sistema
+
+
+
+
++++++++++++++++++++++++++++++
+filter
++++++++++++++++++++++++++++++
+
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **filter**
+
+       .. code::
+
+          QActor filter context ctxmqtt{
+          [# var V = 0 #]
+            
+            State s0 initial{
+          /*1*/    subscribeTo datasource for data		  
+            } 
+          /*2*/Transition t0 whenEvent data -> handleData
+            
+            State handleData{
+              //printCurrentMessage color magenta
+              onMsg( data : value(V)){
+                [#  V = payloadArg(0).toInt() #]
+                println("$name handles $V") color magenta
+                if [# V < 40  #] {
+            /*3*/ emitlocalstream  data : value($V)
+                }
+              } 
+            }    
+            Transition t0 whenEvent data -> handleData
+          }
+
+    - 
+       #. Si sottosrive a :ref:`datasource`
+       #. Attende un evento 
+       #. Propaga l'evento se inferiore a ``40``
+
++++++++++++++++++++++++++++++
+qasink
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **qasink**
+
+       .. code::
+
+ 
+          QActor qasink context ctxmqtt{ 
+          
+            State s0 initial{
+          /*1*/  subscribeTo filter for data
+            }   
+          /*2*/ Transition t0 whenEvent data -> handleData
+            
+            State handleData{		
+          /*3*/  println("$name handles ${currentMsg.msgContent()}")  
+            }
+            Transition t0 whenEvent data -> handleData
+          }
+
+    - 
+
+       #. Si sottosrive a :ref:`filter`
+       #. Attende un evento 
+       #. Elabora l'evento
+
++++++++++++++++++++++++++++++
+busy
++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **busy**
+
+       .. code::
+          
+          QActor busy context ctxmqtt{
+            State s0 initial{
+              println("$name STARTS") color cyan
+          /*1*/  subscribeTo datasource for data		  
+            } 
+          /*2*/Transition t0 whenTime 3000 -> work
+            
+            State work{
+              println("$name PAY ATTENTION") color cyan
+            }
+          /*3*/ Transition t0 whenEvent data -> handleData
+            
+            State handleData{
+          /*4*/  printCurrentMessage color cyan
+            }    
+            Transition t0 whenEvent data -> handleData
+          }
+    -  
+
+       #. Si sottosrive a :ref:`datasource`
+       #. Simula di essere occupato per ``3sec``
+       #. Attende un evento generato da :ref:`datasource`
+       #. Elabora l'evento
+
+:slide1:`Esempio Interruzione`
+
+  
+--------------------------------------
+demointerrupt.qak
+--------------------------------------
+
+- L'attore :ref:`worker` nello stato ``work``, gestisce il dispatch ``cmd`` e l'evento ``alarm``.
+- L'evento ``alarm`` provoca il trasferimento allo stato ``handlealarm`` che termina le sue 
+  azioni con la primitiva :ref:`returnFromInterrupt<Operazioni di ritorno da interruzione>` che restituisce il controllo allo stato
+  ``work`` senza eseguirne le azioni, ma solo le transizioni. Nel caso di ``alarm(tsunami)``.
+  termina il sistema.
+- L'attore :ref:`user` invia` dispatch ``cmd`` a :ref:`worker`.
+- L'attore :ref:`sentinel` emette prina l'evento ``alarm(fire)`` e poi l'evento ``alarm(tsunami)``.
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -   
+
+       .. code::
+
+          System  qakdemo24
+
+          Dispatch cmd   : cmd(X)
+          Event    alarm : alarm(X)
+
+          Context ctxinterrupt ip [host="localhost" port=8045]
+
+          QActor worker context ctxinterrupt{ ... }
+          QActor user context ctxinterrupt{ ... }
+          QActor sentinel context ctxinterrupt{ ... }
+ 
+    - 
+
+        .. image:: ./_static/img/Qak/Archdemointerrupt.png
+          :align: center
+          :width: 60% 
+ 
+
+++++++++++++++++++++++++++++++++++++
+worker
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **worker**
+
+       .. code::
+
+          QActor worker context ctxinterrupt{
+            State s0 initial{
+              println("$name STARTS") color blue
+            }	
+            Goto work 
+            
+            State work{
+              println("$name WORKING ... ") color blue
+              delay 1000
+            }
+            /*1*/Transition t0
+              whenMsg cmd               -> handlecmd
+              whenInterruptEvent  alarm -> handlealarm
+            
+            State handlecmd{
+            /*2*/  printCurrentMessage color blue
+            }
+            Goto work 
+            
+            State handlealarm{
+              printCurrentMessage color black
+            /*3*/  if[# currentMsg.msgContent() == "alarm(tsunami)" #]{
+                println("$name WARNING tsunami ... ") color red
+                delay 1000
+            /*4*/ [# System.exit(0) #]
+              }
+              else{ 
+            /*5*/ returnFromInterrupt  
+              }
+            }
+          }
+    - 
+
+       #. Attesa del dispatch ``cmd`` e dell'evento ``alarm``.
+       #. Gestione di ``cmd``.
+       #. Analisi del payload dell'evento ``alarm``
+       #. Terminazione del sistema
+       #. Esecuzione di :ref:`returnFromInterrupt<Operazioni di ritorno da interruzione>` che 
+          restituisce il controllo allo stato
+          interrotto (``work``) senza eseguirne le azioni, ma solo le transizioni.
+
+++++++++++++++++++++++++++++++++++++
+user
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **user**
+
+       .. code::
+
+          QActor user context ctxinterrupt{
+            State s0 initial{
+              delay 500
+              println("$name forward  cmd(10) ") color cyan
+          /*1*/forward worker -m cmd : cmd(10)
+              delay 500
+              println("$name forward  cmd(20) ") color cyan
+          /*2*/forward worker -m cmd : cmd(20)
+              println("$name ENDS") color cyan
+            }		
+          }
+ 
+    - 
+
+       #. Invio del primo dispatch ``cmd``
+       #. Invio del secondo dispatch ``cmd``
+
+++++++++++++++++++++++++++++++++++++
+sentinel
+++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+
+  * 
+    -  **sentinel**
+
+       .. code::
+
+          QActor sentinel context ctxinterrupt{
+            State s0 initial{
+              delay 300
+              println("$name emits alarm(fire)") color magenta
+          /*1*/ emit alarm : alarm(fire)
+              delay 300
+              println("$name emits alarm(tsunami)") color magenta
+          /*2*/ emit alarm : alarm(tsunami)
+            }	
+          }
+
+    - 
+
+       #. Invio dell'evento *alarm* con payload ``alarm(fire)``
+       #. Invio dell'evento *alarm* con payload ``alarm(tsunami)``

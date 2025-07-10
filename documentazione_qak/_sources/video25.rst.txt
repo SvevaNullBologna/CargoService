@@ -1,0 +1,111 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta       
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slidekp
+
+=================================
+Video2025
+=================================
+
+.. list-table:: 
+  :widths: 25,75
+  :width: 100%
+  
+  * - PRIMI PASSI
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=7ab5ed80-3df7-488c-b59d-b1dd00e8583b
+
+      :ref:`Primipassioperativi25`
+  * - COMPLETAMENTO WORKSPACE
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=349d30ac-87b7-4890-a09b-b1e7008e50ee
+
+      - Dopo 1:55 mostra la generazione automatica del file build2025Starting a partire dalla specifica in qak
+        di un sistema software 'vuoto'.
+  * - CARGOPRODDUCT
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=d3598b13-35a6-4732-9924-b1e800f3eec0
+
+      - Dopo 3:10 mostra cargoproduct_v0.html 
+      - Dopo 3:10 mostra la creazione del package main.java.domain
+      - Dopo 4:44 msostra l'uso di un legger 
+      - Dopo 6:30 parla di CommUtils 
+      - Dopo 8:38 mostra l'uso di gradlew run e la produzione del file di log
+      - Dopo 9:20 mostra JUnit e testlog + gradle test con report
+  * - PRODDUCTSERVICELOGICINTRODUCION:
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=ff1c4610-af3f-423f-a09e-b1ea00f74ba1
+
+      - Dopo 3:55 introduce la specifica **IStorage** e relativo adapter
+      - Dopo 4:53 introduce la memoria volatile **StorageVolatile**
+  * - PRODDUCTSERVICELOGICDISTRIBUTION
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=ea12ece8-ff3c-41df-b160-b1ea00f6944b
+
+      Breve aggiunta al precedente
+  * - PRODDUCTSERVICELOGICIMPLEMENTATION
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=aafd07fe-f4cb-469a-9b68-b1ea00f4ce84
+
+      - Dopo 0:27 nuovi *package main.java.domain.adapter* e *main.java.storage*
+      - Dopo 2:22 calsse astratta **AdapterStorage** e **AdapterStorageVolatile**
+      - Dopo 3:44 discute il **ProductServiceLogic**  che viene eseguita a 6:10
+
+      Verso la fine: test con report, distribuzione fat ed esecuzione
+  * - ELKINTRODUCTION&USAGE
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=31e7d7e8-89da-46da-838e-b1f200e81058
+  * - KIBANAUSAGE
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=d0a56e0d-5193-47da-809e-b1f800e857
+  * - ESPERIMENTIHTTPsynch/asynch
+    - https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=17f063c3-a30d-4112-8dc1-b1f90110f4ae
+
+  * - Machine Learning inMicroservices
+    - https://www.amazon.it/gp/product/1804617741/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1
+
+
+
+- PRIMI PASSI: 
+  
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=7ab5ed80-3df7-488c-b59d-b1dd00e8583b
+- COMPLETAMENTO WORKSPACE: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=349d30ac-87b7-4890-a09b-b1e7008e50ee
+- CARGOPRODDUCT: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=d3598b13-35a6-4732-9924-b1e800f3eec0
+
+  verso metà: logback.xml CommUtils verso fine: JUnit e testlog + gradle test con report
+- PRODDUCTSERVICELOGICINTRODUCION: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=ff1c4610-af3f-423f-a09e-b1ea00f74ba1
+- PRODDUCTSERVICELOGICDISTRIBUTION: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=ea12ece8-ff3c-41df-b160-b1ea00f6944b
+- PRODDUCTSERVICELOGICIMPLEMENTATION: 
+  
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=aafd07fe-f4cb-469a-9b68-b1ea00f4ce84
+  
+  Verso la fine: test con report, distribuzione fat ed esecuzione
+- ELKINTRODUCTION&USAGE: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=31e7d7e8-89da-46da-838e-b1f200e81058
+  
+
+- KIBANAUSAGE: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=d0a56e0d-5193-47da-809e-b1f800e857ed
+- ESPERIMENTIHTTPsynch/asynch: 
+
+  https://unibo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=17f063c3-a30d-4112-8dc1-b1f90110f4ae
+
+
+
+-------------------------------------------
+Distilling Step by Step
+-------------------------------------------
+
+- https://www.redhotcyber.com/post/google-distilling-step-by-step-come-ottimizzare-modelli-linguistici-di-grandi-dimensioni-per-luso-pratico/
+- https://www.redhotcyber.com/post/ottimizare-modelli-di-deep-learning-in-produzione/
+- https://github.com/SforAiDl/KD_Lib?source=post_page-----8bf1dcbbb500--------------------------------
+- https://pypi.org/project/torchdistill/?source=post_page-----8bf1dcbbb500--------------------------------

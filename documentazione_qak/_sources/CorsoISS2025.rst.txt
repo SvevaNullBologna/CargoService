@@ -1,0 +1,210 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: magenta       
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3     
+.. role:: slide4   
+.. role:: slidekp
+
+.. _Sito Web Attività Progettuale : https://www.unibo.it/it/studiare/dottorati-master-specializzazioni-e-altra-formazione/insegnamenti/insegnamento/2024/468018
+.. _Sito Web corso ISS2025: https://www.unibo.it/it/studiare/dottorati-master-specializzazioni-e-altra-formazione/insegnamenti/insegnamento/2024/468003
+.. _Lectures2025: ../LectureBologna2025.html
+.. _Sprint review : https://www.agileway.it/sprint-review-meeting/
+.. _template: _static/templateToFill.html
+.. _Conway Life: https://it.wikipedia.org/wiki/Gioco_della_vita
+.. _Conway Life play: https://playgameoflife.com/
+.. _robot reali: _static/devsDdr.html
+
+========================================
+CorsoISS2025
+========================================
+
+.. https://www.redhotcyber.com/post/google-distilling-step-by-step-come-ottimizzare-modelli-linguistici-di-grandi-dimensioni-per-luso-pratico/
+
+#. :ref:`Obiettivi`
+#. :ref:`Fasi del corso`
+#. :ref:`Il metodo di lavoro`
+#. :ref:`La documentazione del lavoro`
+#. :ref:`Criteri di valutazione<CriteriValutazioneISS2025>`
+#. :ref:`OrganizzareLaValutazioneFinale`
+#. :ref:`Primipassioperativi25`
+
+
+.. list-table:: 
+  :widths: 25,75
+  :width: 100%
+  
+  * - Insegnamento
+    - https://www.unibo.it/it/didattica/insegnamenti/insegnamento/2024/468003
+  
+      https://www.unibo.it/it/didattica/insegnamenti/insegnamento/2024/468018
+  * - Virtuale
+    - https://virtuale.unibo.it/course/view.php?id=35152 
+  * - Wooclap 
+    - https://app.wooclap.com/events/ISS24STARTING
+  * - GITHUB del corso 
+    - https://github.com/anatali/issLab25 
+  * - Lezioni svolte :
+    - `Lectures2025`_
+ 
+--------------------------------------------
+Obiettivi
+--------------------------------------------
+
+Leggiamo nel `Sito Web corso ISS2025`_  e sul `Sito Web Attività Progettuale`_  
+ 
+
+
+-------------------------------------------
+Fasi del corso
+-------------------------------------------
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Parte A: Dai programmi ai microservizi
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Motto di riferimento parte A
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:slide2:`Quello che non posso creare, non lo saprò mai capire` (Feynmann)
+
+Progetto e sviluppo di un sistema :ref:`ConwayLife25` che realizza il gioco `Conway Life`_> 
+(si veda anche `Conway Life play`_>) in modo incrementale, prima in JavaScript, poi
+in Java, e infine come un microservizio o in sistema di due microservizi.
+
+:slide4:`Obiettivi`    
+
+- procedere in modo bottom-up usando linguaggi noti (JavaScript e Java) per 
+  realizzrae il gioco `Conway Life`_>  (si veda anche `Conway Life play`_>) 
+- impostare il prodotto in modo che possa 'evolvere' mediante aggiunte progressive di funzionalità
+  e senza modifiche a quanto è stato già realizzato e testato richiamandosi ad alcuni principi-base
+  delle costruzione del software
+- trasformare il prodotto in un :ref:`microservizio<Microservizi>` o in sistema a microservizi
+- comprendere il concetto di :ref:`abstraction-gap` e di come sia possibile 
+  'nascondere' i dettagli di implementazione del sistema
+  per concentrarsi sulle interazioni 'ad alto livello' tra le parti del sistema
+- introdurre:
+  
+  - la :slide3:`libreria unibo.basicomm23` di supporto alle comunicazioni 
+  - il :ref:`linguaggio  qak` come :slide3:`esempio di DSL` nel dominio della computazione distribuita
+- comprendere il ruolo dei linguaggi di programmazione e i motivi che ne inducono una contiunua evoluzione
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Parte B: Sviluppo di applicazioni distribuite e IOT
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Motto di riferimento parte B
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+.. :slide3:`Dai requisiti al prodotto con processi agili model-based`
+:slide2:`Everything is connected` 
+
+:slide2:`Do not communicate by sharing memory … instead, share memory by communicating`
+
+:slide4:`Obiettivi`: 
+
+- Utilizzare computer a basso costto (RaspberryPi, Arduino) per interfaccairsi con il mondo fisico
+- Progetto e sviluppo di un sistema distribuito  nel campo delle **applicazioni IOT**, 
+  che prevede  l'utilizzo di dispositivi hardware (sonar, led, etc.), robot virtuali e/o `robot reali`_, 
+
+  .. image:: ./_static/img/Intro/mbotIot.png 
+    :align: center
+    :width: 70%
+ 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Parte C: Dai requisiti al prodotto con processi agili model-based
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Motto di riferimento parte C
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+.. :slide3:`Dai requisiti al prodotto con processi agili model-based`
+:slide2:`No code without project, no project without problem analysis, no problem without requirements` (ISS)
+
+e, in più: 
+
+:slide2:`Occorre sia parlare con gli umani sia, in modo coerente ed efficace, istruire una macchina`
+
+:slide3:`Domanda`: vorrei sapere se esiste il motto 'No code without project, no project without problem analysis, no problem without requirements'
+
+:slidekp:`Chiesto a Gemini 12/Feb/20025`
+
+Mentre non ho trovato esattamente quel motto specifico, riflette un principio fondamentale nello sviluppo software.
+
+Questo principio sottolinea l'importanza di una solida base concettuale prima di iniziare a scrivere codice. Ecco una spiegazione:
+
+- **"No code without project"**: Il codice non dovrebbe essere scritto per il semplice gusto di scriverlo. Deve sempre servire a risolvere un problema o raggiungere un obiettivo specifico.
+- **"No project without problem analysis"**: Prima di iniziare qualsiasi progetto, è cruciale comprendere a fondo il problema che si intende risolvere. Questo richiede un'analisi approfondita delle esigenze e dei vincoli.
+- **"No problem without requirements"**: Per risolvere un problema in modo efficace, è necessario definire chiaramente i requisiti del progetto. Questi requisiti dovrebbero specificare cosa il sistema deve fare, come dovrebbe comportarsi e quali sono le aspettative degli utenti.
+
+Questo principio è strettamente correlato a metodologie di sviluppo software come:
+
+- **Agile**: Enfatizza l'importanza di comprendere le esigenze degli utenti e di iterare rapidamente sulla base del feedback.
+- **Scrum**: Utilizza sprint per sviluppare e rilasciare incrementi di funzionalità, con una forte enfasi sulla pianificazione e la definizione degli obiettivi.
+- **Waterfall**: Sebbene meno flessibile di Agile, il modello Waterfall sottolinea l'importanza di una fase di analisi dei requisiti dettagliata prima di passare alla fase di sviluppo.
+
+
+:slide4:`Obiettivi`: 
+
+- evolvere da programmatori-utilizzatori a progettisti-costruttori 
+- procedere in modo top-down partendo da un testo di requisiti scritti in linguaggio naturale
+- seguire un processo agile di sviluppo incrementale, in cui il prodotto viene sviluppato 
+  in diversi SPRINT secondo la metodologia SCRUM
+- incentivare lo sviluppo cooperativo del software
+- usare il :ref:`linguaggio qak` per costruire modelli (eseguibili) del sistema:
+
+  - un modello del sistema come risultato della analisi dei requisiti
+  - un modello del sistema come risultato della analisi del problema (in un dato SPRINT)
+  - un modello del sistema come risultato della progettazione (in un dato SPRINT)
+  
+  Ogni modello diventa il punto di partenza per il SPRINT successivo
+
++++++++++++++++++++++++++++++++++++++
+Il metodo di lavoro
++++++++++++++++++++++++++++++++++++++
+
+#. Partiamo dall'insieme di requisiti **forniti dal committente** ed espressi in linguaggio naturale 
+#. Impostiamo lo ``SPRINT0`` come una **analisi dei requisiti** che mira a esprimerli in modo comprensibile anche alla macchina introducendo:
+
+   - un modello (eseguibile) dell'architattura del sistema desunta dai requisiti 
+   - un (primo) insieme di piani di testing funzionali
+   
+#. Impostiamo una **analisi del problema** che mira a definire:
+ 
+   - una architettura logica del sistema come risultato dall'analisi
+   - un piano di lavoro
+   - una possibile estensione ai piani di testing 
+   - la definizione del primo SPRINT relizzativo
+ 
+#. Impostiamo ogni SPRINT come un **sottoprogetto** con sua propria spiegazione e testing. 
+
+   - Lo SPRINT :math:`n+1` parte dai risultati dello sprint :math:`n` e costruisce un sottosistema (funzionante) 
+     che sarà l'input dello SPRINT :math:`n+2`.
+#. Facciamo seguire ad ogni SPRINT una fase di `Sprint review`_> i cui meeting saranno
+ 
+   - **un nuovo modo di concepire le ore di ricevimento-studenti**
+#. Per ogni  SPRINT, compiliamo un documento (si veda :ref:`La documentazione del lavoro`)  
+   per **rendere esplcite** le conoscenze, 
+   le decisioni, i modelli, etc. introdotti nello SPRINT, 
+   fornendo indicazioni all'utente finale su come eseguire lo SPRINT. 
+
++++++++++++++++++++++++++++++++++++++
+La documentazione del lavoro
++++++++++++++++++++++++++++++++++++++  
+
+Il :ref:`template` da compilare costituisce una sorta di 
+remark:`logbook` (*diario di bordo*), da compilare **in itinere** 
+con indicazioni **sintetiche ed essenziali**, man mano si svolge 
+il processo di produzione e :brown:`non dopo` avere sviluppato il codice.
+
+
+- :ref:`Criteri di valutazione<CriteriValutazioneISS2025>`
+- :ref:`OrganizzareLaValutazioneFinale`
+- :ref:`Primipassioperativi25`

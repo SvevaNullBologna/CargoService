@@ -1,0 +1,148 @@
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slidekp
+.. role:: worktodo 
+
+==================================
+Studenti2025
+==================================
+
+.. list-table::
+  :widths: 30,70
+  :width: 100%
+  
+  * - ``xxx``
+    - *xxx@studio.unibo.it* https://github.com/xxx
+ 
+
+.. WebAssembly e WASI
+.. https://github.com/ilcors-dev
+.. https://thenewstack.io/webassembly/webassembly-what-beginners-need-to-know/
+
+
+
+
+Tutti 2024
+
+.. code::
+
+ABDELCADIR ABDURAHMAN	KARIM	karim.abdelcadir@studio.unibo.it
+
+ANTENUCCI	CARLO	carlo.antenucci@studio.unibo.it
+
+ASTA	ANDREA	andrea.asta@studio.unibo.it
+
+BARONE	ERICA	erica.barone3@studio.unibo.it
+
+BEDESCHI	EMANUELE	emanuele.bedeschi@studio.unibo.it
+
+BELLETTI	RICCARDO	riccardo.belletti2@studio.unibo.it
+
+BERARDI	SIMONE	simone.berardi2@studio.unibo.it
+
+BETTELLI	LUCA	luca.bettelli@studio.unibo.it
+
+BRUCIATI	STEFANO	stefano.bruciati2@studio.unibo.it
+
+BRUNETTO	NICHOLAS	nicholas.brunetto@studio.unibo.it
+
+BUCCHI	RICCARDO	riccardo.bucchi@studio.unibo.it
+
+CANDORI	STEFANO	stefano.candori@studio.unibo.it
+
+CAPACCI	LUCA	luca.capacci2@studio.unibo.it
+
+CAPUZZO	GREGORIO	gregorio.capuzzo@studio.unibo.it
+
+CAVALLARI	TOMMASO	tommaso.cavallari@studio.unibo.it
+
+COLETTA	STEFANO	stefano.coletta@studio.unibo.it
+
+COMPAGNONI	IVAN PAOLO	ivanpaolo.compagnoni@studio.unibo.it
+
+DALL'OLIO	GUIDO DAVIDE	guidodavide.dallolio@studio.unibo.it
+
+DE CESARIS	DAVIDE	davide.decesaris@studio.unibo.it
+
+DEL BOLGIA	LUCA	luca.delbolgia@studio.unibo.it
+
+DI MARIA	FULVIO	fulvio.dimaria@studio.unibo.it
+
+FALCO	GABRIELLA	gabriella.falco@studio.unibo.it
+
+FEDI	ALESSANDRO	alessandro.fedi@studio.unibo.it
+
+GALLO	GIANLUCA	gianluca.gallo2@studio.unibo.it
+
+GANDOLFI	CHIARA	chiara.gandolfi3@studio.unibo.it
+
+GRANDI	LUCA	luca.grandi3@studio.unibo.it
+
+GREGORI	FILIPPO	filippo.gregori@studio.unibo.it
+
+IACHINI	LUCA	luca.iachini4@studio.unibo.it
+
+IACHINI	VALERIO	valerio.iachini@studio.unibo.it
+
+IANNACONE	LEONARDO	leonardo.iannacone@studio.unibo.it
+
+IANNARIO	RAFFAELE LUCA	raffaele.iannario@studio.unibo.it
+
+LIPANI	ALDO	aldo.lipani@studio.unibo.it
+
+MALAGUTI	FILIPPO	filippo.malaguti2@studio.unibo.it
+
+MATTETTI	MASSIMILIANO	massimilian.mattetti@studio.unibo.it
+
+MENCHICCHI	FABIO	fabio.menchicchi@studio.unibo.it
+
+MERLI	MICHELE	michele.merli@studio.unibo.it
+
+MONTANARI	ALESSANDRO	alessandro.montanar5@studio.unibo.it
+
+MORENO LUNA	VINCENZO	vincenzo.morenoluna@studio.unibo.it
+
+MORI	MICHELE	michele.mori2@studio.unibo.it
+
+MORLINI	GABRIELE	gabriele.morlini@studio.unibo.it
+
+MUSOLINO	ANTONINO FRANCESCO	antonino.musolino@studio.unibo.it
+
+POERIO	ANTONIO	antonio.poerio2@studio.unibo.it
+
+POLI	STEFANO	stefano.poli4@studio.unibo.it
+
+PRIVITERA	GIANLUCA	gianluca.privitera2@studio.unibo.it
+
+RICCI	THOMAS	thomas.ricci2@studio.unibo.it
+
+SABIONI	SARA	sara.sabioni@studio.unibo.it
+
+SALUTO	ROBERTO	roberto.saluto@studio.unibo.it
+
+SANTARINI	ALESSANDRO	alessandro.santarin2@studio.unibo.it
+
+SIMO DJILO	ZACHARIE	zacharie.simodjilo@studio.unibo.it
+
+TAGLIAPIETRA	PAOLO	paolo.tagliapietra@studio.unibo.it
+
+TOMASINI	LORENZO	lorenzo.tomasini@studio.unibo.it
+
+
+
+
+In debito 
+
+"Matricola";"Cognome";"Nome";"E-mail";"Anno corso";"C.d.S.";"Ind.";"Ori.";"Materia";"Data esame";"Voto/Giudizio";"CFU";"CFU Debito";"TAF";"Ambito";"SSD";"Livello CILTA/CLIRO";"C.d.S. Iscrizione";"Anno Attività Formativa";"Corsi sicurezza"
+
+"0000943706";"DI LUCA";"MATTIA";"mattia.diluca@studio.unibo.it";"2 F";"0937";"000";"000";"72939 - INGEGNERIA DEI SISTEMI SOFTWARE M";"";;"8";;;;"ING-INF/05";;"0937";"2019";""
+
+"0000926656";"MANCINI";"LETIZIA";"letizia.mancini3@studio.unibo.it";"2 F";"0937";"000";"000";"72939 - INGEGNERIA DEI SISTEMI SOFTWARE M";"";;"8";;;;"ING-INF/05";;"0937";"2019";""
+
+

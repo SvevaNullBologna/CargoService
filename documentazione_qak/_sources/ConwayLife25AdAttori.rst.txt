@@ -1,0 +1,667 @@
+.. role:: red
+.. role:: blue
+.. role:: silde2
+.. role:: red 
+.. role:: blue 
+.. role:: brown 
+.. role:: remark
+.. role:: worktodo
+.. role:: slide
+.. role:: slide1
+.. role:: slide2
+.. role:: slide3
+.. role:: slide4
+.. role:: slidekp
+.. role:: worktodo 
+
+.. _Gioco della vita: https://it.wikipedia.org/wiki/Gioco_della_vita
+
+.. _SpringBoot: https://spring.io/projects/spring-boot
+.. _WebSocket: https://it.wikipedia.org/wiki/WebSocket
+
+.. _Life: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayLifeMqtt/Life.java
+.. _LifeController: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayLifeMqtt/LifeController.java
+
+.. _LifeLocal: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayLifeLocal/LifeLocal.java
+.. _LifeControllerLocal: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayLifeLocal/LifeControllerLocal.java
+.. _OutDev: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayLifeLocal/devices/OutDev.java
+
+
+.. _OutInMqtt: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/conwayMqtt/devices/OutInMqtt.java
+
+.. _WSConwayguiLifeLocal: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/unibo/disi/conwaygui/ws/WSConwayguiLifeLocal.java
+.. _WSConwayguiLifeMqtt: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/java/unibo/disi/conwaygui/ws/WSConwayguiLifeMqtt.java
+
+.. _guipage.html: file:///C:/Didattica2025/mcrsv24/conwaygui/src/main/resources/templates/guipage.html
+ 
+.. _Dockerfile for conwaygui: file:///C:/Didattica2025/mcrsv24/conwaygui/Dockerfile
+.. _IntroDocker: file:///C:/Didattica2024/qak24/iss24Material/docs/_build/html/_static/IntroDocker23.html
+
+.. _conway.qak: file:///C:/Didattica2025/mcrsv24/conwayqak/src/conway.qak
+.. _LifeCoreAgain: file:///C:/Didattica2025/mcrsv24/conwayqak/src/main/java/LifeCoreAgain.java
+ 
+.. _OutInMqttForactor: file:///C:/Didattica2025/mcrsv24/conwayqak/src/main/java/OutInMqttForactor.java
+
+.. _conwayactors.qak: file:///C:/Didattica2025/mcrsv24/conwayactorsqak/src/conwayactors.qak
+.. _conwaycellsqak.qak: file:///C:/Didattica2025/mcrsv24/conwaycellsqak/src/conwaycells.qak
+.. _conwaymaster.qak: file:///C:/Didattica2025/mcrsv24/conwaymasterqak/src/conwaymaster.qak
+
+.. _activatecells_9.bat: file:///C:/Didattica2025/mcrsv24/conwaycellsqak/activatecells_9.bat
+.. _docker-compose-cells9.yml: file:///C:/Didattica2025/mcrsv24/conwaycellsqak/docker-compose-cells9.yml
+
+.. _Automa a stati finiti : https://it.wikipedia.org/wiki/Automa_a_stati_finiti
+
+====================================
+ConwayLife25AdAttori
+====================================
+
+:ref:`ConwayLife25: Obiettivi e fasi del lavoro`
+
+Parte I: da JavaScript a Java
+
+#. :ref:`ConwayLife25: il core e la griglia`
+#. :ref:`ConwayLife25 in JavaScript`
+#. :ref:`ConwayLife25 in Java`
+#. :ref:`ConwayLife25 una GUI per Java`
+#. :ref:`ConwayLife25: un microservizio Java`
+#. :ref:`conwaygui standalone`
+
+Parte II: verso gli attori
+
+#. :ref:`ConwayLife25 il controller come actor`
+ 
+Parte III: celle come attori locali
+
+#. :ref:`Progetto conwayactorsqak`
+
+Parte IV: celle come attori distribuiti
+
+#. :ref:`Progetto conwaycellsqak`
+#. :ref:`Progetto conwaymasterqak`
+
+------------------------------------------------
+ConwayLife25 il controller come actor
+------------------------------------------------
+
+Nel :slide3:`Progetto conwayqak`,
+il componente `LifeController`_ è riscritto nel file `conway.qak`_ come un :ref:`ActorQak<QakActors24>`  di nome ``lifecontroller`` scritto in 
+:ref:`Linguaggio qak`  e il sistema viene esteso con un componente `OutInMqttForactor`_
+che trasforma i messaggi ricevuti via ``MQTT`` in **dispatch** per l'actor ``lifecontroller``.
+
+---------------------------------------
+conway.qak
+---------------------------------------
+
+.. image::  ./_static/img/conway/conwayqakarch.jpg
+  :align: center 
+  :width: 100%   
+
+.. list-table::
+    :widths: 15,35,50
+    :width: 100%
+    
+    * - **File**
+      - **Ruolo e Tipo**    
+      - **Note**
+    * - `LifeCoreAgain`_
+      - Logica del game in Java.  
+      - E' lo stesso codice di `Life`_. Ha un riferimento a `OutInMqttForactor`_ per fare il display delle celle.
+        Le sue operazioni sono invocate dall'actor `LifeController`_ definito in `conway.qak`_.
+    * - `conway.qak`_
+      - Definisce l'actor `LifeController`_ che contiene la logica del controllo del game espressa nel 
+        :ref:`Linguaggio qak`. 
+      - Gestisce messaggi (*dispatch*) inviati da   `OutInMqttForactor`_.
+    * - `OutInMqttForactor`_
+      - Dispositivo di I/O in Java
+      - Interagisce con le pagine HTML vie MQTT usando *MqttConnection25*.
+        Diversamente da :ref:`OutInMqtt.java`, alla ricezione di un messaggio, invia un dispatch al suo 'owner'
+        cioè all'**actor lifecontroller**
+
+
+.. caso di MQQQ implicito
+
+.. .. image::  ./_static/img/conway/conwayqakarchPlus.jpg
+  :align: center 
+  :width: 100%   
+
++++++++++++++++++++++++++++++++++++
+Esecuzione conwayqak
++++++++++++++++++++++++++++++++++++
+
+#. Impostare :ref:`Esecuzione conwaygui standalone`
+#. Eseguire  :slide3:`gradlew run` in **conwayqak**
+
+
+Vediamo dunque come realizzare il refactoring del `LifeController`_ come actor nel modello  `conway.qak`_ 
+e i vantaggi che se ne ottengono.
+ 
++++++++++++++++++++++++++++++++++++++
+Messaggi e contesto
++++++++++++++++++++++++++++++++++++++
+
+Come primo punto, notiamo che le regole del :ref:`Linguaggio Qak` impongono di specificare subito  i messaggi 
+che possono essere scambiati nel sistema.
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * -
+
+        .. code::
+         
+          System  conwayqak
+          //mqttBroker "localhost" : 1883 eventTopic "lifein"       
+  
+          Dispatch start : start(V)
+          Dispatch stop  : stop(V)
+          Dispatch changeCellState : changeCellState(X,Y)
+
+          Context ctxlife ip [host="localhost" port=8920 ]
+
+          QActor lifecontroller 
+            context ctxlife withobj life using "LifeCoreAgain()"
+            	withobj life using "LifeCoreAgain()"
+		          withobj outdev using 
+                 "OutInMqttForactor.activateSingleton(myself, \"guiin\") " {  
+              import "main.java.*"
+              ....
+              }
+
+
+      -  I messaggi sono tutti comandi inivati dalla gui
+
+         :slide3:`Context` indica l'IP e porta del 'microservizio' Qak
+
+         L'actor di nome ``lifecontroller`` incapsula 
+
++++++++++++++++++++++++++++++++++++++
+Generazione di codice
++++++++++++++++++++++++++++++++++++++
+
+Il modello è associato a alla :ref:`Qak software factory`, che genera:
+
+- codice eseguibile in Kotlin;
+- file Prolog che rapprenta conosceza sulla struttura del sistema;
+- codice Python che permette di generare automaticamente una rappresentazione grafica dall'architettura del sistema:
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * 
+      - 
+         .. image::  ./_static/img/conway/conwayqakfilearch.jpg
+           :align: center 
+           :width: 100%   
+      - Il diagramma mostra che l'actor *lifecontroller* :
+
+        - include un ogetto Java (POJO), cioè una istanza di `OutInMqttForactor`_
+        - gestisce eventi deniminati *alarm*  e *kernel_rawmsg* , di cui pareleremo in seguito
+
++++++++++++++++++++++++++++++++++++++
+Facile modificabilità
++++++++++++++++++++++++++++++++++++++
+
+Notiamo che la figura :slidekp:`non visualizza` alcuno dei dispatch (``start/stop/changeCellState``) dichiarati.
+
+Ciò in quanto questi messaggi sono costruiti e inviati dall POJO `OutInMqttForactor`_ che riceve i messaggi
+inviati dalla GUI e li trasforma in dispatch per l'actor `lifecontroller`.
+
+Per chiarire meglio l'architettura, possiamo introdurre nel modello un actor ``guimock``,
+che funge anche da tester.
+
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * 
+      - 
+         .. image::  ./_static/img/conway/conwayqakmodelarch.jpg
+           :align: center 
+           :width: 100%   
+      - Il diagramma mostra che i dispatch ``start/stop/changeCellState`` provengono dalla GUI.
+
+        Quando il prodotto verrà distribuito, l'actor ``guimock`` verrà escluso dal modello.
+
+ 
+
++++++++++++++++++++++++++++++++++++++
+Struttura di lifecontroller
++++++++++++++++++++++++++++++++++++++
+
+Come ogni attore qak, il comportamento del ``lifecontroller`` viene rappresentato come un `Automa a stati finiti`_
+secondo quanto riportato in :ref:`QakActors24: Introduzione`.
+
+.. list-table::
+    :widths: 50,50
+    :width: 100%
+
+    * - Struttura del codice dell'actor
+
+        .. code::
+
+          QActor lifecontroller context ctxlife  {  
+              withobj life using "LifeCoreAgain()"
+              withobj outdev using 
+                "OutInMqttForactor.activateSingleton(myself, \"guiin\") "{  
+          import "main.java.*"
+          [# 
+             var running = false //true quando play
+            
+            //METODI GLOBALI ALL'ACTOR
+            suspend fun fromRawDataToApplMessage(message: String) {
+              ...
+            }
+          
+          #]
+            ...
+
+        .. image::  ./_static/img/conway/conwayqakfilearch.jpg
+           :align: center 
+           :width: 100%   
+
+        Per eseguire, si veda: :ref:`Esecuzione conwayqak`
+
+      - *lifecontroller*    :
+        
+        - incapsula una istanza di `LifeCoreAgain`_
+        - incapsula una istanza di `OutInMqttForactor`_
+        - defnisce una varibaile :slide3:`running` che indica se il gioco è in esecuzione
+        - definisce una funzione di utilità :ref:`fromRawDataToApplMessage`
+        - si comporta nel modo tipico degli :ref:`Automi a stati finiti`
+
+        .. image::  ./_static/img/conway/LifeControllerFSM.png
+           :align: center 
+           :width: 100%   
+
+        #. :ref:`Inizializzazione` (*s0* e *work*)
+        #. :ref:`Stato changeCellState`
+        #. :ref:`Stato handleStart`
+        #. :ref:`Stato play`
+        #. :ref:`Stato handleStop`
+
+        
+ 
+
+
++++++++++++++++++++++++++++++++++++++++
+fromRawDataToApplMessage
++++++++++++++++++++++++++++++++++++++++
+
+
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - :slidekp:`Utility globale`  
+
+        .. code::
+
+            [# 
+ 
+              //Overrides un metodo default built-in nell'actor
+              suspend fun fromRawDataToApplMessage(message: String) {
+                if (message == "start") {
+                    val cmdmsg= 
+                    MsgUtil.buildDispatch("gui", "start", "start(init)", name)
+                    autoMsg( cmdmsg )
+                } else if (message == "stop") {
+                    val cmdmsg= 
+                    MsgUtil.buildDispatch("gui", "stop", "stop(ok)", name)
+                    autoMsg(cmdmsg )
+                } else if (message == "exit") {
+                    System.exit(0)
+                } else if (message.startsWith("cell")) {
+                    val parts: Array<String> = 
+                            message.split("-".toRegex()).toTypedArray()
+                    val y: Int = parts[1].toInt()
+                    val x: Int = parts[2].toInt()
+                    val cmd: String = 
+                      "changeCellState(X,Y)"
+                        .replace("X", "" + x)
+                        .replace("Y", "" + y)
+                    val cmdmsg= 
+                      MsgUtil.buildDispatch("gui","changeCellState",cmd,name)
+                    autoMsg(cmdmsg )
+                }    
+              }//fromRawDataToApplMessage
+             #]
+
+      - 
+        :slide3:`var running`: variabile di stato che vale **true** quando l'attore sta eseguendo il gioco
+
+        Notariamo che:
+
+        - la GUI emette e riceve informazioni in forma di String non meglio definite
+        - ogni :ref:`ActorQak<QakActors24>` opera con riferimento a messaggi strutturati che realizano 
+          la interfaccia :ref:`IApplMessage`
+        
+        E' necessaria una :remark:`conversione` dal *linguaggio della GUI* al *linguaggio degli attori*:
+        
+        :slide3:`fromRawDataToApplMessage`: trasforma una stringa nel payload di un *dispatch*
+        :ref:`IApplMessage` e invia il dispatch all'attore stesso con il metodo 
+        :ref:`autoMsg<Operazioni di messaggista punto a punto>`
+ 
+
+
++++++++++++++++++++++++++++++++++++++++
+Inizializzazione
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - Punto :slidekp:`1` in :ref:`Struttura di LifeController`
+
+        .. code::
+
+          QActor lifecontrol context ctxlife  {  
+          import "main.java.*"
+          ...
+
+            State s0 initial{
+                [#  
+            /*1*/  life.setOutInDev(outdev) //Injection
+                #]
+            }
+            Goto work
+              
+            State work{            
+            }
+            /*2*/ Transition t0 
+              whenMsg changeCellState -> changeCellState
+              whenMsg start -> handleStart
+              whenMsg stop  -> handleStop
+              
+
+
+      -  :slidekp:`/*1*/` Inietta il riferimento a outdev nell'oggetto life, cioè 
+         un riferimento a ``OutInMqttForactor`` in ``LifeCoreAgain`` per 
+         permette a ``LifeCoreAgain`` di inviare messaggi alla GUI
+         
+         :slidekp:`/*2*/` Attende uno dei possibili comandi dalla GUI e cambia di stato quando 
+         uno di essi viene inserito nella :ref:`msgQueue<QakActors24 - l’attore>`  dell'attore
+
++++++++++++++++++++++++++++++++++++++++
+Stato changeCellState
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - Punto :slidekp:`2` in :ref:`Struttura di LifeController`:
+        l'attore elabora il comando ``cell-i-j`` inviato dalla GUI e
+        trasformato nel dispatch ``changeCellState`` da :ref:`fromRawDataToApplMessage`
+
+        .. code::
+
+          State changeCellState{
+            printCurrentMessage
+          /*1*/  onMsg( changeCellState : changeCellState(X,Y) ){
+              [# 
+          /*2*/  val X = payloadArg(0).toInt()
+          /*3*/  val Y = payloadArg(1).toInt()  
+          /*4*/  life.changeCellState(X,Y) 
+              #]
+            }
+          }
+          /*5*/ Goto work
+
+      
+      -  :slidekp:`/*1*/` :ref:`Accede al contenuto del  messaggio<Accesso al contenuto dei messaggi>`
+
+         :slidekp:`/*2*/` Usa il meotdo built-in :ref:`payloadArg` per accedere al primo argomento del messaggio
+
+         :slidekp:`/*3*/` Usa il meotdo built-in :ref:`payloadArg` per accedere al seocndo argomento del messaggio
+
+         :slidekp:`/*4*/` Invoca il metodo *changeCellState* dell'oggetto `LifeCoreAgain`_
+
+         :slidekp:`/*5*/` Torna allo :ref:`stato work<Inizializzazione>`
+
+
++++++++++++++++++++++++++++++++++++++++
+Stato handleStart
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - Punto :slidekp:`3` in :ref:`Struttura di LifeController`:
+
+        .. code::
+
+          State handleStart{
+          /*1*/ onMsg( start : start(V) ){
+          /*2*/   [# var cmdfromgui = payloadArg(0) == "init" #]
+          /*3*/     if [# cmdfromgui #]{   
+                       [# running = true #] 
+                    } //(ri)parte
+              //altrimenti è start(continue)
+            }
+          }
+          Goto play if [# running   #]  else work
+
+      -  
+
+         :slidekp:`/*1*/`:ref:`Accede al contenuto del  messaggio<Accesso al contenuto dei messaggi>`
+
+         :slidekp:`/*2*/`Usa il meotdo built-in :ref:`payloadArg` per accedere all'argomento del messaggio
+          e controlla che sia **"init"**
+
+          :slidekp:`/*3*/` Se la GUI ha inviato il messaggio ``start(init)`` pone la variabile :slide3:`running` a **true**
+          in modo da (ri)attivare il gioco.
+
+
++++++++++++++++++++++++++++++++++++++++
+Stato Play
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - Punto :slidekp:`4` in :ref:`Struttura di LifeController`:
+        l'attore elabora il comando ``cell-i-j`` inviato dalla GUI e
+        trasformato nel dispatch ``changeCellState`` da :ref:`fromRawDataToApplMessage`
+
+        .. code::
+          
+          State play{
+          /*1*/  [# life.playStep() #]
+          /*2*/   delay 1000 //avoid too fast              
+          /*3*/   autodispatch start : start(continue)
+          }
+          /*4*/ Goto work
+
+      -  
+
+         :slidekp:`/*1*/` Invoca il metodo *play* dell'oggetto `LifeCoreAgain`_
+
+         :slidekp:`/*2*/`Attende 1 secondo per rallentare un po' il gioco
+
+         :slidekp:`/*3*/`Si :ref:`autoinvia<Operazioni di messaggista punto a punto>`  
+         il messaggio ``start(continue)`` per continuare il gioco
+
+         :slidekp:`/*4*/` Torna allo :ref:`stato work<Inizializzazione>`
+
+
++++++++++++++++++++++++++++++++++++++++
+Stato handleStop
++++++++++++++++++++++++++++++++++++++++
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+ 
+    * - Punto :slidekp:`5` in :ref:`Struttura di LifeController`:
+
+        .. code::
+
+              State handleStop{
+                if [# running == false #]{ 
+                  println("$name | already stopped") color magenta
+                } else { 
+                  println("$name | STOPPED ") color red 
+                  [# running = false #]
+                }
+              }
+              Goto work
+      -  
+        Cambia il valore della variabile :slide3:`running` a **false** e torna allo :ref:`stato work<Inizializzazione>`
+         
+        La variabile :slide3:`running` viene rimessa a **true** nello stato :ref:`handleStart`
+
+La impostazione del controllo come  :ref:`automa a stati finiti<Automi a stati finiti>`, 
+in cui le transizioni di stato sono 
+indotte (*triggered*) da messaggi, :slide2:`agevola la gestione di eventi e messaggi aggiuntivi` che potrebbero
+essere generati da altri componenti.
+
+Il lettore è inviato ad estendere il comportamento dell'actor `lifecontroller<Struttura di lifecontroller>` 
+per gestire un :slidekp:`evento di allarme`
+e di impostare un test del nuovo comportamento.
+
+---------------------------------------
+Evento kernel_rawmsg
+---------------------------------------
+
+L'evento 
+
+.. code::
+
+    Event kernel_rawmsg : kernel_rawmsg(V) 
+
+
+viene emesso dalla :ref:`Qak infrastructure` quando riceve un messaggio via ``MQTT`` (emesso da un ente 'alieno')
+come stringa che non corrisponde alla rappresentazione di un :ref:`IApplMessage`.
+
+La gestione di questo evento potrebbe consistere nella esecuzione del metodo :ref:`fromRawDataToApplMessage`
+o di un meotodo simile, capace di mappare una stringa in un *dispatch* o in una *request* o in un altro evento
+che possa essere gestito dall'actor.
+
+
+
+
+
+
+==========================================
+Celle come attori locali
+==========================================
+
+Oltre al  :ref:`lifecontroller<Struttura di lifecontroller>`, anche ciascuna cella può essere realizzata come un attore.
+
+Idealmente, il sistema dovrebbe essere costruito usando `N` computer fisici, su ciacuno dei quali attivare una cella.
+In una prima fase, conviene che le celle siano attori locali, cioè attori che operano all'interno di una unica JVM.
+
+-----------------------------------------
+Progetto conwayactorsqak
+-----------------------------------------
+
+Nel :slide3:`Progetto conwayactorsqak` il sistema viene descritto in :ref:`Linguaggio qak` nel modello 
+`conwayactors.qak`_.
+
+Il modello si base sulle seguenti idee:
+
+
+- viene simulata la esistenza di ``N`` giocatori (:slide3:`player`), ciascuno dei quali crea una cella;
+- un attore di nome ``gamemaster`` crea dinamicamente gli ``N``  *player*;
+- ciascun *player* crea dinamicamente una cella, che comunica al *gamemaster* la sua esistenza;
+- il gioco parte quando il  ``gamemaster`` ha ricevuto le notifiche di esistenza da parte di tutte le ``N`` celle.
+
+
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+    * -  
+        .. image::  ./_static/img/conway/conwayactorsqakarch.png
+          :align: center 
+          :width: 70%  
+      -
+        - ogni cella viene realizzata come un attore
+        - le celle sono create dinamicamente da un attore denominato ``player``
+        - il coordinamento tra le celle è ottenuto introducendo un attore di nome ``gamemaster``, 
+          che viene quindi impostato con la stessa :ref:`Struttura di lifecontroller` discussa in precedenza;
+        - le celle vengono visualizzate attraverso la :ref:`conwaygui standalone`
+        - tutto il sistema gira in una stessa JVM
+
+
+Ogni cella interagisce con il dispositivo di output verso la :ref:`conwaygui standalone`
+:slide2:`senza la dipendenza dovuta alla ottimizzazione`.
+
+.. image::  ./_static/img/conway/conwactorsqak.jpg
+  :align: center 
+  :width: 100%  
+
+
+Questa versione costituisce la base per un ulteriore sviluppo in cui le celle sono attori
+che operano in macchine distinte. 
+
+==========================================
+Celle come attori distribuiti
+==========================================
+
+La sperimentazione del sistema costruito usando ``N`` computer fisici, su ciacuno dei quali attivare una cella
+è previsto avvenga in Lab2, grazie alla presenza di ``N`` studenti, ciascuno con il suo PC su cui
+attivare una cella, in uno di due modi:
+
+- eseguendo il programma in locale 
+- attivando un container con l'immagine Docker della cella
+
+-----------------------------------------
+Progetto conwaycellsqak
+-----------------------------------------
+
+Nel :slide3:`Progetto conwaycellsqak`, una cella viene descritta in :ref:`Linguaggio qak` nel modello 
+`conwaycellsqak.qak`_:
+
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+    * -  
+        .. image::  ./_static/img/conway/conwaycellsqakarch.png
+          :align: center 
+          :width: 70%  
+      -
+        - ogni cella viene realizzata come un attore
+
+
+Non disponendo (come accade normalmente) di ``N`` nodi computazionali (ed ``N`` operatori umani) 
+le celle sono attivabili in altri modi:
+
+- eseguendo su un singolo PC un file bat come `activatecells_9.bat`_
+- eseguendo su un singolo PC un file yml come `docker-compose-cells9.yml_
+ 
+-----------------------------------------
+Progetto conwaymasterqak
+-----------------------------------------
+
+Nel :slide3:`Progetto conwaymasterqak`, il coordinatore del gioco viene descritto in :ref:`Linguaggio qak` nel modello 
+`conwaymaster.qak`_:
+
+
+
+.. list-table::
+    :widths: 45,55
+    :width: 100%
+    
+    * -  
+        .. image::  ./_static/img/conway/conwaymasterqakarch.png
+          :align: center 
+          :width: 70%  
+      -
+        - ...
