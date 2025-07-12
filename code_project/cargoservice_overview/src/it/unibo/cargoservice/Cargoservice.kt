@@ -30,7 +30,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
-				var MaxLoad = 1000;
+				val MaxLoad = 1000;
 				var currentRobotWeight = 0;
 		return { //this:ActionBasciFsm
 				state("state_init") { //this:State
@@ -57,7 +57,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("requestcheck") { //this:State
 					action { //it:State
 						CommUtils.outblack("[cargoservice] asking for a check on the received loadrequest to ProductService...")
-						request("checkloadrequest", "checkloadrequest(PID,Weight)" ,"productservice" )  
+						request("checkloadrequest", "checkloadrequest(PID)" ,"productservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -68,13 +68,23 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("requestaccepted") { //this:State
 					action { //it:State
 						
-									PID = payloadArg(0);
-									Weight = payLoadArg(1);
+									val PID = payloadArg(0).toString();
+									val Weight = payLoadArg(1).toFloat();
 									
-									if(currentRobotWeight + Weight > MaxLoad){  
-							}
-									else{		 
-							}
+									if(currentRobotWeight + Weight > MaxLoad){ 
+										Cause = "Weight exceeds MaxLoad"
+										val rejectionMsg = "loadrequestrejected($PID, $Cause)
+										emit("loadrequestrejected",rejectionMsg)
+										gotoState("loadrejected")
+									}
+									else if(){
+										
+									}
+									else{
+										currentRobotWeight += Weight 
+										val acceptedMsg = "loadrequestaccepted($PID,$Weight)"
+										emit("loadrequestaccepted",)
+									}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

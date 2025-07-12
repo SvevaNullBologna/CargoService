@@ -8,9 +8,15 @@ Request loadrequest: loadrequest(PID)
 Request checkloadrequest: checkloadrequest(PID)
 // CargoService -> Company
 Reply loadrequestaccepted : loadrequestaccepted(PID,Weight)
-Reply loadrequestrejected : loadrequestrejected(PID, Cause)
+Reply loadrequestrefused : loadrequestrefused(Cause)
+Dispatch loadrequestrejected : loadrequestrejected(Cause)
 ////////////////////////////
-
+//CargoService -> robot
+Dispatch stop : stop(M)
+Dispatch movefromto : movefromto(X,Y)
+Dispatch resume : resume(Y)
+///////////////////////////
+//CargoService -> WebGUI
 
 
 //CONTEXTS
@@ -27,51 +33,71 @@ ExternalQActor productservice context ctxproductservice
 
 QActor cargoservice context ctxcargoservice{
 	[#
-		var MaxLoad = 1000;
+		val MaxLoad = 1000;
+		var HOME : Position;
 		var currentRobotWeight = 0;
+		var slots: List<Slot>
+		var io_port : Position
 	#]
 	State state_init initial{
 		//add starting up cargoservice operations
 		delay 2000
-	}Goto operative
-	State operative{
-		
-	}
-	Transition t0 whenRequest loadrequest -> requestcheck
+	}Goto operative_wait
+	State operative_wait{
+		println("$name  WAITING FOR REQUEST")
+	}Transition t0 whenRequest loadrequest -> requestcheck
 	              whenReply loadrequestaccepted -> requestaccepted
-				  whenReply loadrequestrejected -> loadrejected
+				  whenDispatch loadrequestrejected -> requestrejected
 				  
 	State requestcheck{
 		println("[cargoservice] asking for a check on the received loadrequest to ProductService...")
-		request productservice -m checkloadrequest: checkloadrequest(PID, Weight)
-	}Goto operative
+		request productservice -m checkloadrequest: checkloadrequest(PID)
+	}Goto operative_wait
 	
 	State requestaccepted{
 		[#
-			PID = payloadArg(0);
-			Weight = payLoadArg(1);
-			
-			if(currentRobotWeight + Weight > MaxLoad){ #]
-				
-				
-		[#	}
-			else{		#]
-				
-		[#	}
+			val PID = payloadArg(0).toString();
+			val Weight = payLoadArg(1).toFloat();
+			var Cause;
 		#]
+		if [# currentRobotWeight + Weight < MaxLoad && slots.free() > 0 #] {
+   		 [#
+    	  	val destination_slot = slots.getEmptySlot();
+      		destination_slot.setProduct(PID);
+      		val SlotId = destination_slot.getId();
+      		// procedi con il carico...
+    	 #]
+    	
+    	// qui mandi reply di accettazione se serve
+  		} else {
+    	[#
+      		val cause = if (currentRobotWeight + Weight >= MaxLoad) 
+                    "Supera peso massimo" 
+                  else 
+                    "Nessuno slot disponibile";
+    	#]
+    	autodispatch loadrequestrejected : loadrequestrejected($Cause)
+  }
+}
 		
-		//assegna slot
-		//
+		
+			
+	
+		
 		
 	}Goto operative 
-	State loadrejected{
-		[#
-			PID = payloadArg(0);
-			Cause = payloadArg(1);
-		#]
-		println("[cargoservice] Load request REJECTED - PID=$PID, Cause=$Cause")
-		// loadrequestrejected : loadrequestrejected(PID, Cause)
+	
+	
+	State requestrejected{
+			[#
+				val PID = payloadArg(0);	
+			#]
+			println("[cargoservice] Load request REJECTED - PID=$PID")
+			
 	}Goto operative
+
+
+
 }
 
 
@@ -84,6 +110,10 @@ QActor request_simulator context ctxcompanysim{
 	
 }	
 
-
+QActor sonarservice context ctxsonarservice{
+	State state_init initial{
+		
+	}
+}
 
 
