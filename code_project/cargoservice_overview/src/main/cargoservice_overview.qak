@@ -1,0 +1,89 @@
+System cargoservice_overview
+
+//MESSAGES AND EVENTS
+////////////////////////////
+//Company -> CargoService
+Request loadrequest: loadrequest(PID)
+//CargoService -> ProductService
+Request checkloadrequest: checkloadrequest(PID)
+// CargoService -> Company
+Reply loadrequestaccepted : loadrequestaccepted(PID,Weight)
+Reply loadrequestrejected : loadrequestrejected(PID, Cause)
+////////////////////////////
+
+
+
+//CONTEXTS
+Context ctxddrrobot			ip [host="localhost" port=11800]
+Context ctxsonarservice		ip [host="localhost" port=11801]
+Context ctxcargoservice		ip [host="localhost" port=11802]
+Context ctxproductservice	ip [host="localhost" port=11803]
+Context ctxcompanysim		ip [host="localhost" port=11804]
+
+//QACTORS
+ExternalQActor basicrobot context ctxddrrobot
+ExternalQActor productservice context ctxproductservice
+
+
+QActor cargoservice context ctxcargoservice{
+	[#
+		var MaxLoad = 1000;
+		var currentRobotWeight = 0;
+	#]
+	State state_init initial{
+		//add starting up cargoservice operations
+		delay 2000
+	}Goto operative
+	State operative{
+		
+	}
+	Transition t0 whenRequest loadrequest -> requestcheck
+	              whenReply loadrequestaccepted -> requestaccepted
+				  whenReply loadrequestrejected -> loadrejected
+				  
+	State requestcheck{
+		println("[cargoservice] asking for a check on the received loadrequest to ProductService...")
+		request productservice -m checkloadrequest: checkloadrequest(PID, Weight)
+	}Goto operative
+	
+	State requestaccepted{
+		[#
+			PID = payloadArg(0);
+			Weight = payLoadArg(1);
+			
+			if(currentRobotWeight + Weight > MaxLoad){ #]
+				
+				
+		[#	}
+			else{		#]
+				
+		[#	}
+		#]
+		
+		//assegna slot
+		//
+		
+	}Goto operative 
+	State loadrejected{
+		[#
+			PID = payloadArg(0);
+			Cause = payloadArg(1);
+		#]
+		println("[cargoservice] Load request REJECTED - PID=$PID, Cause=$Cause")
+		// loadrequestrejected : loadrequestrejected(PID, Cause)
+	}Goto operative
+}
+
+
+QActor request_simulator context ctxcompanysim{
+	
+	State state_init initial {
+		println("[request_simulator] sending a load request to ProductService...")
+		request cargoservice -m loadrequest: loadrequest(PID)
+	}
+	
+}	
+
+
+
+
