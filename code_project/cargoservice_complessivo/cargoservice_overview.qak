@@ -1,0 +1,172 @@
+System cargoservice_overview 
+ 
+ 
+//MESSAGES AND EVENTS 
+//Companysimulator -> CargoService
+Request loadrequest : loadrequest(PID)
+//CargoService -> ProductService 
+Request checkloadrequest: checkloadrequest(PID) 
+//ProductService -> CompanySimulator 
+Reply loadrequestaccepted: loadrequestaccepted(PID, Weight, Slot)
+Reply loadrequestrefused: loadrequestrefused(PID, Cause)
+//CargoService -> WebGUI
+Dispatch updategui : updategui(robotstate, robotposition, slots, led)
+//CargoService -> cargorobot
+Dispatch transport : transport(PID,Slot)
+Dispatch stop : stop(C)
+Dispatch resume: resume(C)
+//SonarService -> CargoService
+Dispatch distance : distance(D)
+//SonarService -> led
+Dispatch ledOn : ledOn(T)
+//CargoRobot -> BasicRobot 
+Dispatch command : command(C)
+Request step: step(length)
+
+
+
+Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_productservice 			ip [host="localhost" port=8001]
+Context ctx_basicrobot 				ip [host="localhost" port=8002]
+Context ctx_companysim 				ip [host="localhost" port=8003]
+Context ctx_sonarservice			ip [host="localhost" port=8004]
+Context ctx_webgui					ip [host="localhost" port=8005]
+
+ExternalQActor basicrobot context ctx_basicrobot
+ExternalQActor productservice context ctx_productservice 
+
+
+
+QActor companysimulator context ctx_companysim{
+ 	State s0 initial {
+ 		request cargoservice -m loadrequest : loadrequest($PID)
+  	} 
+}
+
+QActor cargoservice context ctx_cargoservice {
+	[#
+		// dichiarazione variabili e stati iniziali
+	#] 
+	
+	State s0 initial{
+		println("$name STARTS") color blue
+		
+		[#
+			// inizializzazione di cargoservice
+		#]
+	} 
+	Goto wait_request //cargoservice è inizializzato e va in attesa
+	
+	State wait_request{
+		println("$name WAITING FOR REQUEST") color blue
+	}
+	Transition t0
+	   whenRequest loadrequest -> checkloadrequest //arriva una richiesta di carico da parte della compagnia
+	
+	State checkloadrequest{
+		//dovremmo in realtà mandarla a productservice, in modo che la controlli e ci restituisca il peso. 
+		//Difatti la richiesta può fallire.
+		printCurrentMessage
+		onMsg(loadrequest: loadrequest(PID)) {
+			[#
+				PID = payloadArg(0)
+				
+			#]
+		request productservice -m checkloadrequest: checkloadrequest($PID)
+		//Consideriamo al momento solo il caso in cui funzioni: assegna uno slot libero alla richiesta
+		//replyTo checkloadrequest with loadrequestaccepted(PID, Weight, Slot)
+		}
+	}Transition t1 
+	whenReply loadrequestaccepted -> serveloadrequest
+	whenReply loadrequestrefused -> showerror
+	
+	
+	State serveloadrequest {
+		println("$name SERVING REQUEST") color blue
+		//calculate the position of the slot and sends the robot to take the product at the ioport
+	}
+	Goto wait_request
+	
+	State showerror{
+		
+	}
+}
+
+QActor cargorobot context ctx_cargoservice{
+  State s0 initial {
+  	//si deve trovare in home. Altrimenti ci va.
+  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
+  }Goto wait
+  
+  State wait{
+  	//se non è in posizione home, va in home
+  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
+  }Transition t0
+   				whenMsg transport -> transport
+  				whenMsg stop -> stop
+  
+  State transport{
+  	request basicrobot -m step : step(C)
+  	forward basicrobot -m command : command(C)
+  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
+  	
+  }Goto wait
+  			
+  State stop{
+  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
+  }
+  Transition t0 whenMsg resume -> resume
+  
+  
+  State resume{
+  	returnFromInterrupt
+  }
+} 
+ 
+QActor basicrobot context ctx_basicrobot{
+  State s0 initial {
+  } 
+} 
+
+ 
+QActor productservice context ctx_cargoservice{
+  State s0 initial {
+  } 
+} 
+ 
+	
+QActor hold context ctx_cargoservice{
+  State s0 initial {
+  } 
+} 
+
+QActor webgui context ctx_webgui{
+ 	State s0 initial {
+  	} 
+}
+
+
+QActor sonarservice context ctx_sonarservice{
+ 	State s0 initial {
+ 		
+  	} Goto update 
+  	
+  	State update{
+  		//Detects distance and forwards it to the cargoservice
+  		//if it's within threshold, it sends a message to the led to signal it
+  		if[# distance < threshold #]{
+  			autodispatch ledOn : ledOn(0)
+  		}
+  		forward cargoservice -m distance: distance(D)
+  	}Transition t0 whenMsg ledOn -> ledOn 
+  	
+  	State ledOn{
+  		
+  	}Goto update
+  	
+}
+
+
+ 
+
+
