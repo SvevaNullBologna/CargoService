@@ -1,0 +1,12 @@
+link al testo dei requisiti del committente:https://github.com/anatali/issLab2025/blob/main/iss25Material/docs/_build/html/TemaFinale25.html
+link allo sprint precedente : non esiste. 
+immagine dell'architettura al termine dello sprint precedente : al momento non esiste
+GOAL dello sprint:
+Costruire un Sistema logico di riferimento.
+Evidenziare  su quanti nodi computazionali diversi deve essere distribuito.
+Distinguere i Boundary Context.
+Distinguere i macro-componenti(hardware/software) che occorre sviluppare.
+Fornire un modello delle macro-parti del sistema, specificando quali componenti sono fornite dal committente e quelle da sviluppare.
+Fornire un quadro architetturale complessivo dal quale dedurre un possibile piano di lavoro.
+
+piano di testing : test di coerenza dei messaggi mandati tra i diversi elementi (superato)
