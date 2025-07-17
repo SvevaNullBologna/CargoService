@@ -32,55 +32,43 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						forward("updategui", "updategui(robotstate,robotposition,slots,led)" ,"webgui" ) 
+						CommUtils.outblack("$name READY")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitForCommand", cond=doswitch() )
 				}	 
-				state("wait") { //this:State
+				state("waitForCommand") { //this:State
 					action { //it:State
-						forward("updategui", "updategui(robotstate,robotposition,slots,led)" ,"webgui" ) 
+						CommUtils.outblack("Waiting for command")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t03",targetState="transport",cond=whenDispatch("transport"))
-					transition(edgeName="t04",targetState="stop",cond=whenDispatch("stop"))
+					 transition(edgeName="t05",targetState="executeCommand",cond=whenDispatch("command"))
 				}	 
-				state("transport") { //this:State
+				state("executeCommand") { //this:State
 					action { //it:State
-						request("step", "step(C)" ,"basicrobot" )  
-						forward("command", "command(C)" ,"basicrobot" ) 
-						forward("updategui", "updategui(robotstate,robotposition,slots,led)" ,"webgui" ) 
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("command(C)"), Term.createTerm("command(C)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								
+												var C = payloadArg(0)
+												var length = 100 //temp value of length
+						}
+						CommUtils.outblack("Executing command : $C")
+						forward("cmd", "cmd(C)" ,"basicrobot" ) 
+						request("step", "step(length)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
-				}	 
-				state("stop") { //this:State
-					action { //it:State
-						forward("updategui", "updategui(robotstate,robotposition,slots,led)" ,"webgui" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t05",targetState="resume",cond=whenDispatch("resume"))
-				}	 
-				state("resume") { //this:State
-					action { //it:State
-						returnFromInterrupt(interruptedStateTransitions)
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
+					 transition( edgeName="goto",targetState="waitForCommand", cond=doswitch() )
 				}	 
 			}
 		}

@@ -32,34 +32,28 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name STARTING")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="update", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitForProduct", cond=doswitch() )
 				}	 
-				state("update") { //this:State
+				state("waitForProduct") { //this:State
 					action { //it:State
-						if(  distance < threshold  
-						 ){forward("ledOn", "ledOn(0)" ,name ) 
+						if(  true  
+						 ){emit("productDetected", "productDetected(T)" ) 
 						}
-						forward("distance", "distance(D)" ,"cargoservice" ) 
+						else
+						 {emit("anomalyDetected", "anomalyDetected(T)" ) 
+						 }
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="ledOn",cond=whenDispatch("ledOn"))
-				}	 
-				state("ledOn") { //this:State
-					action { //it:State
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="update", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitForProduct", cond=doswitch() )
 				}	 
 			}
 		}

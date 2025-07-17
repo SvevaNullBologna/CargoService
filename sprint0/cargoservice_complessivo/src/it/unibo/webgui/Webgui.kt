@@ -32,11 +32,33 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name STARTING")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition( edgeName="goto",targetState="waitforupdate", cond=doswitch() )
+				}	 
+				state("waitforupdate") { //this:State
+					action { //it:State
+						CommUtils.outblack("waiting for update of gui...")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t06",targetState="updategui",cond=whenDispatch("update"))
+				}	 
+				state("updategui") { //this:State
+					action { //it:State
+						CommUtils.outblack("updating webgui...")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitforupdate", cond=doswitch() )
 				}	 
 			}
 		}

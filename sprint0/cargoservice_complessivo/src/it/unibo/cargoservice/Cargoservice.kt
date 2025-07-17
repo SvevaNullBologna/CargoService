@@ -29,30 +29,35 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
-		
-				// dichiarazione variabili e stati iniziali
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblue("$name STARTS")
-						
-									// inizializzazione di cargoservice
+						CommUtils.outblack("$name STARTS")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="wait_request", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
 				}	 
-				state("wait_request") { //this:State
+				state("waitrequest") { //this:State
 					action { //it:State
-						CommUtils.outblue("$name WAITING FOR REQUEST")
+						CommUtils.outblack("WAITING FOR LOAD REQUEST...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t00",targetState="checkloadrequest",cond=whenRequest("loadrequest"))
+				}	 
+				state("sendupdate") { //this:State
+					action { //it:State
+						forward("update", "update(U)" ,"webgui" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 				state("checkloadrequest") { //this:State
 					action { //it:State
@@ -61,35 +66,59 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						if( checkMsgContent( Term.createTerm("loadrequest(PID)"), Term.createTerm("loadrequest(PID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-												PID = payloadArg(0)
+												var PID = payloadArg(0)
 												
-								request("checkloadrequest", "checkloadrequest($PID)" ,"productservice" )  
 						}
+						request("checkloadrequest", "checkloadrequest($PID)" ,"productservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t11",targetState="serveloadrequest",cond=whenReply("loadrequestaccepted"))
-					transition(edgeName="t12",targetState="showerror",cond=whenReply("loadrequestrefused"))
+					 transition(edgeName="t11",targetState="waitForProduct",cond=whenReply("loadrequestaccepted"))
+					transition(edgeName="t12",targetState="managerefusal",cond=whenReply("loadrequestrefused"))
+				}	 
+				state("waitForProduct") { //this:State
+					action { //it:State
+						CommUtils.outblack("REQUEST ACCEPTED. Waiting for product on IOPort...")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t23",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
+					transition(edgeName="t24",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
-						CommUtils.outblue("$name SERVING REQUEST")
+						CommUtils.outblack("Product detected. Moving robot...")
+						forward("command", "command(C)" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="wait_request", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
 				}	 
-				state("showerror") { //this:State
+				state("managerefusal") { //this:State
 					action { //it:State
+						CommUtils.outblack("Request refused. Back to wait.")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
+				}	 
+				state("manageanomaly") { //this:State
+					action { //it:State
+						CommUtils.outblack("Anomaly detected during wait. Resetting.")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
 				}	 
 			}
 		}

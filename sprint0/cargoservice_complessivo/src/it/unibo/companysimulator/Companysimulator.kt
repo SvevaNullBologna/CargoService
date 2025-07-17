@@ -32,6 +32,7 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name STARTS")
 						request("loadrequest", "loadrequest($PID)" ,"cargoservice" )  
 						//genTimer( actor, state )
 					}

@@ -28,23 +28,23 @@ with Diagram('cargoservice_overviewArch', show=False, outformat='png', graph_att
      with Cluster('ctx_cargoservice', graph_attr=nodeattr):
           cargoservice=Custom('cargoservice','./qakicons/symActorWithobjSmall.png')
           cargorobot=Custom('cargorobot','./qakicons/symActorWithobjSmall.png')
-          productservice=Custom('productservice','./qakicons/symActorWithobjSmall.png')
-          hold=Custom('hold','./qakicons/symActorWithobjSmall.png')
+          webgui=Custom('webgui','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_productservice', graph_attr=nodeattr):
           productservice=Custom('productservice(ext)','./qakicons/externalQActor.png')
      with Cluster('ctx_basicrobot', graph_attr=nodeattr):
-          basicrobot=Custom('basicrobot','./qakicons/symActorWithobjSmall.png')
           basicrobot=Custom('basicrobot(ext)','./qakicons/externalQActor.png')
      with Cluster('ctx_companysim', graph_attr=nodeattr):
           companysimulator=Custom('companysimulator','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_sonarservice', graph_attr=nodeattr):
           sonarservice=Custom('sonarservice','./qakicons/symActorWithobjSmall.png')
-     with Cluster('ctx_webgui', graph_attr=nodeattr):
-          webgui=Custom('webgui','./qakicons/symActorWithobjSmall.png')
+     sys >> Edge( label='anomalyDetected', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
+     sys >> Edge( label='productDetected', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
+     sonarservice >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonarservice >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<step &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<checkloadrequest &nbsp; >',  fontcolor='magenta') >> productservice
      companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
-     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> basicrobot
-     sonarservice >> Edge(color='blue', style='solid',  decorate='true', label='<distance &nbsp; >',  fontcolor='blue') >> cargoservice
-     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<updategui &nbsp; >',  fontcolor='blue') >> webgui
+     cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> webgui
+     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag

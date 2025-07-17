@@ -1,6 +1,6 @@
 System cargoservice_overview 
  
- 
+
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
@@ -9,20 +9,16 @@ Request checkloadrequest: checkloadrequest(PID)
 //ProductService -> CompanySimulator 
 Reply loadrequestaccepted: loadrequestaccepted(PID, Weight, Slot)
 Reply loadrequestrefused: loadrequestrefused(PID, Cause)
-//CargoService -> WebGUI
-Dispatch updategui : updategui(robotstate, robotposition, slots, led)
 //CargoService -> cargorobot
-Dispatch transport : transport(PID,Slot)
-Dispatch stop : stop(C)
-Dispatch resume: resume(C)
-//SonarService -> CargoService
-Dispatch distance : distance(D)
-//SonarService -> led
-Dispatch ledOn : ledOn(T)
-//CargoRobot -> BasicRobot 
 Dispatch command : command(C)
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+//CargoRobot -> BasicRobot 
+Dispatch cmd : cmd(C)
 Request step: step(length)
-
+//CargoRobot -> webgui
+Dispatch update : update(U)
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
@@ -30,143 +26,125 @@ Context ctx_productservice 			ip [host="localhost" port=8001]
 Context ctx_basicrobot 				ip [host="localhost" port=8002]
 Context ctx_companysim 				ip [host="localhost" port=8003]
 Context ctx_sonarservice			ip [host="localhost" port=8004]
-Context ctx_webgui					ip [host="localhost" port=8005]
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
 
 
-
 QActor companysimulator context ctx_companysim{
  	State s0 initial {
+ 		println("$name STARTS")
  		request cargoservice -m loadrequest : loadrequest($PID)
   	} 
 }
 
-QActor cargoservice context ctx_cargoservice {
-	[#
-		// dichiarazione variabili e stati iniziali
-	#] 
-	
+QActor cargoservice context ctx_cargoservice{
 	State s0 initial{
-		println("$name STARTS") color blue
-		
-		[#
-			// inizializzazione di cargoservice
-		#]
-	} 
-	Goto wait_request //cargoservice è inizializzato e va in attesa
-	
-	State wait_request{
-		println("$name WAITING FOR REQUEST") color blue
+		println("$name STARTS")
 	}
-	Transition t0
-	   whenRequest loadrequest -> checkloadrequest //arriva una richiesta di carico da parte della compagnia
+	Goto waitrequest
+	
+	State waitrequest{
+		println("WAITING FOR LOAD REQUEST...")	
+	}
+	Transition t0 whenRequest loadrequest -> checkloadrequest
+	
+	State sendupdate{
+		forward webgui -m update : update(U) 
+	}
 	
 	State checkloadrequest{
-		//dovremmo in realtà mandarla a productservice, in modo che la controlli e ci restituisca il peso. 
-		//Difatti la richiesta può fallire.
 		printCurrentMessage
-		onMsg(loadrequest: loadrequest(PID)) {
+		onMsg(loadrequest: loadrequest(PID)){
 			[#
-				PID = payloadArg(0)
+				var PID = payloadArg(0)
 				
 			#]
-		request productservice -m checkloadrequest: checkloadrequest($PID)
-		//Consideriamo al momento solo il caso in cui funzioni: assegna uno slot libero alla richiesta
-		//replyTo checkloadrequest with loadrequestaccepted(PID, Weight, Slot)
 		}
-	}Transition t1 
-	whenReply loadrequestaccepted -> serveloadrequest
-	whenReply loadrequestrefused -> showerror
-	
-	
-	State serveloadrequest {
-		println("$name SERVING REQUEST") color blue
-		//calculate the position of the slot and sends the robot to take the product at the ioport
+		request productservice -m checkloadrequest : checkloadrequest($PID)
 	}
-	Goto wait_request
+	Transition t1 
+	whenReply loadrequestaccepted -> waitForProduct
+	whenReply loadrequestrefused -> managerefusal
 	
-	State showerror{
-		
+	State waitForProduct{
+		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
 	}
+	Transition t2
+	whenEvent anomalyDetected -> manageanomaly
+	whenEvent productDetected -> serveloadrequest
+	
+	State serveloadrequest{
+		//waits for the product to appear on IOPort , then takes it
+		//C is a string with the command
+		println("Product detected. Moving robot...")
+		forward cargorobot -m command : command(C)
+	}Goto waitrequest
+	
+	State managerefusal{
+		println("Request refused. Back to wait.")
+	}Goto waitrequest
+	
+	State manageanomaly{
+		println("Anomaly detected during wait. Resetting.")
+	}Goto waitrequest
 }
 
 QActor cargorobot context ctx_cargoservice{
-  State s0 initial {
-  	//si deve trovare in home. Altrimenti ci va.
-  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
-  }Goto wait
-  
-  State wait{
-  	//se non è in posizione home, va in home
-  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
-  }Transition t0
-   				whenMsg transport -> transport
-  				whenMsg stop -> stop
-  
-  State transport{
-  	request basicrobot -m step : step(C)
-  	forward basicrobot -m command : command(C)
-  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
-  	
-  }Goto wait
-  			
-  State stop{
-  	forward webgui -m updategui: updategui(robotstate, robotposition, slots, led)
-  }
-  Transition t0 whenMsg resume -> resume
-  
-  
-  State resume{
-  	returnFromInterrupt
-  }
-} 
- 
-QActor basicrobot context ctx_basicrobot{
-  State s0 initial {
-  } 
-} 
-
- 
-QActor productservice context ctx_cargoservice{
-  State s0 initial {
-  } 
-} 
- 
+	State s0 initial{
+		println("$name READY")
+	}Goto waitForCommand 
 	
-QActor hold context ctx_cargoservice{
-  State s0 initial {
-  } 
-} 
-
-QActor webgui context ctx_webgui{
- 	State s0 initial {
-  	} 
+	State waitForCommand{
+		println("Waiting for command")
+	}Transition t0 whenMsg command  -> executeCommand
+	
+	State executeCommand{
+		printCurrentMessage
+		onMsg(command : command(C)){
+			[#
+				var C = payloadArg(0)
+				var length = 100 //temp value of length
+			#]
+		}
+		println("Executing command : $C")
+		forward basicrobot -m cmd : cmd(C)
+		request basicrobot -m step : step(length)
+	}Goto waitForCommand
+	
 }
-
 
 QActor sonarservice context ctx_sonarservice{
- 	State s0 initial {
- 		
-  	} Goto update 
-  	
-  	State update{
-  		//Detects distance and forwards it to the cargoservice
-  		//if it's within threshold, it sends a message to the led to signal it
-  		if[# distance < threshold #]{
-  			autodispatch ledOn : ledOn(0)
-  		}
-  		forward cargoservice -m distance: distance(D)
-  	}Transition t0 whenMsg ledOn -> ledOn 
-  	
-  	State ledOn{
-  		
-  	}Goto update
-  	
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitForProduct 
+	
+	State waitForProduct{
+		if[# true #]{//if product detected correctly for around three seconds 
+			emit productDetected : productDetected(T)
+		}
+		else{//altrimenti emette un'anomalia
+			emit anomalyDetected : anomalyDetected(T)
+		}	
+	}Goto waitForProduct
+}
+
+QActor webgui context ctx_cargoservice{
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitforupdate
+	
+	State waitforupdate{
+		println("waiting for update of gui...")
+	}
+	Transition t0 whenMsg update -> updategui
+	
+	State updategui{
+			println("updating webgui...")
+	}Goto waitforupdate
 }
 
 
  
-
+ 
 
