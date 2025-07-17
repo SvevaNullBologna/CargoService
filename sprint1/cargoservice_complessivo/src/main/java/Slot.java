@@ -5,8 +5,9 @@ public class Slot{
 	private int id;
 	private int numberOfSpaces;
 	private boolean avaiable;
+	private Position position;
 	
-	public Slot(int id, int numberOfSpaces) {
+	public Slot(int id, int numberOfSpaces, int position) {
 		if(id == 5 ) {
 			this.avaiable = false;
 		}
@@ -15,6 +16,7 @@ public class Slot{
 		}
 		this.id = id;
 		this.numberOfSpaces = numberOfSpaces;
+		this.position = position;
 	}
 	
 	
@@ -33,7 +35,13 @@ public class Slot{
 		}
 	}
 	
+	public Position getPosition(){
+		return position;
+	}
+	
 	public String toString() {
 		return this.getId().toString;
 	}
+	
+	
 }

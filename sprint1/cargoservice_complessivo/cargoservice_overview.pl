@@ -8,6 +8,7 @@ dispatch( refused, refused(PID,Weight) ).
 dispatch( command, command(C) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
+event( anomalyFixed, anomalyFixed(T) ).
 dispatch( cmd, cmd(C) ).
 request( step, step(length) ).
 dispatch( update, update(U) ).
@@ -24,3 +25,9 @@ context(ctx_sonarservice, "localhost",  "TCP", "8004").
  static(companysimulator).
   qactor( cargoservice, ctx_cargoservice, "it.unibo.cargoservice.Cargoservice").
  static(cargoservice).
+  qactor( cargorobot, ctx_cargoservice, "it.unibo.cargorobot.Cargorobot").
+ static(cargorobot).
+  qactor( sonarservice, ctx_sonarservice, "it.unibo.sonarservice.Sonarservice").
+ static(sonarservice).
+  qactor( webgui, ctx_cargoservice, "it.unibo.webgui.Webgui").
+ static(webgui).

@@ -16,6 +16,7 @@ Dispatch command : command(C)
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
 //CargoRobot -> BasicRobot 
 Dispatch cmd : cmd(C)
 Request step: step(length)
@@ -38,7 +39,7 @@ ExternalQActor productservice context ctx_productservice
 
 QActor companysimulator context ctx_companysim{
  	State s0 initial {
- 		println("$name STARTS")
+ 		println("$name STARTS") color magenta
  		request cargoservice -m loadrequest : loadrequest($PID)
   	} 
 }
@@ -51,13 +52,18 @@ QActor cargoservice context ctx_cargoservice{
 		val slots: Slots
 		var currentHoldWeight = 0
 		var io_port : Position 
+
+
+		currentSlot = -1
+		currentPID = -1
+		currentWeight = -1
 		
 	#]
 	State s0 initial{
 		println("$name STARTS")
 		[#
-			slots = new Slots(5,slotSpaces)
-			//io_port = 
+			slots = new Slots(5,slotSpaces) //mockup
+			io_port = new Position(0,0); //mockup 
 		#]
 	}
 	Goto waitrequest
@@ -94,9 +100,13 @@ QActor cargoservice context ctx_cargoservice{
 				val Slot = slots.getAvaiableSlot();
 				val canLoad = (currentHoldWeight + weight) <= MaxLoad && slotId != -1
 			#]
-			if[#canLoad#]{//respects weight and there are empty slots
-				//goto waitForProduct
-				[# slots.setAvaiableSlot(Slot) #]
+			if[#canLoad#]{
+				[#
+					currentPID = PID
+					currentWeight = Weight
+					currentSlot = Slot
+					slots.setAvaiableSlot(Slot)
+				#]
 				autodispatch accepted : accepted($PID, $Weight, $Slot)
 			}
 			else{
@@ -117,39 +127,43 @@ QActor cargoservice context ctx_cargoservice{
 	whenEvent productDetected -> serveloadrequest
 	
 	State serveloadrequest{
-		//waits for the product to appear on IOPort , then takes it
-		//C is a string with the command
-		[# 
-			SlotID
-			val C = "move from IOPort to $SlotID " #
-		]
 		println("Product detected. Moving robot...")
-		forward cargorobot -m command : command(C)
+		forward cargorobot -m command : command("move to $currentSlot")
 	}Goto waitendofrequest
 	
 	State waitendofrequest{
-		
+		println("Waiting for robot to finish its task...")
+		delay 300 	
 	}
 	Transition t4 
 	whenEvent finishedtransport -> waitrequest
+	whenEvent anomalyDetected -> manageanomaly
 	
 	State managerefusal{
 		println("Request refused. Back to wait.")
 	}Goto waitrequest
 	
 	State manageanomaly{
-		println("Anomaly detected during wait. Resetting.")
-	}Goto waitrequest
+		println("Anomaly detected during wait. Fixing...")
+		forward cargorobot -m command: command("stop")
+	}Transition t5 
+	whenEvent anomalyFixed -> resume
+	
+	State resume{
+		println("Anomaly fixed. Resuming...")
+		forward cargorobot -m command : command("resume")
+	}Goto waitendofrequest
 }
 
-/*QActor cargorobot context ctx_cargoservice{
+QActor cargorobot context ctx_cargoservice{
 	State s0 initial{
 		println("$name READY")
 	}Goto waitForCommand 
 	
 	State waitForCommand{
 		println("Waiting for command")
-	}Transition t0 whenMsg command  -> executeCommand
+	}
+	Transition t0 whenMsg command  -> executeCommand
 	
 	State executeCommand{
 		printCurrentMessage
@@ -169,37 +183,38 @@ QActor cargoservice context ctx_cargoservice{
 	}Transition t1 
 	whenEvent finishedtransport -> waitForCommand
 	
-}*/
+}
 
-/*QActor sonarservice context ctx_sonarservice{
+QActor sonarservice context ctx_sonarservice{ 
 	State s0 initial{
 		println("$name STARTING")
 	}Goto waitForProduct 
 	
 	State waitForProduct{
+		
 		if[# true #]{//if product detected correctly for around three seconds 
 			emit productDetected : productDetected(T)
 		}
 		else{//altrimenti emette un'anomalia
 			emit anomalyDetected : anomalyDetected(T)
-		}	
+		}
 	}Goto waitForProduct
-}*/
+	
+}
 
-/*QActor webgui context ctx_cargoservice{
+QActor webgui context ctx_cargoservice{
 	State s0 initial{
 		println("$name STARTING")
 	}Goto waitforupdate
 	
 	State waitforupdate{
 		println("waiting for update of gui...")
-	}
-	Transition t0 whenMsg update -> updategui
+	}Transition t0 whenMsg update -> updategui
 	
 	State updategui{
 			println("updating webgui...")
 	}Goto waitforupdate
-}*/
+}
 
 
  

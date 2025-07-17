@@ -11,7 +11,14 @@ public class Slots{
 	public Slots(int numberOfSlots, int numberOfSpaces) {
 		slotList = new ArrayList<Slot>();
 		for(int i=1; i<=numberOfSlots; i++) {
-			slotList.add(new Slot(i, numberOfSpaces));
+			switch(i) {
+			case 1 : slotList.add(new Slot(i, numberOfSpaces, 1, 1)); break;
+			case 2 : slotList.add(new Slot(i, numberOfSpaces, 2, 2)); break;
+			case 3 : slotList.add(new Slot(i, numberOfSpaces, 3, 3)); break;
+			case 4 : slotList.add(new Slot(i, numberOfSpaces, 4, 4)); break;
+			case 5 : slotList.add(new Slot(i, numberOfSpaces, 5, 5)); break;
+			}
+			
 		}
 	}
 	

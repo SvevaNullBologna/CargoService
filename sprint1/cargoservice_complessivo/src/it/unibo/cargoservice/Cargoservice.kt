@@ -36,13 +36,19 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				val slots: Slots
 				var currentHoldWeight = 0
 				var io_port : Position 
+		
+		
+				currentSlot = -1
+				currentPID = -1
+				currentWeight = -1
+				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("$name STARTS")
 						
-									slots = new Slots(5,slotSpaces)
-									//io_port = 
+									slots = new Slots(5,slotSpaces) //mockup
+									io_port = new Position(0,0); //mockup 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -91,7 +97,11 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 												val Slot = slots.getAvaiableSlot();
 												val canLoad = (currentHoldWeight + weight) <= MaxLoad && slotId != -1
 								if( canLoad 
-								 ){ slots.setAvaiableSlot(Slot)  
+								 ){
+													currentPID = PID
+													currentWeight = Weight
+													currentSlot = Slot
+													slots.setAvaiableSlot(Slot)
 								forward("accepted", "accepted($PID,$Weight,$Slot)" ,name ) 
 								}
 								else
@@ -120,6 +130,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("serveloadrequest") { //this:State
 					action { //it:State
 						CommUtils.outblack("Product detected. Moving robot...")
+						forward("command", "command("move to $currentSlot")" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -129,12 +140,15 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("waitendofrequest") { //this:State
 					action { //it:State
+						CommUtils.outblack("Waiting for robot to finish its task...")
+						delay(300) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t47",targetState="waitrequest",cond=whenEvent("finishedtransport"))
+					transition(edgeName="t48",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
 				}	 
 				state("managerefusal") { //this:State
 					action { //it:State
@@ -148,13 +162,25 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("manageanomaly") { //this:State
 					action { //it:State
-						CommUtils.outblack("Anomaly detected during wait. Resetting.")
+						CommUtils.outblack("Anomaly detected during wait. Fixing...")
+						forward("command", "command("stop")" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
+					 transition(edgeName="t59",targetState="resume",cond=whenEvent("anomalyFixed"))
+				}	 
+				state("resume") { //this:State
+					action { //it:State
+						CommUtils.outblack("Anomaly fixed. Resuming...")
+						forward("command", "command("resume")" ,"cargorobot" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitendofrequest", cond=doswitch() )
 				}	 
 			}
 		}
