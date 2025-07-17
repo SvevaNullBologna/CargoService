@@ -1,14 +1,16 @@
 System cargoservice_overview 
  
-
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
 //CargoService -> ProductService 
-Request checkloadrequest: checkloadrequest(PID) 
+Request getweight: getweight(PID) 
 //ProductService -> CompanySimulator 
-Reply loadrequestaccepted: loadrequestaccepted(PID, Weight, Slot)
-Reply loadrequestrefused: loadrequestrefused(PID, Cause)
+Reply returnweight : returnweight(PID, Weight)
+Reply productnotexistent: productnotexistent(PID)
+//CargoService -> CargoService
+Dispatch accepted : accepted(PID, Weight, Slot)
+Dispatch refused : refused(PID, Weight)
 //CargoService -> cargorobot
 Dispatch command : command(C)
 //SonarService -> Whoever is listening
@@ -19,6 +21,9 @@ Dispatch cmd : cmd(C)
 Request step: step(length)
 //CargoRobot -> webgui
 Dispatch update : update(U)
+
+//CargoRobot -> Whoever is listening
+Event finishedtransport : finishedtransport(T)
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
@@ -39,47 +44,94 @@ QActor companysimulator context ctx_companysim{
 }
 
 QActor cargoservice context ctx_cargoservice{
+	[#
+		import main.java.Slots
+		val MaxLoad = 1000
+		val slotSpaces = 5
+		val slots: Slots
+		var currentHoldWeight = 0
+		var io_port : Position 
+		
+	#]
 	State s0 initial{
 		println("$name STARTS")
+		[#
+			slots = new Slots(5,slotSpaces)
+			//io_port = 
+		#]
 	}
 	Goto waitrequest
 	
 	State waitrequest{
 		println("WAITING FOR LOAD REQUEST...")	
 	}
-	Transition t0 whenRequest loadrequest -> checkloadrequest
+	Transition t0 whenRequest loadrequest -> getweight
 	
-	State sendupdate{
+	/*State sendupdate{
 		forward webgui -m update : update(U) 
-	}
+	}*/
 	
-	State checkloadrequest{
+	State getweight{
 		printCurrentMessage
 		onMsg(loadrequest: loadrequest(PID)){
 			[#
-				var PID = payloadArg(0)
+				var PID = payloadArg(0).toInt()
 				
 			#]
 		}
-		request productservice -m checkloadrequest : checkloadrequest($PID)
+		request productservice -m getweight : getweight($PID)
 	}
 	Transition t1 
-	whenReply loadrequestaccepted -> waitForProduct
-	whenReply loadrequestrefused -> managerefusal
+	whenReply returnweight -> validateRequest
+	whenReply productnotexistent -> managerefusal
+	
+	State validateRequest{
+		printCurrentMessage
+		onMsg(returnweight : returnweight(PID, Weight)){
+			[#
+				val PID = payloadArg(0).toInt()
+				val Weight = payloadArg(1).toInt()
+				val Slot = slots.getAvaiableSlot();
+				val canLoad = (currentHoldWeight + weight) <= MaxLoad && slotId != -1
+			#]
+			if[#canLoad#]{//respects weight and there are empty slots
+				//goto waitForProduct
+				[# slots.setAvaiableSlot(Slot) #]
+				autodispatch accepted : accepted($PID, $Weight, $Slot)
+			}
+			else{
+				autodispatch refused : refused($PID, $Weight)
+			}
+		
+		}
+	}
+	Transition t2
+	whenMsg accepted -> waitForProduct
+	whenMsg refused -> managerefusal
 	
 	State waitForProduct{
 		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
 	}
-	Transition t2
+	Transition t3
 	whenEvent anomalyDetected -> manageanomaly
 	whenEvent productDetected -> serveloadrequest
 	
 	State serveloadrequest{
 		//waits for the product to appear on IOPort , then takes it
 		//C is a string with the command
+		[# 
+			SlotID
+			val C = "move from IOPort to $SlotID " #
+		]
 		println("Product detected. Moving robot...")
 		forward cargorobot -m command : command(C)
-	}Goto waitrequest
+	}Goto waitendofrequest
+	
+	State waitendofrequest{
+		
+	}
+	Transition t4 
+	whenEvent finishedtransport -> waitrequest
 	
 	State managerefusal{
 		println("Request refused. Back to wait.")
@@ -90,7 +142,7 @@ QActor cargoservice context ctx_cargoservice{
 	}Goto waitrequest
 }
 
-QActor cargorobot context ctx_cargoservice{
+/*QActor cargorobot context ctx_cargoservice{
 	State s0 initial{
 		println("$name READY")
 	}Goto waitForCommand 
@@ -110,11 +162,16 @@ QActor cargorobot context ctx_cargoservice{
 		println("Executing command : $C")
 		forward basicrobot -m cmd : cmd(C)
 		request basicrobot -m step : step(length)
-	}Goto waitForCommand
+	}Goto waitToFinish
 	
-}
+	State waitToFinish{
+		println("waiting to finish")
+	}Transition t1 
+	whenEvent finishedtransport -> waitForCommand
+	
+}*/
 
-QActor sonarservice context ctx_sonarservice{
+/*QActor sonarservice context ctx_sonarservice{
 	State s0 initial{
 		println("$name STARTING")
 	}Goto waitForProduct 
@@ -127,9 +184,9 @@ QActor sonarservice context ctx_sonarservice{
 			emit anomalyDetected : anomalyDetected(T)
 		}	
 	}Goto waitForProduct
-}
+}*/
 
-QActor webgui context ctx_cargoservice{
+/*QActor webgui context ctx_cargoservice{
 	State s0 initial{
 		println("$name STARTING")
 	}Goto waitforupdate
@@ -142,7 +199,7 @@ QActor webgui context ctx_cargoservice{
 	State updategui{
 			println("updating webgui...")
 	}Goto waitforupdate
-}
+}*/
 
 
  

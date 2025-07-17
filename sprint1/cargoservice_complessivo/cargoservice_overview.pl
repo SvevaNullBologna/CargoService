@@ -2,13 +2,16 @@
 % cargoservice_overview description   
 %====================================================================================
 request( loadrequest, loadrequest(PID) ).
-request( checkloadrequest, checkloadrequest(PID) ).
+request( getweight, getweight(PID) ).
+dispatch( accepted, accepted(PID,Weight,Slot) ).
+dispatch( refused, refused(PID,Weight) ).
 dispatch( command, command(C) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 dispatch( cmd, cmd(C) ).
 request( step, step(length) ).
 dispatch( update, update(U) ).
+event( finishedtransport, finishedtransport(T) ).
 %====================================================================================
 context(ctx_cargoservice, "localhost",  "TCP", "8000").
 context(ctx_productservice, "localhost",  "TCP", "8001").
@@ -21,9 +24,3 @@ context(ctx_sonarservice, "localhost",  "TCP", "8004").
  static(companysimulator).
   qactor( cargoservice, ctx_cargoservice, "it.unibo.cargoservice.Cargoservice").
  static(cargoservice).
-  qactor( cargorobot, ctx_cargoservice, "it.unibo.cargorobot.Cargorobot").
- static(cargorobot).
-  qactor( sonarservice, ctx_sonarservice, "it.unibo.sonarservice.Sonarservice").
- static(sonarservice).
-  qactor( webgui, ctx_cargoservice, "it.unibo.webgui.Webgui").
- static(webgui).
