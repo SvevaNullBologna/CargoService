@@ -1,0 +1,150 @@
+System cargoservice_overview 
+ 
+
+//MESSAGES AND EVENTS 
+//Companysimulator -> CargoService
+Request loadrequest : loadrequest(PID)
+//CargoService -> ProductService 
+Request checkloadrequest: checkloadrequest(PID) 
+//ProductService -> CompanySimulator 
+Reply loadrequestaccepted: loadrequestaccepted(PID, Weight, Slot)
+Reply loadrequestrefused: loadrequestrefused(PID, Cause)
+//CargoService -> cargorobot
+Dispatch command : command(C)
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+//CargoRobot -> BasicRobot 
+Dispatch cmd : cmd(C)
+Request step: step(length)
+//CargoRobot -> webgui
+Dispatch update : update(U)
+
+
+Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_productservice 			ip [host="localhost" port=8001]
+Context ctx_basicrobot 				ip [host="localhost" port=8002]
+Context ctx_companysim 				ip [host="localhost" port=8003]
+Context ctx_sonarservice			ip [host="localhost" port=8004]
+
+ExternalQActor basicrobot context ctx_basicrobot
+ExternalQActor productservice context ctx_productservice 
+
+
+QActor companysimulator context ctx_companysim{
+ 	State s0 initial {
+ 		println("$name STARTS")
+ 		request cargoservice -m loadrequest : loadrequest($PID)
+  	} 
+}
+
+QActor cargoservice context ctx_cargoservice{
+	State s0 initial{
+		println("$name STARTS")
+	}
+	Goto waitrequest
+	
+	State waitrequest{
+		println("WAITING FOR LOAD REQUEST...")	
+	}
+	Transition t0 whenRequest loadrequest -> checkloadrequest
+	
+	State sendupdate{
+		forward webgui -m update : update(U) 
+	}
+	
+	State checkloadrequest{
+		printCurrentMessage
+		onMsg(loadrequest: loadrequest(PID)){
+			[#
+				var PID = payloadArg(0)
+				
+			#]
+		}
+		request productservice -m checkloadrequest : checkloadrequest($PID)
+	}
+	Transition t1 
+	whenReply loadrequestaccepted -> waitForProduct
+	whenReply loadrequestrefused -> managerefusal
+	
+	State waitForProduct{
+		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
+	}
+	Transition t2
+	whenEvent anomalyDetected -> manageanomaly
+	whenEvent productDetected -> serveloadrequest
+	
+	State serveloadrequest{
+		//waits for the product to appear on IOPort , then takes it
+		//C is a string with the command
+		println("Product detected. Moving robot...")
+		forward cargorobot -m command : command(C)
+	}Goto waitrequest
+	
+	State managerefusal{
+		println("Request refused. Back to wait.")
+	}Goto waitrequest
+	
+	State manageanomaly{
+		println("Anomaly detected during wait. Resetting.")
+	}Goto waitrequest
+}
+
+QActor cargorobot context ctx_cargoservice{
+	State s0 initial{
+		println("$name READY")
+	}Goto waitForCommand 
+	
+	State waitForCommand{
+		println("Waiting for command")
+	}Transition t0 whenMsg command  -> executeCommand
+	
+	State executeCommand{
+		printCurrentMessage
+		onMsg(command : command(C)){
+			[#
+				var C = payloadArg(0)
+				var length = 100 //temp value of length
+			#]
+		}
+		println("Executing command : $C")
+		forward basicrobot -m cmd : cmd(C)
+		request basicrobot -m step : step(length)
+	}Goto waitForCommand
+	
+}
+
+QActor sonarservice context ctx_sonarservice{
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitForProduct 
+	
+	State waitForProduct{
+		if[# true #]{//if product detected correctly for around three seconds 
+			emit productDetected : productDetected(T)
+		}
+		else{//altrimenti emette un'anomalia
+			emit anomalyDetected : anomalyDetected(T)
+		}	
+	}Goto waitForProduct
+}
+
+QActor webgui context ctx_cargoservice{
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitforupdate
+	
+	State waitforupdate{
+		println("waiting for update of gui...")
+	}
+	Transition t0 whenMsg update -> updategui
+	
+	State updategui{
+			println("updating webgui...")
+	}Goto waitforupdate
+}
+
+
+ 
+ 
+

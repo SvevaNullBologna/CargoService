@@ -2,7 +2,7 @@
 % cargoservice_overview description   
 %====================================================================================
 request( loadrequest, loadrequest(PID) ).
-request( checkloadrequest, checkloadrequest(PID) ).
+request( getweight, getweight(PID) ).
 dispatch( command, command(C) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).

@@ -48,7 +48,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="checkloadrequest",cond=whenRequest("loadrequest"))
+					 transition(edgeName="t00",targetState="getweight",cond=whenRequest("loadrequest"))
 				}	 
 				state("sendupdate") { //this:State
 					action { //it:State
@@ -59,7 +59,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					sysaction { //it:State
 					}	 	 
 				}	 
-				state("checkloadrequest") { //this:State
+				state("getweight") { //this:State
 					action { //it:State
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
@@ -69,14 +69,24 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 												var PID = payloadArg(0)
 												
 						}
-						request("checkloadrequest", "checkloadrequest($PID)" ,"productservice" )  
+						request("getweight", "getweight($PID)" ,"productservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t11",targetState="waitForProduct",cond=whenReply("loadrequestaccepted"))
-					transition(edgeName="t12",targetState="managerefusal",cond=whenReply("loadrequestrefused"))
+					 transition(edgeName="t11",targetState="validateRequest",cond=whenReply("returnweight"))
+					transition(edgeName="t12",targetState="managerefusal",cond=whenReply("productnotexistent"))
+				}	 
+				state("validateRequest") { //this:State
+					action { //it:State
+						if( true 
+						 ){}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
@@ -86,8 +96,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t23",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
-					transition(edgeName="t24",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t33",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
+					transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State

@@ -1,14 +1,16 @@
 System cargoservice_overview 
- 
 
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
 //CargoService -> ProductService 
-Request checkloadrequest: checkloadrequest(PID) 
+Request getweight: getweight(PID) 
 //ProductService -> CompanySimulator 
-Reply loadrequestaccepted: loadrequestaccepted(PID, Weight, Slot)
-Reply loadrequestrefused: loadrequestrefused(PID, Cause)
+Reply returnweight : returnweight(PID, Weight)
+Reply productnotexistent: productnotexistent(PID)
+//CargoService -> CargoService
+//Dispatch accepted : accepted(PID, Weight, Slot)
+//Dispatch refused : refused(PID, Weight)
 //CargoService -> cargorobot
 Dispatch command : command(C)
 //SonarService -> Whoever is listening
@@ -47,13 +49,13 @@ QActor cargoservice context ctx_cargoservice{
 	State waitrequest{
 		println("WAITING FOR LOAD REQUEST...")	
 	}
-	Transition t0 whenRequest loadrequest -> checkloadrequest
+	Transition t0 whenRequest loadrequest -> getweight
 	
 	State sendupdate{
 		forward webgui -m update : update(U) 
 	}
 	
-	State checkloadrequest{
+	State getweight{
 		printCurrentMessage
 		onMsg(loadrequest: loadrequest(PID)){
 			[#
@@ -61,16 +63,30 @@ QActor cargoservice context ctx_cargoservice{
 				
 			#]
 		}
-		request productservice -m checkloadrequest : checkloadrequest($PID)
+		request productservice -m getweight : getweight($PID)
 	}
 	Transition t1 
-	whenReply loadrequestaccepted -> waitForProduct
-	whenReply loadrequestrefused -> managerefusal
+	whenReply returnweight -> validateRequest
+	whenReply productnotexistent -> managerefusal
+	
+	State validateRequest{
+		if[#true#]{//respects weight and there are empty slots
+			//goto waitForProduct
+			//autodispatch accepted : accepted(PID, Weight, Slot)
+		}
+		else{
+			//goto managerefusal
+			//autodispatch refused : refused(PID, Weight)
+		}
+	}
+	Transition t2
+	//whenMsg accepted -> waitForProduct
+	//whenMsg refused -> managerefusal
 	
 	State waitForProduct{
 		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
 	}
-	Transition t2
+	Transition t3
 	whenEvent anomalyDetected -> manageanomaly
 	whenEvent productDetected -> serveloadrequest
 	
