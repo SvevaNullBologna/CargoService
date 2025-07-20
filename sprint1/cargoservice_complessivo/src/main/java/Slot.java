@@ -5,9 +5,10 @@ public class Slot{
 	private int id;
 	private int numberOfSpaces;
 	private boolean avaiable;
-	private Position position;
+	private int positionx;
+	private int positiony;
 	
-	public Slot(int id, int numberOfSpaces, int position) {
+	public Slot(int id, int numberOfSpaces, int positionx, int positiony) {
 		if(id == 5 ) {
 			this.avaiable = false;
 		}
@@ -16,7 +17,8 @@ public class Slot{
 		}
 		this.id = id;
 		this.numberOfSpaces = numberOfSpaces;
-		this.position = position;
+		this.positionx = positionx;
+		this.positiony = positiony;
 	}
 	
 	
@@ -35,12 +37,20 @@ public class Slot{
 		}
 	}
 	
-	public Position getPosition(){
-		return position;
+	public int getX() {
+		return this.positionx;
+	}
+	
+	public int getY() {
+		return this.positiony;
+	}
+	
+	public String getPosition() {
+		return "(" + this.positionx + "," + this.positiony + ")";
 	}
 	
 	public String toString() {
-		return this.getId().toString;
+		return ("" + this.getId());
 	}
 	
 	

@@ -1,25 +1,35 @@
 package main.java;
 
-
-import main.java.Slot;
 import java.util.List;
 import java.util.ArrayList;
 
 
 public class Slots{
-	private List<Slot> slotList;
+	private ArrayList<Slot> slotList;
 	public Slots(int numberOfSlots, int numberOfSpaces) {
 		slotList = new ArrayList<Slot>();
 		for(int i=1; i<=numberOfSlots; i++) {
 			switch(i) {
-			case 1 : slotList.add(new Slot(i, numberOfSpaces, 1, 1)); break;
-			case 2 : slotList.add(new Slot(i, numberOfSpaces, 2, 2)); break;
-			case 3 : slotList.add(new Slot(i, numberOfSpaces, 3, 3)); break;
-			case 4 : slotList.add(new Slot(i, numberOfSpaces, 4, 4)); break;
-			case 5 : slotList.add(new Slot(i, numberOfSpaces, 5, 5)); break;
+			case 1 : slotList.add(new Slot(i, numberOfSpaces,1,2)); break;
+			case 2 : slotList.add(new Slot(i, numberOfSpaces,1,3)); break;
+			case 3 : slotList.add(new Slot(i, numberOfSpaces,3,3)); break;
+			case 4 : slotList.add(new Slot(i, numberOfSpaces,3,4)); break;
+			case 5 : slotList.add(new Slot(i, 0,2,5)); break;
 			}
 			
 		}
+	}
+	
+	public Slot getSlotById(int id){
+	    for(Slot s : slotList){
+	        if(s.getId() == id) return s;
+	    }
+	    return null;
+	}
+
+	
+	public String getSlotPositionById(int id) {
+		return slotList.get(id-1).getPosition();
 	}
 	
 	public int getAvaiableSlot(){
@@ -31,7 +41,12 @@ public class Slots{
 		return -1;
 	}
 	
-	public void setAvaiableSlot(int slot){
+	
+	public void registerProductInSlot(int id) {
+		this.registerProductInSlot(getSlotById(id));
+	}
+	public void registerProductInSlot(Slot slot){
 		slot.occupySpace();
 	}
+
 }

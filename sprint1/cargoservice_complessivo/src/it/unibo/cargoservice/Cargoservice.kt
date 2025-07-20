@@ -35,12 +35,10 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				val slotSpaces = 5
 				val slots: Slots
 				var currentHoldWeight = 0
-				var io_port : Position 
 		
-		
-				currentSlot = -1
-				currentPID = -1
-				currentWeight = -1
+				var currentSlot = -1
+				var currentPID = -1
+				var currentWeight = -1
 				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -48,7 +46,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						CommUtils.outblack("$name STARTS")
 						
 									slots = new Slots(5,slotSpaces) //mockup
-									io_port = new Position(0,0); //mockup 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -94,14 +91,14 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								
 												val PID = payloadArg(0).toInt()
 												val Weight = payloadArg(1).toInt()
-												val Slot = slots.getAvaiableSlot();
-												val canLoad = (currentHoldWeight + weight) <= MaxLoad && slotId != -1
+												val Slot = slots.getAvaiableSlot()
+												val canLoad = (currentHoldWeight + Weight) <= MaxLoad && Slot != -1
 								if( canLoad 
 								 ){
 													currentPID = PID
 													currentWeight = Weight
 													currentSlot = Slot
-													slots.setAvaiableSlot(Slot)
+								forward("update", "update("to load: $currentSlot")" ,"webguimock" ) 
 								forward("accepted", "accepted($PID,$Weight,$Slot)" ,name ) 
 								}
 								else
@@ -116,6 +113,16 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					 transition(edgeName="t23",targetState="waitForProduct",cond=whenDispatch("accepted"))
 					transition(edgeName="t24",targetState="managerefusal",cond=whenDispatch("refused"))
 				}	 
+				state("managerefusal") { //this:State
+					action { //it:State
+						CommUtils.outblack("Request refused. Back to wait.")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
+				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
 						CommUtils.outblack("REQUEST ACCEPTED. Waiting for product on IOPort...")
@@ -124,13 +131,14 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t35",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
-					transition(edgeName="t36",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t35",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
 						CommUtils.outblack("Product detected. Moving robot...")
-						forward("command", "command("move to $currentSlot")" ,"cargorobot" ) 
+						 
+									val destination = slots.getSlotPositionById(currentSlot)
+						forward("command", "command("move to $destination")" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -147,40 +155,36 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t47",targetState="waitrequest",cond=whenEvent("finishedtransport"))
-					transition(edgeName="t48",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
+					 transition(edgeName="t46",targetState="lastoperations",cond=whenEvent("finishedtransport"))
 				}	 
-				state("managerefusal") { //this:State
+				state("lastoperations") { //this:State
 					action { //it:State
-						CommUtils.outblack("Request refused. Back to wait.")
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("finishedtransport(T)"), Term.createTerm("finishedtransport(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val msg = payloadArg(0).toString() 
+								if(  msg=="failure"  
+								 ){CommUtils.outblack("There was a fatal error with the load. Load request rejected")
+								}
+								else
+								 {
+								 					slots.registerProductInSlot(currentSlot)
+								 				  	currentHoldWeight = currentHoldWeight + currentWeight 
+								 CommUtils.outblack("product loaded successfully...")
+								 forward("update", "update("loaded to $currentSlot")" ,"webguimock" ) 
+								 }
+								
+												currentSlot = -1
+												currentPID = -1
+												currentWeight = -1
+						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
 					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
-				}	 
-				state("manageanomaly") { //this:State
-					action { //it:State
-						CommUtils.outblack("Anomaly detected during wait. Fixing...")
-						forward("command", "command("stop")" ,"cargorobot" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t59",targetState="resume",cond=whenEvent("anomalyFixed"))
-				}	 
-				state("resume") { //this:State
-					action { //it:State
-						CommUtils.outblack("Anomaly fixed. Resuming...")
-						forward("command", "command("resume")" ,"cargorobot" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="waitendofrequest", cond=doswitch() )
 				}	 
 			}
 		}

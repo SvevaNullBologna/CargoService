@@ -9,8 +9,10 @@ dispatch( command, command(C) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
+request( engage, engage(device,length) ).
+request( moverobot, moverobot(x,y) ).
 dispatch( cmd, cmd(C) ).
-request( step, step(length) ).
+event( alarm, alarm(reason) ).
 dispatch( update, update(U) ).
 event( finishedtransport, finishedtransport(T) ).
 %====================================================================================
@@ -27,7 +29,7 @@ context(ctx_sonarservice, "localhost",  "TCP", "8004").
  static(cargoservice).
   qactor( cargorobot, ctx_cargoservice, "it.unibo.cargorobot.Cargorobot").
  static(cargorobot).
-  qactor( sonarservice, ctx_sonarservice, "it.unibo.sonarservice.Sonarservice").
- static(sonarservice).
-  qactor( webgui, ctx_cargoservice, "it.unibo.webgui.Webgui").
- static(webgui).
+  qactor( sonar_mock, ctx_sonarservice, "it.unibo.sonar_mock.Sonar_mock").
+ static(sonar_mock).
+  qactor( webguimock, ctx_cargoservice, "it.unibo.webguimock.Webguimock").
+ static(webguimock).
