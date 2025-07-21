@@ -1,0 +1,18 @@
+link al testo dei requisiti del committente:https://github.com/anatali/issLab2025/blob/main/iss25Material/docs/_build/html/TemaFinale25.html
+link allo sprint precedente :  C:\Users\Sveva\Documents\GitHub\CargoService\sprint0
+immagine dell'architettura al termine dello sprint precedente :	C:\Users\Sveva\Documents\GitHub\CargoService\sprint0
+GOAL dello sprint:
+1. Enunciazione esplicita dei requisiti del cargoservice
+2. Analisi dei requisiti enunciati
+3. Definizione dell’architettura logica con modello eseguibile in qak
+4. Progetto e realizzazione
+
+piano di testing :
+- test cargoservice : caso in cui la richiesta è accettata;
+		      caso in cui la richiesta viene rifiutata dal productservice;
+		      caso in cui la richiesta viene rifiutata per il peso troppo elevato;
+		      caso in cui la richiesta viene rifiutata per mancanza di spazio negli slot;
+- test cargorobot :
+		      caso in cui la consegna va a buon fine;
+		      caso in cui vi è un'anomalia del sonar;
+		      caso di fallimento di consegna;
