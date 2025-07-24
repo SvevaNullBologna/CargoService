@@ -3,12 +3,11 @@ package main.java;
 
 public class Slot{
 	private int id;
-	private int numberOfSpaces;
 	private boolean avaiable;
 	private int positionx;
 	private int positiony;
 	
-	public Slot(int id, int numberOfSpaces, int positionx, int positiony) {
+	public Slot(int id, int positionx, int positiony) {
 		if(id == 5 ) {
 			this.avaiable = false;
 		}
@@ -16,7 +15,6 @@ public class Slot{
 			this.avaiable = true;
 		}
 		this.id = id;
-		this.numberOfSpaces = numberOfSpaces;
 		this.positionx = positionx;
 		this.positiony = positiony;
 	}
@@ -31,10 +29,7 @@ public class Slot{
 	}
 	
 	public void occupySpace(){
-		this.numberOfSpaces = this.numberOfSpaces - 1;
-		if(this.numberOfSpaces <= 0) {
-			this.avaiable = false;
-		}
+		avaiable = false;
 	}
 	
 	public int getX() {

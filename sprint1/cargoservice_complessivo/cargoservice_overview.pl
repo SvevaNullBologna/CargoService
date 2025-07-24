@@ -5,10 +5,10 @@ request( loadrequest, loadrequest(PID) ).
 request( getweight, getweight(PID) ).
 dispatch( accepted, accepted(PID,Weight,Slot) ).
 dispatch( refused, refused(PID,Weight) ).
-dispatch( command, command(C) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
+dispatch( command, command(C) ).
 request( engage, engage(device,length) ).
 request( moverobot, moverobot(x,y) ).
 dispatch( cmd, cmd(C) ).
@@ -29,7 +29,7 @@ context(ctx_sonarservice, "localhost",  "TCP", "8004").
  static(cargoservice).
   qactor( cargorobot, ctx_cargoservice, "it.unibo.cargorobot.Cargorobot").
  static(cargorobot).
-  qactor( sonar_mock, ctx_sonarservice, "it.unibo.sonar_mock.Sonar_mock").
- static(sonar_mock).
+  qactor( sonarmock, ctx_sonarservice, "it.unibo.sonarmock.Sonarmock").
+ static(sonarmock).
   qactor( webguimock, ctx_cargoservice, "it.unibo.webguimock.Webguimock").
  static(webguimock).

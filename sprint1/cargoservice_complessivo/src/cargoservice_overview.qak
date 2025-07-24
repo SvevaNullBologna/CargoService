@@ -1,0 +1,343 @@
+System cargoservice_overview 
+ 
+ 
+//MESSAGES AND EVENTS 
+//Companysimulator -> CargoService
+Request loadrequest : loadrequest(PID)
+//CargoService -> ProductService 
+Request getweight: getweight(PID) 
+//ProductService -> CompanySimulator 
+Reply returnweight : returnweight(PID, Weight)
+Reply productnotexistent: productnotexistent(PID)
+//CargoService -> CargoService
+Dispatch accepted : accepted(PID, Weight, Slot)
+Dispatch refused : refused(PID, Weight)
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
+//CargoService -> cargorobot
+Dispatch command : command(C)
+//CargoRobot -> BasicRobot 
+Request engage : engage(device, length)
+Request moverobot : moverobot(x, y)
+Dispatch cmd : cmd(C)
+//basicRobot -> CargoRobot
+Reply engagedone : engagedone(E)
+Reply engagerefused : engagerefused(E) 
+Reply moverobotdone : moverobotdone(T)
+Reply moverobotfailed : moverobotfailed(T)
+//basicRobot -> whoever is listening 
+Event alarm : alarm(reason)
+//CargoRobot -> webgui
+Dispatch update : update(U)
+
+//CargoRobot -> Whoever is listening
+Event finishedtransport : finishedtransport(T)
+
+
+Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_productservice 			ip [host="localhost" port=8001]
+Context ctx_basicrobot 				ip [host="localhost" port=8002]
+Context ctx_companysim 				ip [host="localhost" port=8003]
+Context ctx_sonarservice			ip [host="localhost" port=8004]
+
+ExternalQActor basicrobot context ctx_basicrobot
+ExternalQActor productservice context ctx_productservice 
+
+
+QActor companysimulator context ctx_companysim{
+ 	State s0 initial {
+ 		println("$name STARTS") color magenta
+ 		request cargoservice -m loadrequest : loadrequest($PID)
+  	} 
+}
+
+QActor cargoservice context ctx_cargoservice{
+	[#
+		import main.java.Slots
+		val MaxLoad = 1000
+		val slots: Slots
+		var currentHoldWeight = 0
+
+		var currentSlot = -1
+		var currentPID = -1
+		var currentWeight = -1
+		
+	#]
+	State s0 initial{
+		println("$name STARTS")
+		[#
+			slots = new Slots()
+		#]
+	}
+	Goto waitrequest
+	
+	State waitrequest{
+		println("WAITING FOR LOAD REQUEST...")	
+	}
+	Transition t0 whenRequest loadrequest -> getweight
+	
+	State getweight{
+		printCurrentMessage
+		onMsg(loadrequest: loadrequest(PID)){
+			[#
+				var PID = payloadArg(0).toInt()
+				
+			#]
+		}
+		request productservice -m getweight : getweight($PID)
+	}
+	Transition t1 
+	whenReply returnweight -> validateRequest
+	whenReply productnotexistent -> managerefusal
+	
+	
+	State validateRequest{
+		printCurrentMessage
+		onMsg(returnweight : returnweight(PID, Weight)){
+			[#
+				val PID = payloadArg(0).toInt()
+				val Weight = payloadArg(1).toInt()
+				val Slot = slots.getAvaiableSlot()
+				val canLoad = (currentHoldWeight + Weight) <= MaxLoad && Slot != -1
+			#]
+			if[#canLoad#]{
+				[#
+					currentPID = PID
+					currentWeight = Weight
+					currentSlot = Slot
+				#]
+				forward webguimock -m update : update("to load: $currentSlot")
+				autodispatch accepted : accepted($PID, $Weight, $Slot)
+			}
+			else{
+				autodispatch refused : refused($PID, $Weight)
+			}
+		
+		}
+	}
+	Transition t2
+	whenMsg accepted -> waitForProduct
+	whenMsg refused -> managerefusal
+	
+	State managerefusal{
+		println("Request refused. Back to wait.")
+	}Goto waitrequest
+	
+	
+	State waitForProduct{
+		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
+	}
+	Transition t3
+	whenEvent productDetected -> serveloadrequest
+	
+	State serveloadrequest{
+		println("Product detected. Moving robot...")
+		[# 
+			val destination = slots.getSlotPositionById(currentSlot)
+		#]
+		forward cargorobot -m command : command("move to $destination")
+	}Goto waitendofrequest
+	
+	State waitendofrequest{
+		println("Waiting for robot to finish its task...")
+		delay 300 	
+	}
+	Transition t4 
+	whenEvent finishedtransport -> lastoperations 
+	
+	State lastoperations{
+		printCurrentMessage
+		onMsg(finishedtransport : finishedtransport(T)){
+			[# val msg = payloadArg(0).toString()#]
+			if[# msg=="failure" #]{
+				println("There was a fatal error with the load. Load request rejected")
+				
+			}
+			else{
+				[#
+					slots.registerProductInSlot(currentSlot)
+				  	currentHoldWeight = currentHoldWeight + currentWeight 
+				#]
+				println("product loaded successfully...")
+				forward webguimock -m update : update("loaded to $currentSlot")
+			}
+			[#
+				currentSlot = -1
+				currentPID = -1
+				currentWeight = -1
+			#]
+		}
+		
+	}Goto waitrequest
+	
+	
+}
+
+QActor cargorobot context ctx_cargoservice {
+	[#
+		val stepTime = 350
+		val homeX = 0
+		val homeY = 0
+		val ioX = 5
+		val ioY = 0
+
+		var destSlotX = 0
+		var destSlotY = 0
+		var currentDestX = 0
+		var currentDestY = 0
+		
+
+	#]
+
+	State s0 initial {
+		println("$name RUNNING")
+	}Goto engageRobot
+
+	State engageRobot {
+		println("Engaging basic-robot...")
+		request basicrobot -m engage : engage(name, stepTime)
+	}
+	Transition t0
+	whenReply engagedone -> waitForCommand
+	whenReply engagerefused -> retryEngage
+
+	State retryEngage {
+		println("Engage refused, retrying...")
+		delay 500
+	}Goto engageRobot
+
+	State waitForCommand {
+		println("Waiting for command")
+	}
+	Transition t1 whenMsg command -> prepareDelivery
+
+	State prepareDelivery {
+		printCurrentMessage
+		onMsg(command : command(C)) {
+			[# 
+				val coords = C.split(" ").last().replace("(", "").replace(")", "").split(",")
+				destSlotX = coords(0).toInt()
+				destSlotY = coords(1).toInt()
+				
+				phase = "pickup"
+				
+			#]
+		}
+	}Goto pickup
+	
+	State pickup{
+		println("Going to IOPort to pick up product...")
+		[#
+        	currentDestX = ioX
+        	currentDestY = ioY
+      	#]
+      	request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+	}
+	Transition t2
+	whenReply moverobotdone -> delivery
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State delivery{
+		println("Delivering product to slot...")
+      		[#
+        		currentDestX = destSlotX
+        		currentDestY = destSlotY
+      		#]
+      		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+	}
+	Transition t3 
+	whenReply moverobotdone -> return
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State return{
+		println("Returning to home position...")
+      		[#
+        		currentDestX = homeX
+        		currentDestY = homeY
+      		#]
+      		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+	}
+	Transition t4
+	whenReply moverobotdone -> endOfTask 
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State endOfTask{
+		println("Transport complete. Emitting finishedtransport.")
+      	emit finishedtransport : finishedtransport(ok)
+	}
+	Transition t5
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+
+
+	State handleFailure {
+		println("Robot move failed. Check system status.") color red
+		emit finishedtransport : finishedtransport(failure)
+	}Goto waitForCommand
+
+	State handleAnomaly {
+		println("Anomaly detected. Stopping robot...")
+		forward basicrobot -m cmd : cmd(h)
+	}Goto waitFix
+
+	State waitFix {
+		println("Waiting for anomaly to be fixed...")
+		delay 200
+	}
+	Transition t5 whenEvent anomalyFixed  -> resuming
+	
+	State resuming{
+		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+		returnFromInterrupt 
+	}
+	
+}
+
+
+QActor sonarmock context ctx_sonarservice{ 
+	[#import kotlin.random.Random #]
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitForProduct 
+	
+	State waitForProduct{
+		[#	val randomValue = (0..100).random() 	#]
+		if[# randomValue/1 >= 75 #]{ 
+			emit productDetected : productDetected(T)
+		}
+		else{
+			emit anomalyDetected : anomalyDetected(T)
+		}
+	}Goto waitForProduct
+	
+}
+
+
+
+QActor webguimock context ctx_cargoservice{
+	State s0 initial{
+		println("$name STARTING")
+	}Goto waitforupdate
+	
+	State waitforupdate{
+		println("waiting for update of gui...")
+	}Transition t0 whenMsg update -> updategui
+	
+	State updategui{
+			println("updating webgui...")
+	}Goto waitforupdate
+}
+
+
+ 
+ 
+

@@ -32,7 +32,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		
 				import main.java.Slots
 				val MaxLoad = 1000
-				val slotSpaces = 5
 				val slots: Slots
 				var currentHoldWeight = 0
 		
@@ -45,7 +44,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					action { //it:State
 						CommUtils.outblack("$name STARTS")
 						
-									slots = new Slots(5,slotSpaces) //mockup
+									slots = new Slots()
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

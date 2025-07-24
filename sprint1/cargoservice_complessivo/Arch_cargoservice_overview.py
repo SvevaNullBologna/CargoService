@@ -36,13 +36,13 @@ with Diagram('cargoservice_overviewArch', show=False, outformat='png', graph_att
      with Cluster('ctx_companysim', graph_attr=nodeattr):
           companysimulator=Custom('companysimulator','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_sonarservice', graph_attr=nodeattr):
-          sonar_mock=Custom('sonar_mock','./qakicons/symActorWithobjSmall.png')
+          sonarmock=Custom('sonarmock','./qakicons/symActorWithobjSmall.png')
      sys >> Edge( label='productDetected', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
      sys >> Edge( label='finishedtransport', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
      cargorobot >> Edge( label='finishedtransport', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> cargorobot
-     sonar_mock >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sonar_mock >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonarmock >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonarmock >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getweight &nbsp; >',  fontcolor='magenta') >> productservice
      companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
