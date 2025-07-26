@@ -2,7 +2,8 @@
 % cargoservice_overview description   
 %====================================================================================
 request( loadrequest, loadrequest(PID) ).
-request( getweight, getweight(PID) ).
+request( getProduct, product(ID) ).
+reply( getProductAnswer, product(JSonString) ).  %%for getProduct
 dispatch( accepted, accepted(PID,Weight,Slot) ).
 dispatch( refused, refused(PID,Weight) ).
 event( productDetected, productDetected(T) ).

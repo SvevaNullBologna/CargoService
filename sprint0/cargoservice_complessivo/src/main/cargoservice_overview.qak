@@ -4,9 +4,9 @@ System cargoservice_overview
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
 //CargoService -> ProductService 
-Request getweight: getweight(PID) 
+Request getProduct: product(ID) 
 //ProductService -> CompanySimulator 
-Reply returnweight : returnweight(PID, Weight)
+Reply getProductAnswer : product(PJson) for getProduct
 Reply productnotexistent: productnotexistent(PID)
 //CargoService -> CargoService
 //Dispatch accepted : accepted(PID, Weight, Slot)
@@ -63,11 +63,22 @@ QActor cargoservice context ctx_cargoservice{
 				
 			#]
 		}
-		request productservice -m getweight : getweight($PID)
+		request productservice -m getProduct : getProduct($PID)
 	}
 	Transition t1 
-	whenReply returnweight -> validateRequest
-	whenReply productnotexistent -> managerefusal
+	whenReply getProductAnswer -> checkProdAnswer
+	
+	State checkProdAnswer{
+		printCurrentMessage
+		onMsg(getProductAnswer : product(PJson)){
+			[#
+				val jsonStr = payloadArg(0)
+		
+				var Cur_Weight = main.java.Product.getJsonInt(jsonStr, "weight")
+			#]
+		}
+		
+	}Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
 	State validateRequest{
 		if[#true#]{//respects weight and there are empty slots

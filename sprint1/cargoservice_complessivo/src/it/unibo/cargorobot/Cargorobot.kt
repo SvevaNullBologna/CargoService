@@ -30,16 +30,16 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
-				val stepTime = 350
-				val homeX = 0
-				val homeY = 0
-				val ioX = 5
-				val ioY = 0
+				val StepTime = 350
+				val HomeX = 0
+				val HomeY = 0 
+				val IoX = 5
+				val IoY = 0
 		
-				var destSlotX = 0
-				var destSlotY = 0
-				var currentDestX = 0
-				var currentDestY = 0
+				var DestSlotX = 0
+				var DestSlotY = 0
+				var CurrentDestX = 0
+				var CurrentDestY = 0
 				
 		
 		return { //this:ActionBasciFsm
@@ -56,14 +56,14 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				state("engageRobot") { //this:State
 					action { //it:State
 						CommUtils.outblack("Engaging basic-robot...")
-						request("engage", "engage(name,stepTime)" ,"basicrobot" )  
+						request("engage", "engage(cargorobot,$StepTime)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t07",targetState="waitForCommand",cond=whenReply("engagedone"))
-					transition(edgeName="t08",targetState="retryEngage",cond=whenReply("engagerefused"))
+					 transition(edgeName="t06",targetState="waitForCommand",cond=whenReply("engagedone"))
+					transition(edgeName="t07",targetState="retryEngage",cond=whenReply("engagerefused"))
 				}	 
 				state("retryEngage") { //this:State
 					action { //it:State
@@ -84,7 +84,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t19",targetState="prepareDelivery",cond=whenDispatch("command"))
+					 transition(edgeName="t18",targetState="prepareDelivery",cond=whenDispatch("command"))
 				}	 
 				state("prepareDelivery") { //this:State
 					action { //it:State
@@ -93,11 +93,10 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 						if( checkMsgContent( Term.createTerm("command(C)"), Term.createTerm("command(C)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
+												val C = payloadArg(0).toString()
 												val coords = C.split(" ").last().replace("(", "").replace(")", "").split(",")
-												destSlotX = coords(0).toInt()
-												destSlotY = coords(1).toInt()
-												
-												phase = "pickup"
+												DestSlotX = coords[0].toInt()
+												DestSlotY = coords[1].toInt()
 												
 						}
 						//genTimer( actor, state )
@@ -111,52 +110,52 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					action { //it:State
 						CommUtils.outblack("Going to IOPort to pick up product...")
 						
-						        	currentDestX = ioX
-						        	currentDestY = ioY
-						request("moverobot", "moverobot(currentDestX,currentDestY)" ,"basicrobot" )  
+						        	CurrentDestX = IoX
+						        	CurrentDestY = IoY
+						request("moverobot", "moverobot($CurrentDestX,$CurrentDestY)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t210",targetState="delivery",cond=whenReply("moverobotdone"))
-					transition(edgeName="t211",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t212",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t213",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t29",targetState="delivery",cond=whenReply("moverobotdone"))
+					transition(edgeName="t210",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t211",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t212",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("delivery") { //this:State
 					action { //it:State
 						CommUtils.outblack("Delivering product to slot...")
 						
-						        		currentDestX = destSlotX
-						        		currentDestY = destSlotY
-						request("moverobot", "moverobot(currentDestX,currentDestY)" ,"basicrobot" )  
+						        		CurrentDestX = DestSlotX
+						        		CurrentDestY = DestSlotY
+						request("moverobot", "moverobot($CurrentDestX,$CurrentDestY)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t314",targetState="return",cond=whenReply("moverobotdone"))
-					transition(edgeName="t315",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t316",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t317",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t313",targetState="return",cond=whenReply("moverobotdone"))
+					transition(edgeName="t314",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t315",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t316",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("return") { //this:State
 					action { //it:State
 						CommUtils.outblack("Returning to home position...")
 						
-						        		currentDestX = homeX
-						        		currentDestY = homeY
-						request("moverobot", "moverobot(currentDestX,currentDestY)" ,"basicrobot" )  
+						        		CurrentDestX = HomeX
+						        		CurrentDestY = HomeY
+						request("moverobot", "moverobot($CurrentDestX,$CurrentDestY)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t418",targetState="endOfTask",cond=whenReply("moverobotdone"))
-					transition(edgeName="t419",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t420",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t421",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t417",targetState="endOfTask",cond=whenReply("moverobotdone"))
+					transition(edgeName="t418",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t419",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t420",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("endOfTask") { //this:State
 					action { //it:State
@@ -167,9 +166,9 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t522",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t523",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t524",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t521",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t522",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t523",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("handleFailure") { //this:State
 					action { //it:State
@@ -202,11 +201,11 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t525",targetState="resuming",cond=whenEvent("anomalyFixed"))
+					 transition(edgeName="t524",targetState="resuming",cond=whenEvent("anomalyFixed"))
 				}	 
 				state("resuming") { //this:State
 					action { //it:State
-						request("moverobot", "moverobot(currentDestX,currentDestY)" ,"basicrobot" )  
+						request("moverobot", "moverobot($CurrentDestX,$CurrentDestY)" ,"basicrobot" )  
 						returnFromInterrupt(interruptedStateTransitions)
 						//genTimer( actor, state )
 					}

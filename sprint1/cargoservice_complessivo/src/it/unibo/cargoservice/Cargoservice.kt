@@ -19,6 +19,7 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
+import main.java.*
 
 class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -30,21 +31,20 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
-				import main.java.Slots
 				val MaxLoad = 1000
-				val slots: Slots
-				var currentHoldWeight = 0
+				val S: Slots
+				var Cur_HoldWeight = 0
 		
-				var currentSlot = -1
-				var currentPID = -1
-				var currentWeight = -1
+				var Cur_Slot = -1
+				var Cur_PID = -1
+				var Cur_Weight = -1
 				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("$name STARTS")
 						
-									slots = new Slots()
+									S = Slots()
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -68,49 +68,36 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						 	   
 						if( checkMsgContent( Term.createTerm("loadrequest(PID)"), Term.createTerm("loadrequest(PID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-												var PID = payloadArg(0).toInt()
-												
+								 Cur_PID = payloadArg(0).toInt()  
+								request("getProduct", "getProduct($Cur_PID)" ,"productservice" )  
 						}
-						request("getweight", "getweight($PID)" ,"productservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t11",targetState="validateRequest",cond=whenReply("returnweight"))
-					transition(edgeName="t12",targetState="managerefusal",cond=whenReply("productnotexistent"))
+					 transition(edgeName="t11",targetState="checkProdAnswer",cond=whenReply("getProductAnswer"))
 				}	 
-				state("validateRequest") { //this:State
+				state("checkProdAnswer") { //this:State
 					action { //it:State
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
-						if( checkMsgContent( Term.createTerm("returnweight(PID,Weight)"), Term.createTerm("returnweight(PID,Weight)"), 
+						if( checkMsgContent( Term.createTerm("product(JSonString)"), Term.createTerm("product(PJson)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-												val PID = payloadArg(0).toInt()
-												val Weight = payloadArg(1).toInt()
-												val Slot = slots.getAvaiableSlot()
-												val canLoad = (currentHoldWeight + Weight) <= MaxLoad && Slot != -1
-								if( canLoad 
-								 ){
-													currentPID = PID
-													currentWeight = Weight
-													currentSlot = Slot
-								forward("update", "update("to load: $currentSlot")" ,"webguimock" ) 
-								forward("accepted", "accepted($PID,$Weight,$Slot)" ,name ) 
-								}
-								else
-								 {forward("refused", "refused($PID,$Weight)" ,name ) 
-								 }
+												val jsonStr = payloadArg(0)
+										
+												var Cur_Weight = main.java.Product.getJsonInt(jsonStr, "weight")
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t23",targetState="waitForProduct",cond=whenDispatch("accepted"))
-					transition(edgeName="t24",targetState="managerefusal",cond=whenDispatch("refused"))
+					 transition( edgeName="goto",targetState="validateRequest", cond=doswitchGuarded({ Cur_Weight > 0  
+					}) )
+					transition( edgeName="goto",targetState="managerefusal", cond=doswitchGuarded({! ( Cur_Weight > 0  
+					) }) )
 				}	 
 				state("managerefusal") { //this:State
 					action { //it:State
@@ -122,6 +109,28 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					}	 	 
 					 transition( edgeName="goto",targetState="waitrequest", cond=doswitch() )
 				}	 
+				state("validateRequest") { //this:State
+					action { //it:State
+						 
+									var Cur_Slot = S.getAvaiableSlot()
+									val canLoad = (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
+						if( canLoad 
+						 ){
+											val T = "to load $Cur_Slot"
+						forward("update", "update($T)" ,"webguimock" ) 
+						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot)" ,name ) 
+						}
+						else
+						 {forward("refused", "refused($PID,$Weight)" ,name ) 
+						 }
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t22",targetState="waitForProduct",cond=whenDispatch("accepted"))
+					transition(edgeName="t23",targetState="managerefusal",cond=whenDispatch("refused"))
+				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
 						CommUtils.outblack("REQUEST ACCEPTED. Waiting for product on IOPort...")
@@ -130,14 +139,15 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t35",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
 						CommUtils.outblack("Product detected. Moving robot...")
 						 
-									val destination = slots.getSlotPositionById(currentSlot)
-						forward("command", "command("move to $destination")" ,"cargorobot" ) 
+									val destination = S.getSlotPositionById(Cur_Slot)
+									val C = "move to $destination"
+						forward("command", "command($C)" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -154,7 +164,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t46",targetState="lastoperations",cond=whenEvent("finishedtransport"))
+					 transition(edgeName="t45",targetState="lastoperations",cond=whenEvent("finishedtransport"))
 				}	 
 				state("lastoperations") { //this:State
 					action { //it:State
@@ -168,15 +178,16 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								}
 								else
 								 {
-								 					slots.registerProductInSlot(currentSlot)
-								 				  	currentHoldWeight = currentHoldWeight + currentWeight 
+								 					S.registerProductInSlot(Cur_Slot)
+								 				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
+								 				  	val T = "loaded to $Cur_Slot"
 								 CommUtils.outblack("product loaded successfully...")
-								 forward("update", "update("loaded to $currentSlot")" ,"webguimock" ) 
+								 forward("update", "update($T)" ,"webguimock" ) 
 								 }
 								
-												currentSlot = -1
-												currentPID = -1
-												currentWeight = -1
+												Cur_Slot = -1
+												Cur_PID = -1
+												Cur_Weight = -1
 						}
 						//genTimer( actor, state )
 					}

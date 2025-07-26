@@ -48,7 +48,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t026",targetState="updategui",cond=whenDispatch("update"))
+					 transition(edgeName="t025",targetState="updategui",cond=whenDispatch("update"))
 				}	 
 				state("updategui") { //this:State
 					action { //it:State

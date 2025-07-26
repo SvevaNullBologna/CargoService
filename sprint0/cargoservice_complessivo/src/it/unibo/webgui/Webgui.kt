@@ -48,7 +48,7 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="updategui",cond=whenDispatch("update"))
+					 transition(edgeName="t05",targetState="updategui",cond=whenDispatch("update"))
 				}	 
 				state("updategui") { //this:State
 					action { //it:State

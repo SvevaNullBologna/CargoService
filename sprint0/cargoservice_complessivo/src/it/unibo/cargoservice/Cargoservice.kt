@@ -69,14 +69,34 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 												var PID = payloadArg(0)
 												
 						}
-						request("getweight", "getweight($PID)" ,"productservice" )  
+						request("getProduct", "getProduct($PID)" ,"productservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t11",targetState="validateRequest",cond=whenReply("returnweight"))
-					transition(edgeName="t12",targetState="managerefusal",cond=whenReply("productnotexistent"))
+					 transition(edgeName="t11",targetState="checkProdAnswer",cond=whenReply("getProductAnswer"))
+				}	 
+				state("checkProdAnswer") { //this:State
+					action { //it:State
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("product(PJson)"), Term.createTerm("product(PJson)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								
+												val jsonStr = payloadArg(0)
+										
+												var Cur_Weight = main.java.Product.getJsonInt(jsonStr, "weight")
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="validateRequest", cond=doswitchGuarded({ Cur_Weight > 0  
+					}) )
+					transition( edgeName="goto",targetState="managerefusal", cond=doswitchGuarded({! ( Cur_Weight > 0  
+					) }) )
 				}	 
 				state("validateRequest") { //this:State
 					action { //it:State
@@ -96,8 +116,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t33",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
-					transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t32",targetState="manageanomaly",cond=whenEvent("anomalyDetected"))
+					transition(edgeName="t33",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State

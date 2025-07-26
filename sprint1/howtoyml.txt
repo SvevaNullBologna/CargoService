@@ -1,0 +1,12 @@
+da cmd: 
+
+cd alla cartella dello yml
+
+docker network ls 
+
+SE esiste già iss-network OK
+ALTRIMENTI docker network create iss-network
+
+avvia container:
+
+docker-compose up -d

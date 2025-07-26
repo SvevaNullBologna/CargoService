@@ -1,14 +1,12 @@
 System cargoservice_overview 
- 
- 
+
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
 //CargoService -> ProductService 
-Request getweight: getweight(PID) 
+Request getProduct : product(ID) 
 //ProductService -> CompanySimulator 
-Reply returnweight : returnweight(PID, Weight)
-Reply productnotexistent: productnotexistent(PID)
+Reply getProductAnswer : product(JSonString) for getProduct
 //CargoService -> CargoService
 Dispatch accepted : accepted(PID, Weight, Slot)
 Dispatch refused : refused(PID, Weight)
@@ -38,7 +36,7 @@ Event finishedtransport : finishedtransport(T)
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="localhost" port=8001]
-Context ctx_basicrobot 				ip [host="localhost" port=8002]
+Context ctx_basicrobot 				ip [host= "localhost"port=8002]
 Context ctx_companysim 				ip [host="localhost" port=8003]
 Context ctx_sonarservice			ip [host="localhost" port=8004]
 
@@ -54,21 +52,21 @@ QActor companysimulator context ctx_companysim{
 }
 
 QActor cargoservice context ctx_cargoservice{
+	import "main.java.*"
 	[#
-		import main.java.Slots
 		val MaxLoad = 1000
-		val slots: Slots
-		var currentHoldWeight = 0
+		val S: Slots
+		var Cur_HoldWeight = 0
 
-		var currentSlot = -1
-		var currentPID = -1
-		var currentWeight = -1
+		var Cur_Slot = -1
+		var Cur_PID = -1
+		var Cur_Weight = -1
 		
 	#]
 	State s0 initial{
 		println("$name STARTS")
 		[#
-			slots = new Slots()
+			S = Slots()
 		#]
 	}
 	Goto waitrequest
@@ -81,52 +79,53 @@ QActor cargoservice context ctx_cargoservice{
 	State getweight{
 		printCurrentMessage
 		onMsg(loadrequest: loadrequest(PID)){
-			[#
-				var PID = payloadArg(0).toInt()
-				
-			#]
+			[# Cur_PID = payloadArg(0).toInt() #]
+			
+			request productservice -m getProduct : getProduct($Cur_PID)
+
 		}
-		request productservice -m getweight : getweight($PID)
+		
 	}
 	Transition t1 
-	whenReply returnweight -> validateRequest
-	whenReply productnotexistent -> managerefusal
+	whenReply getProductAnswer -> checkProdAnswer
 	
-	
-	State validateRequest{
+	State checkProdAnswer{
 		printCurrentMessage
-		onMsg(returnweight : returnweight(PID, Weight)){
+		onMsg(getProductAnswer : product(PJson)){
 			[#
-				val PID = payloadArg(0).toInt()
-				val Weight = payloadArg(1).toInt()
-				val Slot = slots.getAvaiableSlot()
-				val canLoad = (currentHoldWeight + Weight) <= MaxLoad && Slot != -1
-			#]
-			if[#canLoad#]{
-				[#
-					currentPID = PID
-					currentWeight = Weight
-					currentSlot = Slot
-				#]
-				forward webguimock -m update : update("to load: $currentSlot")
-				autodispatch accepted : accepted($PID, $Weight, $Slot)
-			}
-			else{
-				autodispatch refused : refused($PID, $Weight)
-			}
+				val jsonStr = payloadArg(0)
 		
+				var Cur_Weight = main.java.Product.getJsonInt(jsonStr, "weight")
+			#]
 		}
 	}
-	Transition t2
-	whenMsg accepted -> waitForProduct
-	whenMsg refused -> managerefusal
+	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
 	State managerefusal{
 		println("Request refused. Back to wait.")
 	}Goto waitrequest
 	
+	State validateRequest{
+		[# 
+			var Cur_Slot = S.getAvaiableSlot()
+			val canLoad = (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
+		#]
+			if[#canLoad#]{
+				[#
+					val T = "to load $Cur_Slot"
+				#]
+				forward webguimock -m update : update($T)
+				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot)
+			}
+			else{
+				autodispatch refused : refused($PID, $Weight)
+			}	 
+	}
+	Transition t2
+	whenMsg accepted -> waitForProduct
+	whenMsg refused -> managerefusal
 	
-	State waitForProduct{
+State waitForProduct{
 		println("REQUEST ACCEPTED. Waiting for product on IOPort...")
 	}
 	Transition t3
@@ -135,9 +134,10 @@ QActor cargoservice context ctx_cargoservice{
 	State serveloadrequest{
 		println("Product detected. Moving robot...")
 		[# 
-			val destination = slots.getSlotPositionById(currentSlot)
+			val destination = S.getSlotPositionById(Cur_Slot)
+			val C = "move to $destination"
 		#]
-		forward cargorobot -m command : command("move to $destination")
+		forward cargorobot -m command : command($C)
 	}Goto waitendofrequest
 	
 	State waitendofrequest{
@@ -157,16 +157,17 @@ QActor cargoservice context ctx_cargoservice{
 			}
 			else{
 				[#
-					slots.registerProductInSlot(currentSlot)
-				  	currentHoldWeight = currentHoldWeight + currentWeight 
+					S.registerProductInSlot(Cur_Slot)
+				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
+				  	val T = "loaded to $Cur_Slot"
 				#]
 				println("product loaded successfully...")
-				forward webguimock -m update : update("loaded to $currentSlot")
+				forward webguimock -m update : update($T)
 			}
 			[#
-				currentSlot = -1
-				currentPID = -1
-				currentWeight = -1
+				Cur_Slot = -1
+				Cur_PID = -1
+				Cur_Weight = -1
 			#]
 		}
 		
@@ -177,16 +178,16 @@ QActor cargoservice context ctx_cargoservice{
 
 QActor cargorobot context ctx_cargoservice {
 	[#
-		val stepTime = 350
-		val homeX = 0
-		val homeY = 0
-		val ioX = 5
-		val ioY = 0
+		val StepTime = 350
+		val HomeX = 0
+		val HomeY = 0 
+		val IoX = 5
+		val IoY = 0
 
-		var destSlotX = 0
-		var destSlotY = 0
-		var currentDestX = 0
-		var currentDestY = 0
+		var DestSlotX = 0
+		var DestSlotY = 0
+		var CurrentDestX = 0
+		var CurrentDestY = 0
 		
 
 	#]
@@ -197,7 +198,7 @@ QActor cargorobot context ctx_cargoservice {
 
 	State engageRobot {
 		println("Engaging basic-robot...")
-		request basicrobot -m engage : engage(name, stepTime)
+		request basicrobot -m engage : engage(cargorobot, $StepTime)
 	}
 	Transition t0
 	whenReply engagedone -> waitForCommand
@@ -217,11 +218,10 @@ QActor cargorobot context ctx_cargoservice {
 		printCurrentMessage
 		onMsg(command : command(C)) {
 			[# 
+				val C = payloadArg(0).toString()
 				val coords = C.split(" ").last().replace("(", "").replace(")", "").split(",")
-				destSlotX = coords(0).toInt()
-				destSlotY = coords(1).toInt()
-				
-				phase = "pickup"
+				DestSlotX = coords[0].toInt()
+				DestSlotY = coords[1].toInt()
 				
 			#]
 		}
@@ -230,10 +230,10 @@ QActor cargorobot context ctx_cargoservice {
 	State pickup{
 		println("Going to IOPort to pick up product...")
 		[#
-        	currentDestX = ioX
-        	currentDestY = ioY
+        	CurrentDestX = IoX
+        	CurrentDestY = IoY
       	#]
-      	request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+      	request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t2
 	whenReply moverobotdone -> delivery
@@ -244,10 +244,10 @@ QActor cargorobot context ctx_cargoservice {
 	State delivery{
 		println("Delivering product to slot...")
       		[#
-        		currentDestX = destSlotX
-        		currentDestY = destSlotY
+        		CurrentDestX = DestSlotX
+        		CurrentDestY = DestSlotY
       		#]
-      		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+      		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t3 
 	whenReply moverobotdone -> return
@@ -258,10 +258,10 @@ QActor cargorobot context ctx_cargoservice {
 	State return{
 		println("Returning to home position...")
       		[#
-        		currentDestX = homeX
-        		currentDestY = homeY
+        		CurrentDestX = HomeX
+        		CurrentDestY = HomeY
       		#]
-      		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+      		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t4
 	whenReply moverobotdone -> endOfTask 
@@ -296,11 +296,12 @@ QActor cargorobot context ctx_cargoservice {
 	Transition t5 whenEvent anomalyFixed  -> resuming
 	
 	State resuming{
-		request basicrobot -m moverobot : moverobot(currentDestX, currentDestY)
+		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 		returnFromInterrupt 
 	}
 	
 }
+
 
 
 QActor sonarmock context ctx_sonarservice{ 
@@ -320,6 +321,7 @@ QActor sonarmock context ctx_sonarservice{
 	}Goto waitForProduct
 	
 }
+
 
 
 
