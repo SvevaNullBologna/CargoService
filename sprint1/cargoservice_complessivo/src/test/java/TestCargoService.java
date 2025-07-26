@@ -22,7 +22,7 @@ public class TestCargoService {
 	
     @Test
     public void testLoadRequestAccepted() throws Exception { //usiamo un pid che è presente nel DB
-        String requestStr = CommUtils.buildRequest("tester","loadrequest", "loadrequest(10)", "cargoservice").toString();
+        String requestStr = CommUtils.buildRequest("tester","loadrequest", "loadrequest(1)", "cargoservice").toString();
         System.out.println("Richiesta: " + requestStr);
         String response = conn.request(requestStr);
         System.out.println("Risposta: " + response);
@@ -54,16 +54,52 @@ public class TestCargoService {
 
     @Test
     public void testLoadRequestRejectedForSlot() throws Exception {
-        String requestStr = CommUtils.buildRequest(
-            "tester", 
-            "loadrequest",          
-            "loadrequest(20)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
-            "cargoservice"
-        ).toString();
-
-        System.out.println("Richiesta: " + requestStr);
-
-        String response = conn.request(requestStr);
+    	String requestStr1 = CommUtils.buildRequest(
+                "tester", 
+                "loadrequest",          
+                "loadrequest(1)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
+                "cargoservice"
+            ).toString();
+    	
+    	conn.request(requestStr1);
+    	
+    	String requestStr2 = CommUtils.buildRequest(
+                "tester", 
+                "loadrequest",          
+                "loadrequest(2)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
+                "cargoservice"
+            ).toString();
+    	
+    	conn.request(requestStr2);
+    	
+    	String requestStr3 = CommUtils.buildRequest(
+                "tester", 
+                "loadrequest",          
+                "loadrequest(10)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
+                "cargoservice"
+            ).toString();
+    	
+    	conn.request(requestStr3);
+    	
+    	String requestStr4 = CommUtils.buildRequest(
+                "tester", 
+                "loadrequest",          
+                "loadrequest(11)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
+                "cargoservice"
+            ).toString();
+    	
+    	conn.request(requestStr4);
+    	
+    	String requestStr5 = CommUtils.buildRequest(
+                "tester", 
+                "loadrequest",          
+                "loadrequest(20)",      // PID 20 che dovrebbe far scattare il rifiuto per slot occupati
+                "cargoservice"
+            ).toString();
+    	
+    	System.out.println("Richiesta: " + requestStr5);
+    	
+    	String response = conn.request(requestStr5);
 
         System.out.println("Risposta: " + response);
 
