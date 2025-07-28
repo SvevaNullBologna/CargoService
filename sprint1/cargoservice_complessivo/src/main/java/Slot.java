@@ -6,8 +6,11 @@ public class Slot{
 	private boolean avaiable;
 	private int positionx;
 	private int positiony;
+	private int pickupX;
+	private int pickupY;
+	private String pickup_dir;
 	
-	public Slot(int id, int positionx, int positiony) {
+	public Slot(int id, int positionx, int positiony, int pickupX, int pickupY, String pickup_dir) {
 		if(id == 5 ) {
 			this.avaiable = false;
 		}
@@ -17,6 +20,9 @@ public class Slot{
 		this.id = id;
 		this.positionx = positionx;
 		this.positiony = positiony;
+		this.pickupX = pickupX;
+		this.pickupY = pickupY;
+		this.pickup_dir = pickup_dir;
 	}
 	
 	
@@ -40,8 +46,25 @@ public class Slot{
 		return this.positiony;
 	}
 	
+	
+	public int getPickupX(){
+		return this.pickupX;
+	}
+	
+	public int getPickupY(){
+		return this.pickupY;
+	}
+	
+	public String getPickupDir() {//down, up, left, right
+		return this.pickup_dir;
+	}
+	
 	public String getPosition() {
 		return "(" + this.positionx + "," + this.positiony + ")";
+	}
+	
+	public String getPickUpPosition() {
+		return "(" + this.pickupX + "," + this.pickupY + ")";
 	}
 	
 	public String toString() {
