@@ -19,7 +19,9 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
-import main.java.*
+import main.java.Slots
+import main.java.Slot
+import main.java.domain.Product
 
 class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -32,7 +34,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
 				val MaxLoad = 1000
-				val S: Slots
+				val S: Slots = Slots()
 				var Cur_HoldWeight = 0
 		
 				var Cur_Slot = -1
@@ -42,9 +44,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name STARTS")
-						
-									S = Slots()
+						CommUtils.outmagenta("cargoservice STARTS")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -54,7 +54,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("waitrequest") { //this:State
 					action { //it:State
-						CommUtils.outblack("WAITING FOR LOAD REQUEST...")
+						CommUtils.outmagenta("WAITING FOR LOAD REQUEST...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -86,8 +86,9 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
 												val jsonStr = payloadArg(0)
-										
-												var Cur_Weight = main.java.Product.getJsonInt(jsonStr, "weight")
+												val p = Product(jsonStr)
+												Cur_Weight = p.getWeight()
+												Cur_PID = p.getProductId()
 						}
 						//genTimer( actor, state )
 					}
@@ -101,7 +102,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("managerefusal") { //this:State
 					action { //it:State
-						CommUtils.outblack("Request refused. Back to wait.")
+						CommUtils.outmagenta("Request refused. Back to wait.")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -112,8 +113,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("validateRequest") { //this:State
 					action { //it:State
 						 
-									var Cur_Slot = S.getAvaiableSlot()
-									val canLoad = (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
+									Cur_Slot = S.getAvaiableSlot()
+									val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
 						if( canLoad 
 						 ){
 											val T = "to load $Cur_Slot"
@@ -121,7 +122,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot)" ,name ) 
 						}
 						else
-						 {forward("refused", "refused($PID,$Weight)" ,name ) 
+						 {forward("refused", "refused($Cur_PID,$Cur_Weight)" ,name ) 
 						 }
 						//genTimer( actor, state )
 					}
@@ -133,7 +134,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
-						CommUtils.outblack("REQUEST ACCEPTED. Waiting for product on IOPort...")
+						CommUtils.outmagenta("REQUEST ACCEPTED. Waiting for product on IOPort...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -143,7 +144,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
-						CommUtils.outblack("Product detected. Moving robot...")
+						CommUtils.outmagenta("Product detected. Moving robot...")
 						 
 									val destination = S.getSlotPositionById(Cur_Slot)
 									val C = "move to $destination"
@@ -157,7 +158,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("waitendofrequest") { //this:State
 					action { //it:State
-						CommUtils.outblack("Waiting for robot to finish its task...")
+						CommUtils.outmagenta("Waiting for robot to finish its task...")
 						delay(300) 
 						//genTimer( actor, state )
 					}
@@ -174,7 +175,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val msg = payloadArg(0).toString() 
 								if(  msg=="failure"  
-								 ){CommUtils.outblack("There was a fatal error with the load. Load request rejected")
+								 ){CommUtils.outmagenta("There was a fatal error with the load. Load request rejected")
 								}
 								else
 								 {
@@ -182,7 +183,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								 				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
 								 				  	val T = "loaded to $Cur_Slot"
 								 CommUtils.outblack("product loaded successfully...")
-								 forward("update", "update($T)" ,"webguimock" ) 
 								 }
 								
 												Cur_Slot = -1

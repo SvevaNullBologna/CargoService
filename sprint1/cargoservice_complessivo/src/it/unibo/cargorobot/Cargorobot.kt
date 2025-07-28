@@ -45,7 +45,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name RUNNING")
+						CommUtils.outmagenta("$name RUNNING")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

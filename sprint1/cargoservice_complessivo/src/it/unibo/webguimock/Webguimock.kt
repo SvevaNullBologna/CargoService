@@ -32,7 +32,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name STARTING")
+						CommUtils.outblue("$name STARTING")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -42,7 +42,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				}	 
 				state("waitforupdate") { //this:State
 					action { //it:State
-						CommUtils.outblack("waiting for update of gui...")
+						CommUtils.outblue("waiting for update of gui...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -52,7 +52,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				}	 
 				state("updategui") { //this:State
 					action { //it:State
-						CommUtils.outblack("updating webgui...")
+						CommUtils.outblue("updating webgui...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

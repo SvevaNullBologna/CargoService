@@ -48,5 +48,9 @@ public class Slots{
 	public void registerProductInSlot(Slot slot){
 		slot.occupySpace();
 	}
+	
+	public static void getLoadPositionForSlot(){
+		
+	}
 
 }

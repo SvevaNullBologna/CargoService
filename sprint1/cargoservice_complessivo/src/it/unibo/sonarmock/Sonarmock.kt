@@ -19,6 +19,7 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
+import kotlin.random.Random
 
 class Sonarmock ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -29,11 +30,10 @@ class Sonarmock ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
-		import kotlin.random.Random  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name STARTING")
+						CommUtils.outmagenta("$name STARTING")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -43,13 +43,16 @@ class Sonarmock ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
-							val randomValue = (0..100).random() 	 
+							val randomValue = Random.nextInt(0,100) 	 
 						if(  randomValue/1 >= 75  
 						 ){emit("productDetected", "productDetected(T)" ) 
+						CommUtils.outmagenta("$name EMIT product detected")
 						}
 						else
 						 {emit("anomalyDetected", "anomalyDetected(T)" ) 
+						 CommUtils.outmagenta("$name EMIT anomaly detected")
 						 }
+						delay(100000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

@@ -149,7 +149,7 @@ eclipse {
 
 application {
     //Define the main class for the application.
-    mainClassName    = 'it.unibo.ctx_sonarservice.MainCtx_sonarserviceKt'
+    mainClassName    = 'main.kotlin.MainLauncherKt'
 }
  
  jar {

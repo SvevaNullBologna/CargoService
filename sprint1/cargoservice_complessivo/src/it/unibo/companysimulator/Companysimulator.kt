@@ -33,7 +33,7 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("$name STARTS")
-						request("loadrequest", "loadrequest($PID)" ,"cargoservice" )  
+						request("loadrequest", "loadrequest(42)" ,"cargoservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
