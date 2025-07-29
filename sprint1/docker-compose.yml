@@ -1,34 +1,35 @@
 version: "3.9"
 
 services:
+
   mosquitto:
     image: eclipse-mosquitto:1.6.15
     container_name: mosquitto
     environment:
-      - MQTT_ALLOW_ANONYMOUS=true
+      - MQTT_ALLOW_ANONYMOUS=true   # Permette connessioni anonime
     ports:
-      - 1883:1883
-      - 9001:9001
+      - 1883:1883                  # Porta MQTT
+      - 9001:9001                  # Porta WebSocket MQTT
     networks:
       - iss-network
 
   mongodb:
     image: mongo:6.0.4
-    container_name: mongodb
+    container_name: mongodb  
     mem_limit: 512m
     environment:
-      - MONGO_INITDB_DATABASE=cargodb
+      - MONGO_INITDB_DATABASE=cargodb # Nome del database da inizializzare
     ports:
-      - "27017:27017"
+      - 27017:27017
     command: mongod
     networks:
       - iss-network
 
   eureka:
-    image: natbodocker/springcloud-eureka
-    container_name: eurekaserver
+    image: natbodocker/springcloud-eureka                                      
+    container_name: eurekaserver 
     ports:
-      - "8761:8761"
+      - 8761:8761
     environment:
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=true
       - EUREKA_CLIENT_FETCH_REGISTRY=true
@@ -39,7 +40,7 @@ services:
       - iss-network
 
   cargoserviceqak:
-    container_name: cargoserviceqak
+    container_name: cargoserviceqak 
     image: docker.io/natbodocker/cargoserviceqak:1.0
     environment:
       - MONGO_HOST=mongodb
@@ -57,24 +58,23 @@ services:
     container_name: wenv
     image: docker.io/natbodocker/virtualrobotdisi25:2.2
     ports:
-      - 8090:8090
-      - 8091:8091/tcp
+      - 8090:8090                 # Porta WebPageServer (sceneSocketHandler)
+      - 8091:8091/tcp             # Eventuali comunicazioni aggiuntive
       - 8091:8091/udp
     networks:
       - iss-network
 
   basicrobot24:
-    container_name: my-basicrobot
-    image: koltrakak/my-basicrobot
+    container_name: basicrobot24
+    image: docker.io/natbodocker/basicrobot24:3.0
     mem_limit: 512m
     ports:
-      - "8020:8020/tcp"
-      - "8020:8020/udp"
-      - "8085:8085"
+      - 8020:8020                # Porta per connessioni robot
+      - 8085:8085                # Interfaccia utente o logging
     environment:
-      - VIRTUAL_ENV=wenv
+      - VIRTUAL_ENV=wenv                         # Connessione al robot virtuale
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - SERVICE_HOST=192.168.1.189
+      - SERVICE_HOST=192.168.1.189               # Host locale del servizio
       - SERVICE_IP=192.168.1.189
       - MQTTBROKER=mosquitto
     depends_on:

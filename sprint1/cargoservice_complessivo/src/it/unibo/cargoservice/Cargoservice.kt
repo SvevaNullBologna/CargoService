@@ -71,6 +71,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						if( checkMsgContent( Term.createTerm("loadrequest(PID)"), Term.createTerm("loadrequest(PID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Cur_PID = payloadArg(0).toInt()  
+								CommUtils.outmagenta("received request with PID : $Cur_PID")
+								CommUtils.outmagenta("sending request to productservice")
 								request("getProduct", "getProduct($Cur_PID)" ,"productservice" )  
 						}
 						//genTimer( actor, state )

@@ -18,9 +18,9 @@ event( alarm, alarm(reason) ).
 dispatch( update, update(U) ).
 event( finishedtransport, finishedtransport(T) ).
 %====================================================================================
-context(ctx_cargoservice, "localhost",  "TCP", "8000").
+context(ctx_cargoservice, "localhost",  "TCP", "8111").
 context(ctx_productservice, "localhost",  "TCP", "8001").
-context(ctx_basicrobot, "localhost",  "TCP", "8002").
+context(ctx_basicrobot, "localhost",  "TCP", "8020").
 context(ctx_companysim, "localhost",  "TCP", "8003").
 context(ctx_sonarservice, "localhost",  "TCP", "8004").
  qactor( basicrobot, ctx_basicrobot, "external").

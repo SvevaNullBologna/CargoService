@@ -35,9 +35,9 @@ Dispatch update : update(U)
 Event finishedtransport : finishedtransport(T)
 
 
-Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_cargoservice 			ip [host="localhost" port=8111]
 Context ctx_productservice 			ip [host="localhost" port=8001]
-Context ctx_basicrobot 				ip [host= "localhost"port=8002]
+Context ctx_basicrobot 				ip [host= "localhost"port=8020]
 Context ctx_companysim 				ip [host="localhost" port=8003]
 Context ctx_sonarservice			ip [host="localhost" port=8004]
 
@@ -47,9 +47,14 @@ ExternalQActor productservice context ctx_productservice
 
 QActor companysimulator context ctx_companysim{
  	State s0 initial {
- 		println("$name STARTS") color magenta
- 		request cargoservice -m loadrequest : loadrequest(42)
-  	} 
+ 		println("$name STARTS") color cyan
+  	}Goto sendRequest
+  	
+  	State sendRequest{
+  		println("$name sending request ") color cyan
+  		request cargoservice -m loadrequest : loadrequest(10)
+  		delay 2000
+  	}
 }
 
 QActor cargoservice context ctx_cargoservice{
@@ -84,11 +89,10 @@ QActor cargoservice context ctx_cargoservice{
 		printCurrentMessage
 		onMsg(loadrequest: loadrequest(PID)){
 			[# Cur_PID = payloadArg(0).toInt() #]
-			
+			println("received request with PID : $Cur_PID") color magenta
+			println("sending request to productservice") color magenta
 			request productservice -m getProduct : getProduct($Cur_PID)
-
 		}
-		
 	}
 	Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer
