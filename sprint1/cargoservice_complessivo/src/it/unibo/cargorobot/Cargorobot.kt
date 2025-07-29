@@ -41,6 +41,8 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				var CurrentDestX = 0
 				var CurrentDestY = 0
 				
+				var Direction = "up"
+				
 		
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -90,13 +92,12 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					action { //it:State
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
-						if( checkMsgContent( Term.createTerm("command(C)"), Term.createTerm("command(C)"), 
+						if( checkMsgContent( Term.createTerm("command(X,Y,DIR)"), Term.createTerm("command(X,Y,DIR)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
-												val C = payloadArg(0).toString()
-												val coords = C.split(" ").last().replace("(", "").replace(")", "").split(",")
-												DestSlotX = coords[0].toInt()
-												DestSlotY = coords[1].toInt()
+												DestSlotX = X.toInt()
+												DestSlotY = Y.toInt()
+												Direction = DIR.toString()
 												
 						}
 						//genTimer( actor, state )
@@ -135,10 +136,22 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t313",targetState="return",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t313",targetState="deposit",cond=whenReply("moverobotdone"))
 					transition(edgeName="t314",targetState="handleFailure",cond=whenReply("moverobotfailed"))
 					interrupthandle(edgeName="t315",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
 					interrupthandle(edgeName="t316",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+				}	 
+				state("deposit") { //this:State
+					action { //it:State
+						forward("setdirection", "dir($Direction)" ,"basicrobot" ) 
+						CommUtils.outblack("depositing product on slot...")
+						delay(3000) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="return", cond=doswitch() )
 				}	 
 				state("return") { //this:State
 					action { //it:State

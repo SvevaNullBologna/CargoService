@@ -37,7 +37,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				val S: Slots = Slots()
 				var Cur_HoldWeight = 0
 		
-				var Cur_Slot = -1
+				var Cur_Slot_ID = -1
 				var Cur_PID = -1
 				var Cur_Weight = -1
 				
@@ -113,13 +113,13 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("validateRequest") { //this:State
 					action { //it:State
 						 
-									Cur_Slot = S.getAvaiableSlot()
-									val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
+									Cur_Slot_ID = S.getAvaiableSlotID()
+									val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot_ID != -1 
 						if( canLoad 
 						 ){
-											val T = "to load $Cur_Slot"
+											val T = "to load $Cur_Slot_ID"
 						forward("update", "update($T)" ,"webguimock" ) 
-						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot)" ,name ) 
+						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot_ID)" ,name ) 
 						}
 						else
 						 {forward("refused", "refused($Cur_PID,$Cur_Weight)" ,name ) 
@@ -146,9 +146,10 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					action { //it:State
 						CommUtils.outmagenta("Product detected. Moving robot...")
 						 
-									val destination = S.getSlotPositionById(Cur_Slot)
-									val C = "move to $destination"
-						forward("command", "command($C)" ,"cargorobot" ) 
+									val DestinationX = S.getPickupPositionXById(Cur_Slot_ID)
+									val DestinationY = S.getPickupPositionYById(Cur_Slot_ID)
+									val Direction = S.getSlotPickupDirectionById(Cur_Slot_ID)
+						forward("command", "command($DestinationX,$DestinationY,$Direction)" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -179,13 +180,14 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								}
 								else
 								 {
-								 					S.registerProductInSlot(Cur_Slot)
+								 					S.registerProductInSlot(Cur_Slot_ID)
 								 				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
-								 				  	val T = "loaded to $Cur_Slot"
+								 				  	val T = "loaded to $Cur_Slot_ID"
 								 CommUtils.outblack("product loaded successfully...")
+								 forward("update", "update($T)" ,"webguimock" ) 
 								 }
 								
-												Cur_Slot = -1
+												Cur_Slot_ID = -1
 												Cur_PID = -1
 												Cur_Weight = -1
 						}

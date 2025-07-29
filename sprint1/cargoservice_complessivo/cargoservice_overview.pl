@@ -9,9 +9,10 @@ dispatch( refused, refused(PID,Weight) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
-dispatch( command, command(C) ).
+dispatch( command, command(X,Y,DIR) ).
 request( engage, engage(device,length) ).
 request( moverobot, moverobot(x,y) ).
+dispatch( setdirection, dir(D) ).
 dispatch( cmd, cmd(C) ).
 event( alarm, alarm(reason) ).
 dispatch( update, update(U) ).

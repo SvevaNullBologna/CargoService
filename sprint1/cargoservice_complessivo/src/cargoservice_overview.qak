@@ -15,10 +15,11 @@ Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
 Event anomalyFixed : anomalyFixed(T)
 //CargoService -> cargorobot
-Dispatch command : command(C)
+Dispatch command : command(X,Y,DIR)
 //CargoRobot -> BasicRobot 
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
+Dispatch setdirection : dir( D )  //up|down|left|right
 Dispatch cmd : cmd(C)
 //basicRobot -> CargoRobot
 Reply engagedone : engagedone(E)
@@ -61,7 +62,7 @@ QActor cargoservice context ctx_cargoservice{
 		val S: Slots = Slots()
 		var Cur_HoldWeight = 0
 
-		var Cur_Slot = -1
+		var Cur_Slot_ID = -1
 		var Cur_PID = -1
 		var Cur_Weight = -1
 		
@@ -108,15 +109,15 @@ QActor cargoservice context ctx_cargoservice{
 	
 	State validateRequest{
 		[# 
-			Cur_Slot = S.getAvaiableSlot()
-			val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot != -1 
+			Cur_Slot_ID = S.getAvaiableSlotID()
+			val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot_ID != -1 
 		#]
 			if[#canLoad#]{
 				[#
-					val T = "to load $Cur_Slot"
+					val T = "to load $Cur_Slot_ID"
 				#]
 				forward webguimock -m update : update($T)
-				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot)
+				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot_ID)
 			}
 			else{
 				autodispatch refused : refused($Cur_PID, $Cur_Weight)
@@ -135,10 +136,11 @@ State waitForProduct{
 	State serveloadrequest{
 		println("Product detected. Moving robot...") color magenta
 		[# 
-			val destination = S.getSlotPositionById(Cur_Slot)
-			val C = "move to $destination"
+			val DestinationX = S.getPickupPositionXById(Cur_Slot_ID)
+			val DestinationY = S.getPickupPositionYById(Cur_Slot_ID)
+			val Direction = S.getSlotPickupDirectionById(Cur_Slot_ID)
 		#]
-		forward cargorobot -m command : command($C)
+		forward cargorobot -m command : command($DestinationX, $DestinationY, $Direction)
 	}Goto waitendofrequest
 	
 	State waitendofrequest{
@@ -158,15 +160,15 @@ State waitForProduct{
 			}
 			else{
 				[#
-					S.registerProductInSlot(Cur_Slot)
+					S.registerProductInSlot(Cur_Slot_ID)
 				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
-				  	val T = "loaded to $Cur_Slot"
+				  	val T = "loaded to $Cur_Slot_ID"
 				#]
 				println("product loaded successfully...")
-				//forward webguimock -m update : update($T)
+				forward webguimock -m update : update($T)
 			}
 			[#
-				Cur_Slot = -1
+				Cur_Slot_ID = -1
 				Cur_PID = -1
 				Cur_Weight = -1
 			#]
@@ -189,6 +191,8 @@ QActor cargorobot context ctx_cargoservice {
 		var DestSlotY = 0
 		var CurrentDestX = 0
 		var CurrentDestY = 0
+		
+		var Direction = "up"
 		
 
 	#]
@@ -217,14 +221,14 @@ QActor cargorobot context ctx_cargoservice {
 
 	State prepareDelivery {
 		printCurrentMessage
-		onMsg(command : command(C)) {
+		onMsg(command : command(X,Y,DIR)) {
 			[# 
-				val C = payloadArg(0).toString()
-				val coords = C.split(" ").last().replace("(", "").replace(")", "").split(",")
-				DestSlotX = coords[0].toInt()
-				DestSlotY = coords[1].toInt()
+				DestSlotX = X.toInt()
+				DestSlotY = Y.toInt()
+				Direction = DIR.toString()
 				
 			#]
+			
 		}
 	}Goto pickup
 	
@@ -251,10 +255,17 @@ QActor cargorobot context ctx_cargoservice {
       		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t3 
-	whenReply moverobotdone -> return
+	whenReply moverobotdone -> deposit
 	whenReply moverobotfailed -> handleFailure
 	whenInterruptEvent alarm -> handleAnomaly
 	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State deposit{
+		forward basicrobot -m setdirection : dir($Direction)
+		println("depositing product on slot...")
+		delay 3000
+	}
+	Goto return 
 	
 	State return{
 		println("Returning to home position...")

@@ -39,7 +39,27 @@ public class Slots{
 		return slotList.get(id-1).getPickupDir();
 	}
 	
-	public int getAvaiableSlot(){
+	public String getSlotPositionBySlot(Slot slot) {
+		return slot.getPosition();
+	}
+	
+	public String getSlotPickupPositionBySlot(Slot slot) {
+		return slot.getPickUpPosition();
+	}
+	
+	public String getSlotPickupDirectionBySlot(Slot slot) {
+		return slot.getPickupDir();
+	}
+	
+	public int getPickupPositionXById(int id) {
+		return getSlotById(id).getPickupX();
+	}
+	
+	public int getPickupPositionYById(int id) {
+		return getSlotById(id).getPickupY();
+	}
+	
+	public int getAvaiableSlotID(){
 		for(Slot s: slotList) {
 			if(s.isAvaiable()){
 				return s.getId();
@@ -56,8 +76,6 @@ public class Slots{
 		slot.occupySpace();
 	}
 	
-	public static void getLoadPositionForSlot(){
-		
-	}
+	
 
 }

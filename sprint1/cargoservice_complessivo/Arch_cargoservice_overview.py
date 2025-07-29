@@ -46,7 +46,7 @@ with Diagram('cargoservice_overviewArch', show=False, outformat='png', graph_att
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
      companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
-     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
      cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> webguimock
      cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag
