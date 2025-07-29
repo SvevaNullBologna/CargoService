@@ -95,9 +95,9 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 						if( checkMsgContent( Term.createTerm("command(X,Y,DIR)"), Term.createTerm("command(X,Y,DIR)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
-												DestSlotX = X.toInt()
-												DestSlotY = Y.toInt()
-												Direction = DIR.toString()
+												DestSlotX = payloadArg(0).toInt()
+												DestSlotY = payloadArg(1).toInt()
+												Direction = payloadArg(2).toString()
 												
 						}
 						//genTimer( actor, state )

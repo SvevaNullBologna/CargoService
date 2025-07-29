@@ -34,7 +34,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
 				val MaxLoad = 1000
-				val S: Slots = Slots()
+				lateinit var S: Slots
 				var Cur_HoldWeight = 0
 		
 				var Cur_Slot_ID = -1
@@ -45,6 +45,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("cargoservice STARTS")
+						
+									S = Slots()
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

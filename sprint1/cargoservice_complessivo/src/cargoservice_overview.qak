@@ -59,7 +59,7 @@ QActor cargoservice context ctx_cargoservice{
 	
 	[#
 		val MaxLoad = 1000
-		val S: Slots = Slots()
+		lateinit var S: Slots
 		var Cur_HoldWeight = 0
 
 		var Cur_Slot_ID = -1
@@ -69,6 +69,9 @@ QActor cargoservice context ctx_cargoservice{
 	#]
 	State s0 initial{
 		println("cargoservice STARTS") color magenta
+		[#
+			S = Slots()
+		#]
 	}
 	Goto waitrequest
 	
@@ -223,9 +226,9 @@ QActor cargorobot context ctx_cargoservice {
 		printCurrentMessage
 		onMsg(command : command(X,Y,DIR)) {
 			[# 
-				DestSlotX = X.toInt()
-				DestSlotY = Y.toInt()
-				Direction = DIR.toString()
+				DestSlotX = payloadArg(0).toInt()
+				DestSlotY = payloadArg(1).toInt()
+				Direction = payloadArg(2).toString()
 				
 			#]
 			
