@@ -149,9 +149,9 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					action { //it:State
 						CommUtils.outmagenta("Product detected. Moving robot...")
 						 
-									val DestinationX = S.getPickupPositionXById(Cur_Slot_ID)
-									val DestinationY = S.getPickupPositionYById(Cur_Slot_ID)
-									val Direction = S.getSlotPickupDirectionById(Cur_Slot_ID)
+									val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
+									val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
+									val Direction = S.getSlotDepositDirectionById(Cur_Slot_ID)
 						forward("command", "command($DestinationX,$DestinationY,$Direction)" ,"cargorobot" ) 
 						//genTimer( actor, state )
 					}

@@ -6,11 +6,11 @@ public class Slot{
 	private boolean avaiable;
 	private int positionx;
 	private int positiony;
-	private int pickupX;
-	private int pickupY;
-	private String pickup_dir;
+	private int depositX;
+	private int depositY;
+	private String deposit_dir;
 	
-	public Slot(int id, int positionx, int positiony, int pickupX, int pickupY, String pickup_dir) {
+	public Slot(int id, int positionx, int positiony, int depositX, int depositY, String deposit_dir) {
 		if(id == 5 ) {
 			this.avaiable = false;
 		}
@@ -20,9 +20,9 @@ public class Slot{
 		this.id = id;
 		this.positionx = positionx;
 		this.positiony = positiony;
-		this.pickupX = pickupX;
-		this.pickupY = pickupY;
-		this.pickup_dir = pickup_dir;
+		this.depositX = depositX;
+		this.depositY = depositY;
+		this.deposit_dir = deposit_dir;
 	}
 	
 	
@@ -47,24 +47,24 @@ public class Slot{
 	}
 	
 	
-	public int getPickupX(){
-		return this.pickupX;
+	public int getDepositX(){
+		return this.depositX;
 	}
 	
-	public int getPickupY(){
-		return this.pickupY;
+	public int getDepositY(){
+		return this.depositY;
 	}
 	
-	public String getPickupDir() {//down, up, left, right
-		return this.pickup_dir;
+	public String getDepositDir() {//down, up, left, right
+		return this.deposit_dir;
 	}
 	
 	public String getPosition() {
 		return "(" + this.positionx + "," + this.positiony + ")";
 	}
 	
-	public String getPickUpPosition() {
-		return "(" + this.pickupX + "," + this.pickupY + ")";
+	public String getDepositPosition() {
+		return "(" + this.depositX + "," + this.depositY + ")";
 	}
 	
 	public String toString() {

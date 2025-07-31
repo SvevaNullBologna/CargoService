@@ -143,9 +143,9 @@ State waitForProduct{
 	State serveloadrequest{
 		println("Product detected. Moving robot...") color magenta
 		[# 
-			val DestinationX = S.getPickupPositionXById(Cur_Slot_ID)
-			val DestinationY = S.getPickupPositionYById(Cur_Slot_ID)
-			val Direction = S.getSlotPickupDirectionById(Cur_Slot_ID)
+			val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
+			val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
+			val Direction = S.getSlotDepositDirectionById(Cur_Slot_ID)
 		#]
 		forward cargorobot -m command : command($DestinationX, $DestinationY, $Direction)
 	}Goto waitendofrequest

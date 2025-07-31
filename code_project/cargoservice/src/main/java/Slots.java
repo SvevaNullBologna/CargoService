@@ -31,32 +31,32 @@ public class Slots{
 		return slotList.get(id-1).getPosition();
 	}
 	
-	public String getSlotPickupPositionById(int id) {
-		return slotList.get(id-1).getPickUpPosition();
+	public String getSlotDepositPositionById(int id) {
+		return slotList.get(id-1).getDepositPosition();
 	}
 	
-	public String getSlotPickupDirectionById(int id) {
-		return slotList.get(id-1).getPickupDir();
+	public String getSlotDepositDirectionById(int id) {
+		return slotList.get(id-1).getDepositDir();
 	}
 	
 	public String getSlotPositionBySlot(Slot slot) {
 		return slot.getPosition();
 	}
 	
-	public String getSlotPickupPositionBySlot(Slot slot) {
-		return slot.getPickUpPosition();
+	public String getSlotDepositPositionBySlot(Slot slot) {
+		return slot.getDepositPosition();
 	}
 	
-	public String getSlotPickupDirectionBySlot(Slot slot) {
-		return slot.getPickupDir();
+	public String getSlotDepositDirectionBySlot(Slot slot) {
+		return slot.getDepositDir();
 	}
 	
-	public int getPickupPositionXById(int id) {
-		return getSlotById(id).getPickupX();
+	public int getDepositPositionXById(int id) {
+		return getSlotById(id).getDepositX();
 	}
 	
-	public int getPickupPositionYById(int id) {
-		return getSlotById(id).getPickupY();
+	public int getDepositPositionYById(int id) {
+		return getSlotById(id).getDepositY();
 	}
 	
 	public int getAvaiableSlotID(){
