@@ -1,0 +1,66 @@
+System easy
+ 
+Request engage : engage(device, length)
+Request moverobot : moverobot(x, y)
+Dispatch setdirection : dir( D )  //up|down|left|right
+
+Reply engagedone : engagedone(E)
+Reply engagerefused : engagerefused(E) 
+Reply moverobotdone : moverobotdone(T)
+Reply moverobotfailed : moverobotfailed(T)
+
+//Context ctx_basicrobot ip[host="basicrobot24" port=8020]
+ 
+
+Context ctx_easy ip[host="localhost" port=8000]
+Context ctx_basicrobot ip[host="127.0.0.1" port=8020] 
+Context ctx_productservice ip[host="127.0.0.1" port=8111]
+ 
+ExternalQActor basicrobot context ctx_basicrobot
+
+QActor example context ctx_easy {
+	State s0 initial {
+		println("example startss") color blue
+		delay 2000
+	}Goto checkproxy
+	
+	State checkproxy {
+		println("Checking if proxy is ready...")
+		// Questo delay dà tempo al sistema per avviare i proxy.
+		delay 1000
+	}Goto try
+	
+	State try  {
+		[# val Device = "example"
+			val Length = 320
+		#]
+		println("trying engage") color blue
+		request basicrobot -m engage : engage ($Device,$Length) 
+		delay 200
+	}Goto waitengage 
+	
+	State waitengage{
+		println("waiting engage") color blue
+		delay 200
+	}
+	Transition t0
+	whenReply engagedone -> ok
+	whenReply engagerefused -> error
+	
+	State ok{
+		println("engage done") color blue
+		request basicrobot -m moverobot : moverobot(0,0)
+	}
+	Transition t1
+	whenReply moverobotdone -> movedone
+	whenReply moverobotfailed -> error 
+	State movedone{
+		println("move done") color blue
+	}
+	
+	
+	State error{
+		println("error engage") color blue
+		delay 200
+	}Goto try
+}
