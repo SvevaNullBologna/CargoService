@@ -128,6 +128,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				}	 
 				state("delivery") { //this:State
 					action { //it:State
+						delay(3000) 
 						CommUtils.outyellow("Delivering product to slot...")
 						
 						        		CurrentDestX = DestSlotX
@@ -148,7 +149,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					action { //it:State
 						forward("setdirection", "dir($Direction)" ,"basicrobot" ) 
 						CommUtils.outyellow("depositing product on slot...")
-						delay(300) 
+						delay(3000) 
 						emit("deliveredToSlot", "deliveredToSlot(ok)" ) 
 						//genTimer( actor, state )
 					}

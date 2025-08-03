@@ -266,6 +266,7 @@ QActor cargorobot context ctx_cargoservice {
 	whenInterruptEvent anomalyDetected -> handleAnomaly
 	
 	State delivery{
+		delay 3000
 		println("Delivering product to slot...") color yellow
       		[#
         		CurrentDestX = DestSlotX
@@ -283,7 +284,7 @@ QActor cargorobot context ctx_cargoservice {
 	State deposit{
 		forward basicrobot -m setdirection : dir($Direction)
 		println("depositing product on slot...") color yellow
-		delay 300
+		delay 3000
 		emit  deliveredToSlot : deliveredToSlot(ok)
 	}
 	Goto return 
