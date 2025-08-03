@@ -22,23 +22,21 @@ Event deliveredToSlot : deliveredToSlot(T)
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
 Dispatch setdirection : dir( D )  //up|down|left|right
-Dispatch cmd : cmd(C)
+Event alarm : alarm(reason) //to stop robot completely
+Event info : info(x)
 //basicRobot -> CargoRobot
 Reply engagedone : engagedone(E)
 Reply engagerefused : engagerefused(E) 
 Reply moverobotdone : moverobotdone(T)
 Reply moverobotfailed : moverobotfailed(T)
-//basicRobot -> whoever is listening 
-Event alarm : alarm(reason)
+
+
 //CargoRobot -> webgui
 Dispatch update : update(U)
 
 //CargoRobot -> Whoever is listening
 Event finishedtransport : finishedtransport(T)
-////////////////DEBUG//////////////////////////////
-Request getrobotstate : getrobotstate(ARG)
-Reply robotstate      : robotstate(POS,DIR)  for getrobotstate
-////////////////////////////////////////////////////
+
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
@@ -75,6 +73,7 @@ QActor cargoservice context ctx_cargoservice{
 		var Cur_Slot_ID = -1
 		var Cur_PID = -1
 		var Cur_Weight = -1
+		var Cur_Direction = "down"
 		
 	#]
 	State s0 initial{
@@ -100,9 +99,8 @@ QActor cargoservice context ctx_cargoservice{
 			request productservice -m getProduct : getProduct($Cur_PID)
 		}
 	}
-	Goto checkProdAnswerMock
-	/*Transition t1 
-	whenReply getProductAnswer -> checkProdAnswer*/
+	Transition t1 
+	whenReply getProductAnswer -> checkProdAnswer
 	
 	State checkProdAnswer{
 		printCurrentMessage
@@ -117,10 +115,6 @@ QActor cargoservice context ctx_cargoservice{
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
-	State checkProdAnswerMock{
-		println("Doing test! Checking if robot can go get the product from IOPOrt") color magenta
-	}Goto waitForProduct
-	
 	State managerefusal{
 		println("Request refused. Back to wait.") color magenta
 	}Goto waitrequest
@@ -131,9 +125,6 @@ QActor cargoservice context ctx_cargoservice{
 			val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot_ID != -1 
 		#]
 			if[#canLoad#]{
-				[#
-					val T = "to load $Cur_Slot_ID"
-				#]
 				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot_ID)
 			}
 			else{
@@ -152,10 +143,7 @@ State waitForProduct{
 	
 	State serveloadrequest{
 		println("Product detected. Moving robot...") color magenta
-		[# 
-			Cur_Slot_ID = 4 //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-		#]
-		println("Slot = $Cur_Slot_ID")
+		println("Slot = $Cur_Slot_ID") color magenta
 		[#
 			val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
 			val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
@@ -341,7 +329,7 @@ QActor cargorobot context ctx_cargoservice {
 	
 	State handleAnomaly {
 		println("Anomaly detected. Stopping robot...") color yellow
-		forward basicrobot -m cmd : cmd(h)
+		emit alarm : alarm(blocca)
 	}Goto waitFix
 
 	State waitFix {
@@ -358,50 +346,35 @@ QActor cargorobot context ctx_cargoservice {
 	
 }
  
-QActor hold context ctx_cargoservice{
-	State s0 initial{
-		println("$name starts")
-	}Goto retrieveinfo
-	
-	State retrieveinfo{
-		[#val ARG = "arg" #]
-		request basicrobot -m getrobotstate : getrobotstate($ARG)	
-	}
-	Transition t0
-	whenReply robotstate-> print
-	
-	State print{
-		printCurrentMessage
-		onMsg(robotstate : robostate(POS,DIR)){
-			[#
-				val Pos = payloadArg(0).toString()
-				val Dir = payloadArg(1).toString()
-			#] 
-			println("Pos = $Pos, Dir = $Dir") color yellow
-		}
-		
-	}
-}
 
 QActor sonarmock context ctx_cargoservice{ 
 	import "kotlin.random.Random"
+	[# var inAnomaly = false#]
 	State s0 initial{
 		println("$name STARTING") color green
 		delay 5000
 	}Goto waitForProduct 
 	
 	State waitForProduct{
-		[#	val randomValue = Random.nextInt(76,100) 	#]
-		if[# randomValue/1 >= 75 #]{ 
+		[#	val randomValue = Random.nextInt(50,100) 	#]
+		if[# !inAnomaly && randomValue/1 >= 75 #]{ 
 			emit productDetected : productDetected(T)
 			println("$name EMIT product detected") color green
 		}
 		else{
-			emit anomalyDetected : anomalyDetected(T)
-			println("$name EMIT anomaly detected") color green
+			if[# inAnomaly #]{
+				emit anomalyFixed : anomalyFixed(T)
+				[# inAnomaly = false #]
+			}
+			else{
+				emit anomalyDetected : anomalyDetected(T)
+				[# inAnomaly = true #]
+				println("$name EMIT anomaly detected") color green	
+			}
 		}
 		delay 10000
 	}Goto waitForProduct
+
 	
 }
 

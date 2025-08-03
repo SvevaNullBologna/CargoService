@@ -30,6 +30,7 @@ class Sonarmock ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
+		 var inAnomaly = false 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -44,14 +45,21 @@ class Sonarmock ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
-							val randomValue = Random.nextInt(76,100) 	 
-						if(  randomValue/1 >= 75  
+							val randomValue = Random.nextInt(50,100) 	 
+						if(  !inAnomaly && randomValue/1 >= 75  
 						 ){emit("productDetected", "productDetected(T)" ) 
 						CommUtils.outgreen("$name EMIT product detected")
 						}
 						else
-						 {emit("anomalyDetected", "anomalyDetected(T)" ) 
-						 CommUtils.outgreen("$name EMIT anomaly detected")
+						 {if(  inAnomaly  
+						  ){emit("anomalyFixed", "anomalyFixed(T)" ) 
+						  inAnomaly = false  
+						 }
+						 else
+						  {emit("anomalyDetected", "anomalyDetected(T)" ) 
+						   inAnomaly = true  
+						  CommUtils.outgreen("$name EMIT anomaly detected")
+						  }
 						 }
 						delay(10000) 
 						//genTimer( actor, state )

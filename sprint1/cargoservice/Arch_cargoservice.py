@@ -29,7 +29,6 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
           companysimulator=Custom('companysimulator','./qakicons/symActorWithobjSmall.png')
           cargoservice=Custom('cargoservice','./qakicons/symActorWithobjSmall.png')
           cargorobot=Custom('cargorobot','./qakicons/symActorWithobjSmall.png')
-          hold=Custom('hold','./qakicons/symActorWithobjSmall.png')
           sonarmock=Custom('sonarmock','./qakicons/symActorWithobjSmall.png')
           webguimock=Custom('webguimock','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_productservice', graph_attr=nodeattr):
@@ -41,13 +40,14 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      sys >> Edge( label='finishedtransport', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
      cargorobot >> Edge( label='deliveredToSlot', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge( label='finishedtransport', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     cargorobot >> Edge( label='alarm', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> cargorobot
      sonarmock >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonarmock >> Edge( label='anomalyFixed', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      sonarmock >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
-     hold >> Edge(color='magenta', style='solid', decorate='true', label='<getrobotstate<font color="darkgreen"> robotstate</font> &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
      companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
-     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; >',  fontcolor='blue') >> basicrobot
      cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag

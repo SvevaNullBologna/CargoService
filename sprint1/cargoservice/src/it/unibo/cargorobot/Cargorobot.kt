@@ -65,8 +65,8 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="waitForCommand",cond=whenReply("engagedone"))
-					transition(edgeName="t07",targetState="retryEngage",cond=whenReply("engagerefused"))
+					 transition(edgeName="t07",targetState="waitForCommand",cond=whenReply("engagedone"))
+					transition(edgeName="t08",targetState="retryEngage",cond=whenReply("engagerefused"))
 				}	 
 				state("retryEngage") { //this:State
 					action { //it:State
@@ -87,7 +87,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t18",targetState="prepareDelivery",cond=whenDispatch("command"))
+					 transition(edgeName="t19",targetState="prepareDelivery",cond=whenDispatch("command"))
 				}	 
 				state("prepareDelivery") { //this:State
 					action { //it:State
@@ -121,10 +121,10 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t29",targetState="delivery",cond=whenReply("moverobotdone"))
-					transition(edgeName="t210",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t211",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t212",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t210",targetState="delivery",cond=whenReply("moverobotdone"))
+					transition(edgeName="t211",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t212",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t213",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("delivery") { //this:State
 					action { //it:State
@@ -139,10 +139,10 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t313",targetState="deposit",cond=whenReply("moverobotdone"))
-					transition(edgeName="t314",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t315",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t316",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t314",targetState="deposit",cond=whenReply("moverobotdone"))
+					transition(edgeName="t315",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t316",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t317",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("deposit") { //this:State
 					action { //it:State
@@ -170,10 +170,10 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t417",targetState="endOfTask",cond=whenReply("moverobotdone"))
-					transition(edgeName="t418",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t419",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t420",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t418",targetState="endOfTask",cond=whenReply("moverobotdone"))
+					transition(edgeName="t419",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t420",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t421",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("endOfTask") { //this:State
 					action { //it:State
@@ -192,10 +192,10 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t521",targetState="waitForCommand",cond=whenReply("moverobotdone"))
-					transition(edgeName="t522",targetState="handleFailure",cond=whenReply("moverobotfailed"))
-					interrupthandle(edgeName="t523",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
-					interrupthandle(edgeName="t524",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
+					 transition(edgeName="t522",targetState="waitForCommand",cond=whenReply("moverobotdone"))
+					transition(edgeName="t523",targetState="handleFailure",cond=whenReply("moverobotfailed"))
+					interrupthandle(edgeName="t524",targetState="handleAnomaly",cond=whenEvent("alarm"),interruptedStateTransitions)
+					interrupthandle(edgeName="t525",targetState="handleAnomaly",cond=whenEvent("anomalyDetected"),interruptedStateTransitions)
 				}	 
 				state("handleFailure") { //this:State
 					action { //it:State
@@ -210,7 +210,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				state("handleAnomaly") { //this:State
 					action { //it:State
 						CommUtils.outyellow("Anomaly detected. Stopping robot...")
-						forward("cmd", "cmd(h)" ,"basicrobot" ) 
+						emit("alarm", "alarm(blocca)" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -227,7 +227,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t525",targetState="resuming",cond=whenEvent("anomalyFixed"))
+					 transition(edgeName="t526",targetState="resuming",cond=whenEvent("anomalyFixed"))
 				}	 
 				state("resuming") { //this:State
 					action { //it:State

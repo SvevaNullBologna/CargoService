@@ -40,6 +40,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				var Cur_Slot_ID = -1
 				var Cur_PID = -1
 				var Cur_Weight = -1
+				var Cur_Direction = "down"
 				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -81,7 +82,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="checkProdAnswerMock", cond=doswitch() )
+					 transition(edgeName="t11",targetState="checkProdAnswer",cond=whenReply("getProductAnswer"))
 				}	 
 				state("checkProdAnswer") { //this:State
 					action { //it:State
@@ -105,16 +106,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					transition( edgeName="goto",targetState="managerefusal", cond=doswitchGuarded({! ( Cur_Weight > 0  
 					) }) )
 				}	 
-				state("checkProdAnswerMock") { //this:State
-					action { //it:State
-						CommUtils.outmagenta("Doing test! Checking if robot can go get the product from IOPOrt")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="waitForProduct", cond=doswitch() )
-				}	 
 				state("managerefusal") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("Request refused. Back to wait.")
@@ -131,9 +122,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 									Cur_Slot_ID = S.getAvaiableSlotID()
 									val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot_ID != -1 
 						if( canLoad 
-						 ){
-											val T = "to load $Cur_Slot_ID"
-						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot_ID)" ,name ) 
+						 ){forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot_ID)" ,name ) 
 						}
 						else
 						 {forward("refused", "refused($Cur_PID,$Cur_Weight)" ,name ) 
@@ -143,8 +132,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t21",targetState="waitForProduct",cond=whenDispatch("accepted"))
-					transition(edgeName="t22",targetState="managerefusal",cond=whenDispatch("refused"))
+					 transition(edgeName="t22",targetState="waitForProduct",cond=whenDispatch("accepted"))
+					transition(edgeName="t23",targetState="managerefusal",cond=whenDispatch("refused"))
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
@@ -154,14 +143,12 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t33",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("Product detected. Moving robot...")
-						 
-									Cur_Slot_ID = 4 //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-						CommUtils.outblack("Slot = $Cur_Slot_ID")
+						CommUtils.outmagenta("Slot = $Cur_Slot_ID")
 						
 									val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
 									val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
@@ -191,8 +178,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t44",targetState="registerDelivery",cond=whenEvent("deliveredToSlot"))
-					transition(edgeName="t45",targetState="lastoperations",cond=whenEvent("finishedtransport"))
+					 transition(edgeName="t45",targetState="registerDelivery",cond=whenEvent("deliveredToSlot"))
+					transition(edgeName="t46",targetState="lastoperations",cond=whenEvent("finishedtransport"))
 				}	 
 				state("registerDelivery") { //this:State
 					action { //it:State
