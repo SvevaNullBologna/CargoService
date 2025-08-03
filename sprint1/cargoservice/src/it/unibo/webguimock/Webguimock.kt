@@ -33,6 +33,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name STARTING")
+						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -48,7 +49,7 @@ class Webguimock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t025",targetState="updategui",cond=whenDispatch("update"))
+					 transition(edgeName="t027",targetState="updategui",cond=whenDispatch("update"))
 				}	 
 				state("updategui") { //this:State
 					action { //it:State

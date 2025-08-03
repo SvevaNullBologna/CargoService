@@ -47,6 +47,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						CommUtils.outmagenta("cargoservice STARTS")
 						
 									S = Slots()
+						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -80,7 +81,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t11",targetState="checkProdAnswer",cond=whenReply("getProductAnswer"))
+					 transition( edgeName="goto",targetState="checkProdAnswerMock", cond=doswitch() )
 				}	 
 				state("checkProdAnswer") { //this:State
 					action { //it:State
@@ -104,6 +105,16 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					transition( edgeName="goto",targetState="managerefusal", cond=doswitchGuarded({! ( Cur_Weight > 0  
 					) }) )
 				}	 
+				state("checkProdAnswerMock") { //this:State
+					action { //it:State
+						CommUtils.outmagenta("Doing test! Checking if robot can go get the product from IOPOrt")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitForProduct", cond=doswitch() )
+				}	 
 				state("managerefusal") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("Request refused. Back to wait.")
@@ -122,7 +133,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						if( canLoad 
 						 ){
 											val T = "to load $Cur_Slot_ID"
-						forward("update", "update($T)" ,"webguimock" ) 
 						forward("accepted", "accepted($Cur_PID,$Cur_Weight,$Cur_Slot_ID)" ,name ) 
 						}
 						else
@@ -133,8 +143,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t22",targetState="waitForProduct",cond=whenDispatch("accepted"))
-					transition(edgeName="t23",targetState="managerefusal",cond=whenDispatch("refused"))
+					 transition(edgeName="t21",targetState="waitForProduct",cond=whenDispatch("accepted"))
+					transition(edgeName="t22",targetState="managerefusal",cond=whenDispatch("refused"))
 				}	 
 				state("waitForProduct") { //this:State
 					action { //it:State
@@ -144,12 +154,15 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t33",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("Product detected. Moving robot...")
 						 
+									Cur_Slot_ID = 4 //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+						CommUtils.outblack("Slot = $Cur_Slot_ID")
+						
 									val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
 									val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
 									val Direction = S.getSlotDepositDirectionById(Cur_Slot_ID)
@@ -161,6 +174,14 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					}	 	 
 					 transition( edgeName="goto",targetState="waitendofrequest", cond=doswitch() )
 				}	 
+				state("delivered") { //this:State
+					action { //it:State
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+				}	 
 				state("waitendofrequest") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("Waiting for robot to finish its task...")
@@ -170,7 +191,21 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t45",targetState="lastoperations",cond=whenEvent("finishedtransport"))
+					 transition(edgeName="t44",targetState="registerDelivery",cond=whenEvent("deliveredToSlot"))
+					transition(edgeName="t45",targetState="lastoperations",cond=whenEvent("finishedtransport"))
+				}	 
+				state("registerDelivery") { //this:State
+					action { //it:State
+						
+											S.registerProductInSlot(Cur_Slot_ID)
+										  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
+										  	val T = "loaded to $Cur_Slot_ID"
+						CommUtils.outmagenta("product delivered successfully...")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 				state("lastoperations") { //this:State
 					action { //it:State
@@ -183,12 +218,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								 ){CommUtils.outmagenta("There was a fatal error with the load. Load request rejected")
 								}
 								else
-								 {
-								 					S.registerProductInSlot(Cur_Slot_ID)
-								 				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
-								 				  	val T = "loaded to $Cur_Slot_ID"
-								 CommUtils.outmagenta("product loaded successfully...")
-								 forward("update", "update($T)" ,"webguimock" ) 
+								 {CommUtils.outmagenta("end of robot's operations with success.")
 								 }
 								
 												Cur_Slot_ID = -1

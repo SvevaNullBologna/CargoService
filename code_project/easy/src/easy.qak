@@ -49,7 +49,7 @@ QActor example context ctx_easy {
 	
 	State ok{
 		println("engage done") color blue
-		request basicrobot -m moverobot : moverobot(0,0)
+		request basicrobot -m moverobot : moverobot(0,4)
 	}
 	Transition t1
 	whenReply moverobotdone -> movedone

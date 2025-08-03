@@ -33,6 +33,7 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outcyan("$name STARTS")
+						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -44,7 +45,6 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 					action { //it:State
 						CommUtils.outcyan("$name sending request ")
 						request("loadrequest", "loadrequest(10)" ,"cargoservice" )  
-						delay(2000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

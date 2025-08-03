@@ -10,6 +10,7 @@ event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
 dispatch( command, command(X,Y,DIR) ).
+event( deliveredToSlot, deliveredToSlot(T) ).
 request( engage, engage(device,length) ).
 request( moverobot, moverobot(x,y) ).
 dispatch( setdirection, dir(D) ).
@@ -17,6 +18,8 @@ dispatch( cmd, cmd(C) ).
 event( alarm, alarm(reason) ).
 dispatch( update, update(U) ).
 event( finishedtransport, finishedtransport(T) ).
+request( getrobotstate, getrobotstate(ARG) ).
+reply( robotstate, robotstate(POS,DIR) ).  %%for getrobotstate
 %====================================================================================
 context(ctx_cargoservice, "localhost",  "TCP", "8000").
 context(ctx_productservice, "127.0.0.1",  "TCP", "8111").
@@ -29,6 +32,8 @@ context(ctx_basicrobot, "127.0.0.1",  "TCP", "8020").
  static(cargoservice).
   qactor( cargorobot, ctx_cargoservice, "it.unibo.cargorobot.Cargorobot").
  static(cargorobot).
+  qactor( hold, ctx_cargoservice, "it.unibo.hold.Hold").
+ static(hold).
   qactor( sonarmock, ctx_cargoservice, "it.unibo.sonarmock.Sonarmock").
  static(sonarmock).
   qactor( webguimock, ctx_cargoservice, "it.unibo.webguimock.Webguimock").

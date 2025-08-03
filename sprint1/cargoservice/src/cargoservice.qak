@@ -16,6 +16,8 @@ Event anomalyDetected : anomalyDetected(T)
 Event anomalyFixed : anomalyFixed(T)
 //CargoService -> cargorobot
 Dispatch command : command(X,Y,DIR)
+//Cargorobot -> Whoever is listening 
+Event deliveredToSlot : deliveredToSlot(T)
 //CargoRobot -> BasicRobot 
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
@@ -33,7 +35,10 @@ Dispatch update : update(U)
 
 //CargoRobot -> Whoever is listening
 Event finishedtransport : finishedtransport(T)
-
+////////////////DEBUG//////////////////////////////
+Request getrobotstate : getrobotstate(ARG)
+Reply robotstate      : robotstate(POS,DIR)  for getrobotstate
+////////////////////////////////////////////////////
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
@@ -48,12 +53,12 @@ ExternalQActor productservice context ctx_productservice
 QActor companysimulator context ctx_cargoservice{
  	State s0 initial {
  		println("$name STARTS") color cyan
+ 		delay 5000
   	}Goto sendRequest
   	
   	State sendRequest{
   		println("$name sending request ") color cyan
   		request cargoservice -m loadrequest : loadrequest(10)
-  		delay 2000
   	}
 }
 
@@ -77,6 +82,7 @@ QActor cargoservice context ctx_cargoservice{
 		[#
 			S = Slots()
 		#]
+		delay 5000
 	}
 	Goto waitrequest
 	
@@ -94,8 +100,9 @@ QActor cargoservice context ctx_cargoservice{
 			request productservice -m getProduct : getProduct($Cur_PID)
 		}
 	}
-	Transition t1 
-	whenReply getProductAnswer -> checkProdAnswer
+	Goto checkProdAnswerMock
+	/*Transition t1 
+	whenReply getProductAnswer -> checkProdAnswer*/
 	
 	State checkProdAnswer{
 		printCurrentMessage
@@ -110,6 +117,10 @@ QActor cargoservice context ctx_cargoservice{
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
+	State checkProdAnswerMock{
+		println("Doing test! Checking if robot can go get the product from IOPOrt") color magenta
+	}Goto waitForProduct
+	
 	State managerefusal{
 		println("Request refused. Back to wait.") color magenta
 	}Goto waitrequest
@@ -123,7 +134,6 @@ QActor cargoservice context ctx_cargoservice{
 				[#
 					val T = "to load $Cur_Slot_ID"
 				#]
-				forward webguimock -m update : update($T)
 				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot_ID)
 			}
 			else{
@@ -143,6 +153,10 @@ State waitForProduct{
 	State serveloadrequest{
 		println("Product detected. Moving robot...") color magenta
 		[# 
+			Cur_Slot_ID = 4 //DEBUGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+		#]
+		println("Slot = $Cur_Slot_ID")
+		[#
 			val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
 			val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
 			val Direction = S.getSlotDepositDirectionById(Cur_Slot_ID)
@@ -150,12 +164,26 @@ State waitForProduct{
 		forward cargorobot -m command : command($DestinationX, $DestinationY, $Direction)
 	}Goto waitendofrequest
 	
+	
+State delivered{
+	
+}
 	State waitendofrequest{
 		println("Waiting for robot to finish its task...") color magenta
 		delay 300 	
 	}
 	Transition t4 
+	whenEvent deliveredToSlot -> registerDelivery
 	whenEvent finishedtransport -> lastoperations 
+	
+	State registerDelivery{
+		[#
+					S.registerProductInSlot(Cur_Slot_ID)
+				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
+				  	val T = "loaded to $Cur_Slot_ID"
+				#]
+				println("product delivered successfully...") color magenta
+	}
 	
 	State lastoperations{
 		printCurrentMessage
@@ -166,13 +194,7 @@ State waitForProduct{
 				
 			}
 			else{
-				[#
-					S.registerProductInSlot(Cur_Slot_ID)
-				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
-				  	val T = "loaded to $Cur_Slot_ID"
-				#]
-				println("product loaded successfully...") color magenta
-				forward webguimock -m update : update($T)
+				println("end of robot's operations with success.") color magenta
 			}
 			[#
 				Cur_Slot_ID = -1
@@ -191,21 +213,22 @@ QActor cargorobot context ctx_cargoservice {
 		val StepTime = 350
 		val HomeX = 0
 		val HomeY = 0 
-		val IoX = 5
-		val IoY = 0
+		val IoX = 0
+		val IoY = 4
 
 		var DestSlotX = 0
 		var DestSlotY = 0
 		var CurrentDestX = 0
 		var CurrentDestY = 0
 		
-		var Direction = "up"
+		var Direction = "down"
 		
-
+		var endWithFailure = false
 	#]
 
 	State s0 initial {
 		println("$name RUNNING") color yellow
+		delay 500
 	}Goto engageRobot
 
 	State engageRobot {
@@ -245,6 +268,7 @@ QActor cargorobot context ctx_cargoservice {
         	CurrentDestX = IoX
         	CurrentDestY = IoY
       	#]
+      	println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY") color yellow
       	request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t2
@@ -259,6 +283,7 @@ QActor cargorobot context ctx_cargoservice {
         		CurrentDestX = DestSlotX
         		CurrentDestY = DestSlotY
       		#]
+      		println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY") color yellow
       		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t3 
@@ -270,7 +295,8 @@ QActor cargorobot context ctx_cargoservice {
 	State deposit{
 		forward basicrobot -m setdirection : dir($Direction)
 		println("depositing product on slot...") color yellow
-		delay 3000
+		delay 300
+		emit  deliveredToSlot : deliveredToSlot(ok)
 	}
 	Goto return 
 	
@@ -280,6 +306,7 @@ QActor cargorobot context ctx_cargoservice {
         		CurrentDestX = HomeX
         		CurrentDestY = HomeY
       		#]
+      		println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY")
       		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
 	}
 	Transition t4
@@ -289,20 +316,29 @@ QActor cargorobot context ctx_cargoservice {
 	whenInterruptEvent anomalyDetected -> handleAnomaly
 	
 	State endOfTask{
-		println("Transport complete. Emitting finishedtransport.") color yellow
-      	emit finishedtransport : finishedtransport(ok)
+		if[# endWithFailure #]{
+			println("Robot move failed. Check system status.") color red
+			emit finishedtransport : finishedtransport(failure)
+		}
+		else{
+			println("Transport complete. Emitting finishedtransport.") color yellow
+      		emit finishedtransport : finishedtransport(ok)
+		}
+		[# val Dir = "down"#]
+		forward basicrobot -m setdirection : dir($Dir)
 	}
 	Transition t5
+	whenReply moverobotdone -> waitForCommand
 	whenReply moverobotfailed -> handleFailure
 	whenInterruptEvent alarm -> handleAnomaly
 	whenInterruptEvent anomalyDetected -> handleAnomaly
 
 
 	State handleFailure {
-		println("Robot move failed. Check system status.") color red
-		emit finishedtransport : finishedtransport(failure)
-	}Goto waitForCommand
-
+		[# endWithFailure = true #]		
+	}Goto return 
+	
+	
 	State handleAnomaly {
 		println("Anomaly detected. Stopping robot...") color yellow
 		forward basicrobot -m cmd : cmd(h)
@@ -322,25 +358,49 @@ QActor cargorobot context ctx_cargoservice {
 	
 }
  
-
+QActor hold context ctx_cargoservice{
+	State s0 initial{
+		println("$name starts")
+	}Goto retrieveinfo
+	
+	State retrieveinfo{
+		[#val ARG = "arg" #]
+		request basicrobot -m getrobotstate : getrobotstate($ARG)	
+	}
+	Transition t0
+	whenReply robotstate-> print
+	
+	State print{
+		printCurrentMessage
+		onMsg(robotstate : robostate(POS,DIR)){
+			[#
+				val Pos = payloadArg(0).toString()
+				val Dir = payloadArg(1).toString()
+			#] 
+			println("Pos = $Pos, Dir = $Dir") color yellow
+		}
+		
+	}
+}
 
 QActor sonarmock context ctx_cargoservice{ 
 	import "kotlin.random.Random"
 	State s0 initial{
-		println("$name STARTING") color magenta
+		println("$name STARTING") color green
+		delay 5000
 	}Goto waitForProduct 
 	
 	State waitForProduct{
-		[#	val randomValue = Random.nextInt(0,100) 	#]
+		[#	val randomValue = Random.nextInt(76,100) 	#]
 		if[# randomValue/1 >= 75 #]{ 
 			emit productDetected : productDetected(T)
-			println("$name EMIT product detected") color magenta
+			println("$name EMIT product detected") color green
 		}
 		else{
 			emit anomalyDetected : anomalyDetected(T)
-			println("$name EMIT anomaly detected") color magenta
+			println("$name EMIT anomaly detected") color green
 		}
-		delay 100000
+		delay 10000
 	}Goto waitForProduct
 	
 }
@@ -351,7 +411,7 @@ QActor sonarmock context ctx_cargoservice{
 QActor webguimock context ctx_cargoservice{
 	State s0 initial{
 		println("$name STARTING") color blue
-		
+		delay 5000
 	}Goto waitforupdate
 	
 	State waitforupdate{

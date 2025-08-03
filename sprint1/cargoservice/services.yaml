@@ -1,4 +1,16 @@
 services:
+  mongodb:
+    image: mongo:6.0.4
+    container_name: mongodb  
+    mem_limit: 512m
+    environment:
+      - MONGO_INITDB_DATABASE=cargodb # Nome del database da inizializzare
+    ports:
+      - "27017:27017"
+    command: mongod
+    networks:
+      - iss-network
+
   wenv:
     container_name: wenv
     image: docker.io/natbodocker/virtualrobotdisi25:2.2
@@ -64,6 +76,9 @@ services:
     ports:
       - 8111:8111/tcp
       - 8111:8111/udp
+    depends_on:
+      - mongodb
+      - eureka
     networks:
       - iss-network
 
