@@ -1,0 +1,120 @@
+System cargoservice
+
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
+//
+Dispatch devicesStart : devicesStart(T)
+Dispatch devicesStop : devicesStop(T)
+//
+Event reactorReady : reactorReady(T)
+Event detectorReady: detectorReady(T)
+
+Dispatch ready : ready(T)
+Dispatch notReadyYet : notReadyYet(T)
+
+Context ctx_sonarservice			ip [host="localhost" port=8004] //temp
+
+
+
+QActor sonarservice context ctx_sonarservice{
+	[# 
+		var reactorReady = false
+		var detectorReady = false 
+	#]
+	State s0 initial{
+		delay 2000
+		println("sonarservice ready") color green
+	}Goto turningSonarOn
+	
+	State turningSonarOn {
+		println("sonarservice active: activating devices...") color green
+		forward reactor -m devicesStart : devicesStart(T)
+		delay 5000
+	}
+	Transition t1 
+	whenEvent reactorReady -> handleReactorReady
+	whenEvent detectorReady -> handleDetectorReady 
+	
+	State handleReactorReady{
+		[# reactorReady = true #]
+		if[# reactorReady && detectorReady #]{
+			forward sonarservice -m ready : ready(T)
+		}
+		else{
+			autodispatch  notReadyYet : notReadyYet(T)
+		}
+	}
+	Transition t2 
+	whenMsg ready -> working
+	whenEvent detectorReady -> handleDetectorReady 
+	whenMsg notReadyYet -> turningSonarOn
+	
+	State handleDetectorReady{
+		[# detectorReady = true #]	
+		if[# reactorReady && detectorReady #]{
+			autodispatch ready : ready(T)
+		}
+		else{
+			autodispatch notReadyYet : notReadyYet(T)
+		}
+	}
+	Transition t2 
+	whenMsg ready -> working
+	whenEvent reactorReady -> handleReactorReady
+	whenMsg notReadyYet -> turningSonarOn
+	
+	State working{
+		
+	}
+	
+	State turningoff{
+		println("sonarservice turning off: deactivating sonar...") color green
+		[#
+			reactorReady = false
+			detectorReady = false
+		#]
+		forward reactor -m devicesStop : devicesStop(T)
+		delay 5000
+	}
+}
+
+
+QActor reactor context ctx_sonarservice{
+	State s0 initial{
+		println("$name turning on...") color green
+		delay 2000
+	}Goto waitingCommand
+		
+	State waitingCommand{
+		println("$name waiting command...") color green
+	}Transition t0
+	whenMsg devicesStart -> devicesOn
+	whenMsg devicesStop -> devicesOff
+	
+	State devicesOn{
+		[#
+			Runtime.getRuntime().exec("python sonarStart.py")
+			Runtime.getRuntime().exec("python ledCheck.py")
+		#]
+		println("sonardevice and led ready...") color green
+		emit reactorReady : reactorReady(T) 
+	}
+	Goto waitingCommand
+	
+	State devicesOff {
+		[#
+			sonarProcess = Runtime.getRuntime().exec("python sonarStop.py")
+			ledProcess = Runtime.getRuntime().exec("python ledCheck.py")
+		#]
+		println("sonardevice and led off...") color green
+		delay 2000
+	}Goto waitingCommand
+}
+
+QActor detector context ctx_sonarservice{
+	State s0 initial{
+		
+	}
+}
