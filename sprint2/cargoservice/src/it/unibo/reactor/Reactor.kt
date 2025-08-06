@@ -49,8 +49,10 @@ class Reactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t08",targetState="devicesOn",cond=whenDispatch("devicesStart"))
-					transition(edgeName="t09",targetState="devicesOff",cond=whenDispatch("devicesStop"))
+					 transition(edgeName="t011",targetState="devicesOn",cond=whenDispatch("devicesStart"))
+					transition(edgeName="t012",targetState="devicesOff",cond=whenDispatch("devicesStop"))
+					transition(edgeName="t013",targetState="anomaly",cond=whenEvent("anomalyDetected"))
+					transition(edgeName="t014",targetState="productDetected",cond=whenEvent("productDetected"))
 				}	 
 				state("devicesOn") { //this:State
 					action { //it:State
@@ -73,6 +75,33 @@ class Reactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 									ledProcess = Runtime.getRuntime().exec("python ledCheck.py")
 						CommUtils.outgreen("sonardevice and led off...")
 						delay(2000) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitingCommand", cond=doswitch() )
+				}	 
+				state("anomaly") { //this:State
+					action { //it:State
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t115",targetState="anomalyFix",cond=whenEvent("anomalyFixed"))
+				}	 
+				state("anomalyFix") { //this:State
+					action { //it:State
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitingCommand", cond=doswitch() )
+				}	 
+				state("productDetected") { //this:State
+					action { //it:State
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

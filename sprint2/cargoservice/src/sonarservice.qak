@@ -1,5 +1,7 @@
 System cargoservice
 
+mqttBroker "192.168.137.1" : 1883 eventTopic "sonar/events" 
+
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
@@ -10,9 +12,12 @@ Dispatch devicesStop : devicesStop(T)
 //
 Event reactorReady : reactorReady(T)
 Event detectorReady: detectorReady(T)
-
+//
 Dispatch ready : ready(T)
 Dispatch notReadyYet : notReadyYet(T)
+
+Dispatch correctDistanceDetected : correctDistanceDetected(T)
+Dispatch keepDetecting : keepDetecting(T)
 
 Context ctx_sonarservice			ip [host="localhost" port=8004] //temp
 
@@ -20,8 +25,11 @@ Context ctx_sonarservice			ip [host="localhost" port=8004] //temp
 
 QActor sonarservice context ctx_sonarservice{
 	[# 
+		val DFREE = 30
+		var counter = 0  
 		var reactorReady = false
 		var detectorReady = false 
+		var anomaly = false
 	#]
 	State s0 initial{
 		delay 2000
@@ -47,7 +55,7 @@ QActor sonarservice context ctx_sonarservice{
 		}
 	}
 	Transition t2 
-	whenMsg ready -> working
+	whenMsg ready -> detecting
 	whenEvent detectorReady -> handleDetectorReady 
 	whenMsg notReadyYet -> turningSonarOn
 	
@@ -61,13 +69,45 @@ QActor sonarservice context ctx_sonarservice{
 		}
 	}
 	Transition t2 
-	whenMsg ready -> working
+	whenMsg ready -> detecting
 	whenEvent reactorReady -> handleReactorReady
 	whenMsg notReadyYet -> turningSonarOn
 	
-	State working{
-		
+	State detecting{
+		println("sonarservice working ") color green
+		//gets somehow distance
+		if[# distance > DFREE || distance < 0 #]{
+			[# anomaly = true #]
+			emit anomalyDetected : anomalyDetected(T)
+		}
+		else{
+			if[# distance < DFREE/2 #]{
+				if[# anomaly #]{
+					[# anomaly = false #]
+					emit anomalyFixed : anomalyFixed(T)
+				}
+				autodispatch correctDistanceDetected : correctDistanceDetected(T)
+			}
+			else{
+				autodispatch keepDetecting : keepDetecting(T)
+			}
+		}
+		delay 1000	
 	}
+	Transition t3
+	whenMsg correctDistanceDetected -> count
+	whenMsg keepDetecting -> detecting
+	whenEvent anomalyDetected -> detecting
+	
+	State count{
+		[# anomaly = false #]
+		[# counter++ #]
+		if[# counter >= 3 #]{
+			[# counter = 0 #]
+			emit productDetected : productDetected(T)
+		}
+	}Goto detecting
+	
 	
 	State turningoff{
 		println("sonarservice turning off: deactivating sonar...") color green
@@ -92,6 +132,8 @@ QActor reactor context ctx_sonarservice{
 	}Transition t0
 	whenMsg devicesStart -> devicesOn
 	whenMsg devicesStop -> devicesOff
+	whenEvent anomalyDetected -> anomaly
+	whenEvent productDetected -> productDetected
 	
 	State devicesOn{
 		[#
@@ -111,10 +153,20 @@ QActor reactor context ctx_sonarservice{
 		println("sonardevice and led off...") color green
 		delay 2000
 	}Goto waitingCommand
-}
-
-QActor detector context ctx_sonarservice{
-	State s0 initial{
+	
+	State anomaly{
 		
 	}
+	Transition t1
+	whenEvent anomalyFixed -> anomalyFix
+	
+	State anomalyFix{
+		
+	}Goto waitingCommand
+	
+	State productDetected{
+		
+	}
+	Goto waitingCommand
 }
+

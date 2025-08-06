@@ -30,8 +30,11 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		 
+				val DFREE = 30
+				var counter = 0  
 				var reactorReady = false
 				var detectorReady = false 
+				var anomaly = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -71,7 +74,7 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t22",targetState="working",cond=whenDispatch("ready"))
+					 transition(edgeName="t22",targetState="detecting",cond=whenDispatch("ready"))
 					transition(edgeName="t23",targetState="handleDetectorReady",cond=whenEvent("detectorReady"))
 					transition(edgeName="t24",targetState="turningSonarOn",cond=whenDispatch("notReadyYet"))
 				}	 
@@ -89,17 +92,53 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t25",targetState="working",cond=whenDispatch("ready"))
+					 transition(edgeName="t25",targetState="detecting",cond=whenDispatch("ready"))
 					transition(edgeName="t26",targetState="handleReactorReady",cond=whenEvent("reactorReady"))
 					transition(edgeName="t27",targetState="turningSonarOn",cond=whenDispatch("notReadyYet"))
 				}	 
-				state("working") { //this:State
+				state("detecting") { //this:State
 					action { //it:State
+						CommUtils.outgreen("sonarservice working ")
+						if(  distance > DFREE || distance < 0  
+						 ){ anomaly = true  
+						emit("anomalyDetected", "anomalyDetected(T)" ) 
+						}
+						else
+						 {if(  distance < DFREE/2  
+						  ){if(  anomaly  
+						  ){ anomaly = false  
+						 emit("anomalyFixed", "anomalyFixed(T)" ) 
+						 }
+						 forward("correctDistanceDetected", "correctDistanceDetected(T)" ,name ) 
+						 }
+						 else
+						  {forward("keepDetecting", "keepDetecting(T)" ,name ) 
+						  }
+						 }
+						delay(1000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition(edgeName="t38",targetState="count",cond=whenDispatch("correctDistanceDetected"))
+					transition(edgeName="t39",targetState="detecting",cond=whenDispatch("keepDetecting"))
+					transition(edgeName="t310",targetState="detecting",cond=whenEvent("anomalyDetected"))
+				}	 
+				state("count") { //this:State
+					action { //it:State
+						 anomaly = false  
+						 counter++  
+						if(  counter >= 3  
+						 ){ counter = 0  
+						emit("productDetected", "productDetected(T)" ) 
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="detecting", cond=doswitch() )
 				}	 
 				state("turningoff") { //this:State
 					action { //it:State
