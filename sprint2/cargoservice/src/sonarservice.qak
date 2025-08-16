@@ -6,20 +6,16 @@ mqttBroker "192.168.137.1" : 1883 eventTopic "sonar/events"
 Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
 Event anomalyFixed : anomalyFixed(T)
-//
+//Sonarservice -> reactor
 Dispatch devicesStart : devicesStart(T)
 Dispatch devicesStop : devicesStop(T)
-//
+//reactor -> sonarservice
 Event reactorReady : reactorReady(T)
-Event detectorReady: detectorReady(T)
-//
-Dispatch ready : ready(T)
-Dispatch notReadyYet : notReadyYet(T)
-
-Dispatch correctDistanceDetected : correctDistanceDetected(T)
+Dispatch distance : distance(Dist)
+//sonarservice -> sonarservice
 Dispatch keepDetecting : keepDetecting(T)
 
-Context ctx_sonarservice			ip [host="localhost" port=8004] //temp
+Context ctx_sonarservice			ip [host="localhost" port=8004] 
 
 
 
@@ -27,8 +23,7 @@ QActor sonarservice context ctx_sonarservice{
 	[# 
 		val DFREE = 30
 		var counter = 0  
-		var reactorReady = false
-		var detectorReady = false 
+		
 		var anomaly = false
 	#]
 	State s0 initial{
@@ -39,82 +34,48 @@ QActor sonarservice context ctx_sonarservice{
 	State turningSonarOn {
 		println("sonarservice active: activating devices...") color green
 		forward reactor -m devicesStart : devicesStart(T)
-		delay 5000
 	}
 	Transition t1 
-	whenEvent reactorReady -> handleReactorReady
-	whenEvent detectorReady -> handleDetectorReady 
-	
-	State handleReactorReady{
-		[# reactorReady = true #]
-		if[# reactorReady && detectorReady #]{
-			forward sonarservice -m ready : ready(T)
-		}
-		else{
-			autodispatch  notReadyYet : notReadyYet(T)
-		}
-	}
-	Transition t2 
-	whenMsg ready -> detecting
-	whenEvent detectorReady -> handleDetectorReady 
-	whenMsg notReadyYet -> turningSonarOn
-	
-	State handleDetectorReady{
-		[# detectorReady = true #]	
-		if[# reactorReady && detectorReady #]{
-			autodispatch ready : ready(T)
-		}
-		else{
-			autodispatch notReadyYet : notReadyYet(T)
-		}
-	}
-	Transition t2 
-	whenMsg ready -> detecting
-	whenEvent reactorReady -> handleReactorReady
-	whenMsg notReadyYet -> turningSonarOn
-	
+	whenEvent reactorReady -> detecting
+	 
 	State detecting{
-		println("sonarservice working ") color green
-		//gets somehow distance
-		if[# distance > DFREE || distance < 0 #]{
+		println("$name waiting for distance detection...") color green
+	}
+	Transition t2
+	whenMsg distance -> filterdistance
+	
+	State filterdistance{
+		printCurrentMessage
+		onMsg(distance : distance(Dist)){
+			[# val d = payloadArg(0).toInt() #]
+			if[# d > DFREE || d < 0 #]{
 			[# anomaly = true #]
 			emit anomalyDetected : anomalyDetected(T)
-		}
-		else{
-			if[# distance < DFREE/2 #]{
+			} 
+			else{ // 0 < distance < DFREE  
 				if[# anomaly #]{
 					[# anomaly = false #]
 					emit anomalyFixed : anomalyFixed(T)
 				}
-				autodispatch correctDistanceDetected : correctDistanceDetected(T)
-			}
-			else{
-				autodispatch keepDetecting : keepDetecting(T)
+				if[# d < DFREE/2 #]{ // 0 < distance < DFREE/2
+					[# counter++ #]
+					if[# counter >= 3 #]{
+						[# counter = 0 #]
+						emit productDetected : productDetected(T)
+					}	
+				}
 			}
 		}
-		delay 1000	
+		delay 3000	
+		autodispatch keepDetecting : keepDetecting(T)
 	}
 	Transition t3
-	whenMsg correctDistanceDetected -> count
 	whenMsg keepDetecting -> detecting
-	whenEvent anomalyDetected -> detecting
-	
-	State count{
-		[# anomaly = false #]
-		[# counter++ #]
-		if[# counter >= 3 #]{
-			[# counter = 0 #]
-			emit productDetected : productDetected(T)
-		}
-	}Goto detecting
+	whenMsg devicesStop -> turningoff
 	
 	
 	State turningoff{
 		println("sonarservice turning off: deactivating sonar...") color green
-		[#
-			reactorReady = false
-			detectorReady = false
-		#]
 		forward reactor -m devicesStop : devicesStop(T)
 		delay 5000
 	}
@@ -133,40 +94,51 @@ QActor reactor context ctx_sonarservice{
 	whenMsg devicesStart -> devicesOn
 	whenMsg devicesStop -> devicesOff
 	whenEvent anomalyDetected -> anomaly
-	whenEvent productDetected -> productDetected
 	
 	State devicesOn{
 		[#
 			Runtime.getRuntime().exec("python sonarStart.py")
 			Runtime.getRuntime().exec("python ledCheck.py")
 		#]
+		delay 1000
 		println("sonardevice and led ready...") color green
 		emit reactorReady : reactorReady(T) 
-	}
-	Goto waitingCommand
+	}Goto waitingCommand
+	
+	State readDistance{
+		println("reading distance ...") color green
+		[#
+			val p = Runtime.getRuntime().exec("python getSonarDistance.py")
+			val reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
+			val Dist = Integer.parseInt(reader.readLine())
+		#]
+		forward sonarservice -m distance : distance($Dist)
+	}Goto readDistance
 	
 	State devicesOff {
 		[#
-			sonarProcess = Runtime.getRuntime().exec("python sonarStop.py")
-			ledProcess = Runtime.getRuntime().exec("python ledCheck.py")
+			Runtime.getRuntime().exec("python sonarStop.py")
+			Runtime.getRuntime().exec("python ledCheck.py")
 		#]
 		println("sonardevice and led off...") color green
 		delay 2000
 	}Goto waitingCommand
 	
 	State anomaly{
-		
+		println("$name turning on led for anomaly...")
+		[#
+			Runtime.getRuntime().exec("python ledOn.py")
+		#]
 	}
 	Transition t1
 	whenEvent anomalyFixed -> anomalyFix
 	
 	State anomalyFix{
-		
+		println("$name turning off led because the anomaly is fixed...")
+		[#
+			Runtime.getRuntime().exec("python ledOff.py")
+		#]	
 	}Goto waitingCommand
 	
-	State productDetected{
-		
-	}
-	Goto waitingCommand
 }
 

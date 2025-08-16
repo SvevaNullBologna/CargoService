@@ -81,7 +81,7 @@ class Example ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				state("ok") { //this:State
 					action { //it:State
 						CommUtils.outblue("engage done")
-						request("moverobot", "moverobot(0,4)" ,"basicrobot" )  
+						request("moverobot", "moverobot(6,4)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

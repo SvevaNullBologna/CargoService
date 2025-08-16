@@ -32,8 +32,7 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		 
 				val DFREE = 30
 				var counter = 0  
-				var reactorReady = false
-				var detectorReady = false 
+				
 				var anomaly = false
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -51,101 +50,61 @@ class Sonarservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					action { //it:State
 						CommUtils.outgreen("sonarservice active: activating devices...")
 						forward("devicesStart", "devicesStart(T)" ,"reactor" ) 
-						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t10",targetState="handleReactorReady",cond=whenEvent("reactorReady"))
-					transition(edgeName="t11",targetState="handleDetectorReady",cond=whenEvent("detectorReady"))
-				}	 
-				state("handleReactorReady") { //this:State
-					action { //it:State
-						 reactorReady = true  
-						if(  reactorReady && detectorReady  
-						 ){forward("ready", "ready(T)" ,"sonarservice" ) 
-						}
-						else
-						 {forward("notReadyYet", "notReadyYet(T)" ,name ) 
-						 }
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t22",targetState="detecting",cond=whenDispatch("ready"))
-					transition(edgeName="t23",targetState="handleDetectorReady",cond=whenEvent("detectorReady"))
-					transition(edgeName="t24",targetState="turningSonarOn",cond=whenDispatch("notReadyYet"))
-				}	 
-				state("handleDetectorReady") { //this:State
-					action { //it:State
-						 detectorReady = true  
-						if(  reactorReady && detectorReady  
-						 ){forward("ready", "ready(T)" ,name ) 
-						}
-						else
-						 {forward("notReadyYet", "notReadyYet(T)" ,name ) 
-						 }
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t25",targetState="detecting",cond=whenDispatch("ready"))
-					transition(edgeName="t26",targetState="handleReactorReady",cond=whenEvent("reactorReady"))
-					transition(edgeName="t27",targetState="turningSonarOn",cond=whenDispatch("notReadyYet"))
+					 transition(edgeName="t10",targetState="detecting",cond=whenEvent("reactorReady"))
 				}	 
 				state("detecting") { //this:State
 					action { //it:State
-						CommUtils.outgreen("sonarservice working ")
-						if(  distance > DFREE || distance < 0  
-						 ){ anomaly = true  
-						emit("anomalyDetected", "anomalyDetected(T)" ) 
-						}
-						else
-						 {if(  distance < DFREE/2  
-						  ){if(  anomaly  
-						  ){ anomaly = false  
-						 emit("anomalyFixed", "anomalyFixed(T)" ) 
-						 }
-						 forward("correctDistanceDetected", "correctDistanceDetected(T)" ,name ) 
-						 }
-						 else
-						  {forward("keepDetecting", "keepDetecting(T)" ,name ) 
-						  }
-						 }
-						delay(1000) 
+						CommUtils.outgreen("$name waiting for distance detection...")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t38",targetState="count",cond=whenDispatch("correctDistanceDetected"))
-					transition(edgeName="t39",targetState="detecting",cond=whenDispatch("keepDetecting"))
-					transition(edgeName="t310",targetState="detecting",cond=whenEvent("anomalyDetected"))
+					 transition(edgeName="t21",targetState="filterdistance",cond=whenDispatch("distance"))
 				}	 
-				state("count") { //this:State
+				state("filterdistance") { //this:State
 					action { //it:State
-						 anomaly = false  
-						 counter++  
-						if(  counter >= 3  
-						 ){ counter = 0  
-						emit("productDetected", "productDetected(T)" ) 
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("distance(Dist)"), Term.createTerm("distance(Dist)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val d = payloadArg(0).toInt()  
+								if(  d > DFREE || d < 0  
+								 ){ anomaly = true  
+								emit("anomalyDetected", "anomalyDetected(T)" ) 
+								}
+								else
+								 {if(  anomaly  
+								  ){ anomaly = false  
+								 emit("anomalyFixed", "anomalyFixed(T)" ) 
+								 }
+								 if(  d < DFREE/2  
+								  ){ counter++  
+								 if(  counter >= 3  
+								  ){ counter = 0  
+								 emit("productDetected", "productDetected(T)" ) 
+								 }
+								 }
+								 }
 						}
+						delay(3000) 
+						forward("keepDetecting", "keepDetecting(T)" ,name ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="detecting", cond=doswitch() )
+					 transition(edgeName="t32",targetState="detecting",cond=whenDispatch("keepDetecting"))
+					transition(edgeName="t33",targetState="turningoff",cond=whenDispatch("devicesStop"))
 				}	 
 				state("turningoff") { //this:State
 					action { //it:State
 						CommUtils.outgreen("sonarservice turning off: deactivating sonar...")
-						
-									reactorReady = false
-									detectorReady = false
 						forward("devicesStop", "devicesStop(T)" ,"reactor" ) 
 						delay(5000) 
 						//genTimer( actor, state )

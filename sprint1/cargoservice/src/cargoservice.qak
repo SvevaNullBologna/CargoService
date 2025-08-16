@@ -102,6 +102,8 @@ QActor cargoservice context ctx_cargoservice{
 	Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer
 	
+	
+	
 	State checkProdAnswer{
 		printCurrentMessage
 		onMsg(getProductAnswer : product(PJson)){

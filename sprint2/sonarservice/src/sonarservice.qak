@@ -1,0 +1,104 @@
+System cargoservice
+
+mqttBroker "192.168.137.1" : 1883 eventTopic "sonar/events" 
+
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
+
+Event sonardata : distance(D)
+
+Context ctx_sonarservice			ip [host="localhost" port=8004] 
+
+
+
+QActor listener context ctx_sonarservice{
+	[#
+		lateinit var reader : java.io.BufferedReader
+    	lateinit var p : Process	
+    	var Distance = 0
+	#]
+	State s0 initial{
+		println("$name turning on...") color green
+		[#
+			p = Runtime.getRuntime().exec("python sonar.py")
+			reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
+		#]
+		delay 2000
+	}Goto readSonarData
+	
+	State readSonarData{
+		[#
+			var data = reader.readLine()
+			
+			if(data!=null){
+				try{
+					val vd = data.toFloat()
+					val v = vd.toInt()
+					
+					if(v <= 100){
+						Distance = v 
+					}
+					else{
+						Distance = 0
+					}
+				}
+				catch(e: Exception){
+					CommUtils.outred("$name readSonarDataError: $e")
+				}
+			}
+		#]
+		if[#Distance > 0 #]
+		{
+			println("readsonardata : $data") color green
+			emitlocalstream sonardata : distance($Distance)
+		}	
+		delay 1000
+	}Goto readSonarData
+}
+
+QActor reactor context ctx_sonarservice{
+	[# 
+		val DFREE = 30
+		var counter = 0  
+		var anomaly = false
+	#]
+	State s0 initial{
+		println("$name turning on...") color green
+		delay 2000
+	}Goto waitingDistance
+		
+	State waitingDistance{
+		println("$name waiting command...") color green
+	}Transition t0
+	whenEvent sonardata -> filterDistance
+	
+	State filterDistance{
+		printCurrentMessage
+		[# val distance = payloadArg(0).toInt() #]
+		if[# distance > DFREE || distance < 0 #]{
+			[# anomaly = true #]
+			[# Runtime.getRuntime().exec("python ledOn.py") #]
+			emit anomalyDetected : anomalyDetected(T)
+		} 
+		else{ // 0 < distance < DFREE  
+			if[# anomaly #]{
+				[# anomaly = false #]
+				emit anomalyFixed : anomalyFixed(T)
+				[# Runtime.getRuntime().exec("python ledOff.py") #]
+			}
+			if[# distance < DFREE/2 #]{ // 0 < distance < DFREE/2
+				[# counter++ #]
+				if[# counter >= 3 #]{
+					[# counter = 0 #]
+					[# Runtime.getRuntime().exec("python ledCheck.py") #]
+					emit productDetected : productDetected(T)
+				}	
+			}
+			// DFREE/2 <= distance <= DFREE 
+		}
+	}Goto waitingDistance
+	
+}
+

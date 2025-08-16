@@ -8,10 +8,7 @@ event( anomalyFixed, anomalyFixed(T) ).
 dispatch( devicesStart, devicesStart(T) ).
 dispatch( devicesStop, devicesStop(T) ).
 event( reactorReady, reactorReady(T) ).
-event( detectorReady, detectorReady(T) ).
-dispatch( ready, ready(T) ).
-dispatch( notReadyYet, notReadyYet(T) ).
-dispatch( correctDistanceDetected, correctDistanceDetected(T) ).
+dispatch( distance, distance(Dist) ).
 dispatch( keepDetecting, keepDetecting(T) ).
 %====================================================================================
 context(ctx_sonarservice, "localhost",  "TCP", "8004").

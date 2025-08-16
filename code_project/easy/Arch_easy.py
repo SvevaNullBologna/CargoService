@@ -27,7 +27,10 @@ with Diagram('easyArch', show=False, outformat='png', graph_attr=graphattr) as d
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_easy', graph_attr=nodeattr):
           example=Custom('example','./qakicons/symActorWithobjSmall.png')
+          stoptest=Custom('stoptest','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_basicrobot', graph_attr=nodeattr):
           basicrobot=Custom('basicrobot(ext)','./qakicons/externalQActor.png')
      example >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     stoptest >> Edge(color='magenta', style='solid', decorate='true', label='<moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     stoptest >> Edge(color='blue', style='solid',  decorate='true', label='<nomoremove &nbsp; nextmove &nbsp; >',  fontcolor='blue') >> basicrobot
 diag

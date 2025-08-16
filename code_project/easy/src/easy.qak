@@ -3,11 +3,14 @@ System easy
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
 Dispatch setdirection : dir( D )  //up|down|left|right
+Dispatch nomoremove : nomoremove(M)
+Dispatch nextmove : nextmove(M)
 
 Reply engagedone : engagedone(E)
 Reply engagerefused : engagerefused(E) 
 Reply moverobotdone : moverobotdone(T)
 Reply moverobotfailed : moverobotfailed(T)
+
 
 //Context ctx_basicrobot ip[host="basicrobot24" port=8020]
  
@@ -49,7 +52,7 @@ QActor example context ctx_easy {
 	
 	State ok{
 		println("engage done") color blue
-		request basicrobot -m moverobot : moverobot(0,4)
+		request basicrobot -m moverobot : moverobot(6,4)
 	}
 	Transition t1
 	whenReply moverobotdone -> movedone
@@ -63,4 +66,32 @@ QActor example context ctx_easy {
 		println("error engage") color blue
 		delay 200
 	}Goto try
+}
+
+QActor stoptest context ctx_easy {
+	State s0 initial{
+		println("$name STARTS //////////////////////////////// ") color yellow
+		delay 5000
+	}
+	Goto test1
+	
+	State test1{
+		println("stopping robot ... //////////////////////////// ") color yellow
+		forward basicrobot -m nomoremove : nomoremove(M)
+		delay 3000
+	}Goto test2
+	
+	State test2{
+		println("resuming robot ... ////////////////////////") color yellow
+		forward basicrobot -m nextmove : nextmove(M)
+		delay 1000
+	}
+	Goto test3 
+	
+	State test3{
+		println("moverobot //////////////") color yellow
+		request basicrobot -m moverobot : moverobot(6,4)
+		delay 100
+	}
+	
 }

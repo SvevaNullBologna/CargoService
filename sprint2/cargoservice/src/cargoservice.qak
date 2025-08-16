@@ -42,7 +42,7 @@ Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
 Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
 //Context ctx_companysim 				ip [host="localhost" port=8003]
-Context ctx_sonarservice			ip [host="localhost" port=8004] //temp
+Context ctx_sonarservice			ip [host="localhost" port=8004] 
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
@@ -367,4 +367,3 @@ QActor webguimock context ctx_cargoservice{
 
  
  
-

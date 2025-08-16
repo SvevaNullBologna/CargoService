@@ -49,16 +49,16 @@ class Reactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t011",targetState="devicesOn",cond=whenDispatch("devicesStart"))
-					transition(edgeName="t012",targetState="devicesOff",cond=whenDispatch("devicesStop"))
-					transition(edgeName="t013",targetState="anomaly",cond=whenEvent("anomalyDetected"))
-					transition(edgeName="t014",targetState="productDetected",cond=whenEvent("productDetected"))
+					 transition(edgeName="t04",targetState="devicesOn",cond=whenDispatch("devicesStart"))
+					transition(edgeName="t05",targetState="devicesOff",cond=whenDispatch("devicesStop"))
+					transition(edgeName="t06",targetState="anomaly",cond=whenEvent("anomalyDetected"))
 				}	 
 				state("devicesOn") { //this:State
 					action { //it:State
 						
 									Runtime.getRuntime().exec("python sonarStart.py")
 									Runtime.getRuntime().exec("python ledCheck.py")
+						delay(1000) 
 						CommUtils.outgreen("sonardevice and led ready...")
 						emit("reactorReady", "reactorReady(T)" ) 
 						//genTimer( actor, state )
@@ -68,11 +68,26 @@ class Reactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 					}	 	 
 					 transition( edgeName="goto",targetState="waitingCommand", cond=doswitch() )
 				}	 
+				state("readDistance") { //this:State
+					action { //it:State
+						CommUtils.outgreen("reading distance ...")
+						
+									val p = Runtime.getRuntime().exec("python getSonarDistance.py")
+									val reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
+									val Dist = Integer.parseInt(reader.readLine())
+						forward("distance", "distance($Dist)" ,"sonarservice" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="readDistance", cond=doswitch() )
+				}	 
 				state("devicesOff") { //this:State
 					action { //it:State
 						
-									sonarProcess = Runtime.getRuntime().exec("python sonarStop.py")
-									ledProcess = Runtime.getRuntime().exec("python ledCheck.py")
+									Runtime.getRuntime().exec("python sonarStop.py")
+									Runtime.getRuntime().exec("python ledCheck.py")
 						CommUtils.outgreen("sonardevice and led off...")
 						delay(2000) 
 						//genTimer( actor, state )
@@ -84,24 +99,21 @@ class Reactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				}	 
 				state("anomaly") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name turning on led for anomaly...")
+						
+									Runtime.getRuntime().exec("python ledOn.py")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t115",targetState="anomalyFix",cond=whenEvent("anomalyFixed"))
+					 transition(edgeName="t17",targetState="anomalyFix",cond=whenEvent("anomalyFixed"))
 				}	 
 				state("anomalyFix") { //this:State
 					action { //it:State
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="waitingCommand", cond=doswitch() )
-				}	 
-				state("productDetected") { //this:State
-					action { //it:State
+						CommUtils.outblack("$name turning off led because the anomaly is fixed...")
+						
+									Runtime.getRuntime().exec("python ledOff.py")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
