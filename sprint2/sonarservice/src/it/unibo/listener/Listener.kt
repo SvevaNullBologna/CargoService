@@ -38,7 +38,7 @@ class Listener ( name: String, scope: CoroutineScope, isconfined: Boolean=false,
 					action { //it:State
 						CommUtils.outgreen("$name turning on...")
 						
-									p = Runtime.getRuntime().exec("python sonar.py")
+									p = Runtime.getRuntime().exec("python src/resources/python/sonar.py")
 									reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
 						delay(2000) 
 						//genTimer( actor, state )

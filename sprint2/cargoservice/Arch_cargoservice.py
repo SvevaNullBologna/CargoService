@@ -25,16 +25,25 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
-     with Cluster('ctx_sonarservice', graph_attr=nodeattr):
-          sonarservice=Custom('sonarservice','./qakicons/symActorWithobjSmall.png')
-          reactor=Custom('reactor','./qakicons/symActorWithobjSmall.png')
-     sys >> Edge( label='reactorReady', **evattr, decorate='true', fontcolor='darkgreen') >> sonarservice
-     sonarservice >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sonarservice >> Edge( label='anomalyFixed', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sonarservice >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sys >> Edge( label='anomalyDetected', **evattr, decorate='true', fontcolor='darkgreen') >> reactor
-     reactor >> Edge( label='reactorReady', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> reactor
-     reactor >> Edge(color='blue', style='solid',  decorate='true', label='<distance &nbsp; >',  fontcolor='blue') >> sonarservice
-     sonarservice >> Edge(color='blue', style='solid',  decorate='true', label='<devicesStart &nbsp; devicesStop &nbsp; >',  fontcolor='blue') >> reactor
+     with Cluster('ctx_cargoservice', graph_attr=nodeattr):
+          companysimulator=Custom('companysimulator','./qakicons/symActorWithobjSmall.png')
+          cargoservice=Custom('cargoservice','./qakicons/symActorWithobjSmall.png')
+          cargorobot=Custom('cargorobot','./qakicons/symActorWithobjSmall.png')
+          webguimock=Custom('webguimock','./qakicons/symActorWithobjSmall.png')
+     with Cluster('ctx_productservice', graph_attr=nodeattr):
+          productservice=Custom('productservice(ext)','./qakicons/externalQActor.png')
+     with Cluster('ctx_basicrobot', graph_attr=nodeattr):
+          basicrobot=Custom('basicrobot(ext)','./qakicons/externalQActor.png')
+     sys >> Edge( label='productDetected', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
+     sys >> Edge( label='deliveredToSlot', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
+     sys >> Edge( label='finishedtransport', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
+     cargorobot >> Edge( label='deliveredToSlot', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     cargorobot >> Edge( label='finishedtransport', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     cargorobot >> Edge( label='alarm', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> cargorobot
+     cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
+     companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
+     cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; >',  fontcolor='blue') >> basicrobot
+     cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag

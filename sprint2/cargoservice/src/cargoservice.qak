@@ -1,5 +1,6 @@
 System cargoservice
  
+mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
@@ -37,12 +38,13 @@ Dispatch update : update(U)
 //CargoRobot -> Whoever is listening
 Event finishedtransport : finishedtransport(T)
 
-
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
 Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
 //Context ctx_companysim 				ip [host="localhost" port=8003]
-Context ctx_sonarservice			ip [host="localhost" port=8004] 
+Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo partire il sonar sulla stessa macchina
+//Context ctx_sonarservice 			ip [host="" port=8004] //per quando deve cercare il raspberry
+
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
@@ -101,6 +103,8 @@ QActor cargoservice context ctx_cargoservice{
 	}
 	Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer
+	
+	
 	
 	State checkProdAnswer{
 		printCurrentMessage
@@ -367,3 +371,4 @@ QActor webguimock context ctx_cargoservice{
 
  
  
+

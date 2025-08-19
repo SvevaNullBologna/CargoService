@@ -1,28 +1,82 @@
 System cargoservice
 
-mqttBroker "192.168.137.1" : 1883 eventTopic "sonar/events" 
+mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
 
-//SonarService -> Whoever is listening
+//sonar_reactor -> Whoever is listening
 Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
 Event anomalyFixed : anomalyFixed(T)
+//sonar_listener -> localstream
+Event distance : distance(D)
 
-Event sonardata : distance(D)
 
 Context ctx_sonarservice			ip [host="localhost" port=8004] 
 
 
 
-QActor listener context ctx_sonarservice{
+/*QActor sonarsimul context ctx_sonarservice{
+	State s0 initial{
+		println("$name starts") color cyan
+		
+	}Goto work 
+	
+	State work{
+		delay 1000 // attendo che sonarlistener entri in attesa
+		
+		// misurazioni non consistenti
+		[# var M = 30 #]
+		println("emitting 30 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	    delay 1000
+	    [# M = 15 #]
+	    println("emitting 15 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	    delay 1000
+	    [# M = 10 #]
+	    println("emitting 10 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	    delay 1000
+	    [# M = 0 #]
+	    println("emitting 0 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	    delay 1000
+	    [# M = 10 #]
+	    println("emitting 10 ...") color magenta
+		emitlocalstream distance      : distance($M)
+		delay 1000
+		[# M = 10 #]
+	    println("emitting 10 ...") color magenta
+		emitlocalstream distance      : distance($M)
+		delay 1000
+	    [# M = 10 #]
+	    println("emitting 10 ...") color magenta
+		emitlocalstream distance      : distance($M)
+		[# M = 10 #]
+	    println("emitting 10 ...") color magenta
+		emitlocalstream distance      : distance($M)
+		[# M = 40 #]
+	    println("emitting 40 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	    [# M = 0 #]
+	    println("emitting 0 ...") color magenta
+		emitlocalstream distance      : distance($M)
+		[# M = 40 #]
+	    println("emitting 40 ...") color magenta
+		emitlocalstream distance      : distance($M)
+	}
+}*/
+
+
+QActor sonar_listener context ctx_sonarservice{
 	[#
 		lateinit var reader : java.io.BufferedReader
     	lateinit var p : Process	
     	var Distance = 0
 	#]
 	State s0 initial{
-		println("$name turning on...") color green
+		println("$name turning on...") color magenta
 		[#
-			p = Runtime.getRuntime().exec("python sonar.py")
+			p = Runtime.getRuntime().exec("python src/resources/python/sonar.py")
 			reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
 		#]
 		delay 2000
@@ -49,16 +103,17 @@ QActor listener context ctx_sonarservice{
 				}
 			}
 		#]
-		if[#Distance > 0 #]
+		if[#Distance >= 0 #]
 		{
-			println("readsonardata : $data") color green
-			emitlocalstream sonardata : distance($Distance)
+			println("readsonardata : $data") color magenta
+			emitlocalstream distance : distance($Distance)
 		}	
 		delay 1000
 	}Goto readSonarData
 }
 
-QActor reactor context ctx_sonarservice{
+
+QActor sonar_reactor context ctx_sonarservice{
 	[# 
 		val DFREE = 30
 		var counter = 0  
@@ -66,39 +121,80 @@ QActor reactor context ctx_sonarservice{
 	#]
 	State s0 initial{
 		println("$name turning on...") color green
+		subscribeTo sonar_listener for distance
+		//subscribeTo sonarsimul for distance
 		delay 2000
 	}Goto waitingDistance
 		
 	State waitingDistance{
 		println("$name waiting command...") color green
 	}Transition t0
-	whenEvent sonardata -> filterDistance
+	whenEvent distance -> filterDistance
 	
 	State filterDistance{
 		printCurrentMessage
-		[# val distance = payloadArg(0).toInt() #]
-		if[# distance > DFREE || distance < 0 #]{
-			[# anomaly = true #]
-			[# Runtime.getRuntime().exec("python ledOn.py") #]
-			emit anomalyDetected : anomalyDetected(T)
-		} 
-		else{ // 0 < distance < DFREE  
-			if[# anomaly #]{
-				[# anomaly = false #]
-				emit anomalyFixed : anomalyFixed(T)
-				[# Runtime.getRuntime().exec("python ledOff.py") #]
-			}
-			if[# distance < DFREE/2 #]{ // 0 < distance < DFREE/2
-				[# counter++ #]
-				if[# counter >= 3 #]{
+		onMsg(distance : distance(D)){
+			[# val distance = payloadArg(0).toInt() #]
+			println("distance detected = $distance") color magenta
+			if[# distance > DFREE || distance < 0 #]{
+				[# anomaly = true #]		
+				println("anomaly detected ") color green
+				emit anomalyDetected : anomalyDetected(T)
+			} 
+			else{ // 0 < distance < DFREE  
+				if[# anomaly #]{
+					[# anomaly = false #]
+					emit anomalyFixed : anomalyFixed(T)
+					println("anomaly fixed") color green	
+				}
+				if[# distance < DFREE/2 #]{ // 0 < distance < DFREE/2
+					[# counter++ #]
+					if[# counter >= 3 #]{
+						[# counter = 0 
+					   	 #]
+						println("productDetected") color green
+						emit productDetected : productDetected(T)
+					}	
+				}
+				else{
+					println("needs more detecting") color green
 					[# counter = 0 #]
-					[# Runtime.getRuntime().exec("python ledCheck.py") #]
-					emit productDetected : productDetected(T)
-				}	
-			}
+				}
 			// DFREE/2 <= distance <= DFREE 
+			}
 		}
 	}Goto waitingDistance
+	
+}
+
+QActor led_device context ctx_sonarservice{
+	State s0 initial{
+		println("$name starts") color yellow
+	}
+	Goto waitingcommand
+	
+	State waitingcommand{
+		println("$name waiting command") color yellow
+	}
+	Transition t0 
+	whenEvent anomalyDetected -> turnlighton 
+	whenEvent anomalyFixed -> turnlightoff
+	whenEvent productDetected -> blinklight
+	
+	State turnlighton{
+		println("$name turning light on") color yellow
+		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25On.py") #]
+	}Goto waitingcommand
+	
+	State turnlightoff{
+		println("$name turning light off") color yellow
+		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25Off.py") #]
+	}Goto waitingcommand
+	
+	State blinklight{
+		println("$name blinking light") color yellow 
+		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25Blink.py") #]
+	}Goto waitingcommand
 	
 }
 

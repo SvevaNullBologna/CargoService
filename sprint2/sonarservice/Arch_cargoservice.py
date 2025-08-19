@@ -26,10 +26,14 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_sonarservice', graph_attr=nodeattr):
-          listener=Custom('listener','./qakicons/symActorWithobjSmall.png')
-          reactor=Custom('reactor','./qakicons/symActorWithobjSmall.png')
-     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> reactor
-     reactor >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     reactor >> Edge( label='anomalyFixed', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     reactor >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+          sonar_listener=Custom('sonar_listener','./qakicons/symActorWithobjSmall.png')
+          sonar_reactor=Custom('sonar_reactor','./qakicons/symActorWithobjSmall.png')
+          led_device=Custom('led_device','./qakicons/symActorWithobjSmall.png')
+     sonar_listener >> Edge( label='distance', **eventedgeattr, decorate='true', fontcolor='red') >> sonar_reactor
+     sonar_reactor >> Edge( label='anomalyDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonar_reactor >> Edge( label='anomalyFixed', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sonar_reactor >> Edge( label='productDetected', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sys >> Edge( label='anomalyDetected', **evattr, decorate='true', fontcolor='darkgreen') >> led_device
+     sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> led_device
+     sys >> Edge( label='productDetected', **evattr, decorate='true', fontcolor='darkgreen') >> led_device
 diag

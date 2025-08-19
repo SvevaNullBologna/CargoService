@@ -1,14 +1,16 @@
 %====================================================================================
 % cargoservice description   
 %====================================================================================
-mqttBroker("192.168.137.1", "1883", "sonar/events").
+mqttBroker("mosquittoalone", "1883", "unibo/qak/events").
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
-event( sonardata, distance(D) ).
+event( distance, distance(D) ).
 %====================================================================================
 context(ctx_sonarservice, "localhost",  "TCP", "8004").
- qactor( listener, ctx_sonarservice, "it.unibo.listener.Listener").
- static(listener).
-  qactor( reactor, ctx_sonarservice, "it.unibo.reactor.Reactor").
- static(reactor).
+ qactor( sonar_listener, ctx_sonarservice, "it.unibo.sonar_listener.Sonar_listener").
+ static(sonar_listener).
+  qactor( sonar_reactor, ctx_sonarservice, "it.unibo.sonar_reactor.Sonar_reactor").
+ static(sonar_reactor).
+  qactor( led_device, ctx_sonarservice, "it.unibo.led_device.Led_device").
+ static(led_device).
