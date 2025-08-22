@@ -5,8 +5,6 @@ mqttBroker("mosquittoalone", "1883", "unibo/qak/events").
 request( loadrequest, loadrequest(PID) ).
 request( getProduct, product(ID) ).
 reply( getProductAnswer, product(JSonString) ).  %%for getProduct
-dispatch( accepted, accepted(PID,Weight,Slot) ).
-dispatch( refused, refused(PID,Weight) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).
@@ -17,8 +15,11 @@ request( moverobot, moverobot(x,y) ).
 dispatch( setdirection, dir(D) ).
 event( alarm, alarm(reason) ).
 event( info, info(x) ).
-dispatch( update, update(U) ).
+dispatch( update, update(HoldJsonString) ).
 event( finishedtransport, finishedtransport(T) ).
+request( checkIfFits, checkIfFits(PID,Weight) ).
+reply( accepted, accepted(JsonString) ).  %%for checkIfFits
+reply( refused, refused(PID,Weight) ).  %%for checkIfFits
 %====================================================================================
 context(ctx_cargoservice, "localhost",  "TCP", "8000").
 context(ctx_productservice, "127.0.0.1",  "TCP", "8111").

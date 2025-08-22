@@ -51,7 +51,7 @@ public class Slots{
 		return getSlotById(id).getDepositY();
 	}
 	
-	public int getAvaiableSlotID(){
+	public int getAvailableSlotID(){
 		for(Slot s: slotList) {
 			if(s.isAvaiable()){
 				return s.getId();

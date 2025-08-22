@@ -36,15 +36,17 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      with Cluster('ctx_basicrobot', graph_attr=nodeattr):
           basicrobot=Custom('basicrobot(ext)','./qakicons/externalQActor.png')
      sys >> Edge( label='productDetected', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
-     sys >> Edge( label='deliveredToSlot', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
      sys >> Edge( label='finishedtransport', **evattr, decorate='true', fontcolor='darkgreen') >> cargoservice
      cargorobot >> Edge( label='deliveredToSlot', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge( label='finishedtransport', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      cargorobot >> Edge( label='alarm', **eventedgeattr, decorate='true', fontcolor='red') >> sys
      sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> cargorobot
+     sys >> Edge( label='deliveredToSlot', **evattr, decorate='true', fontcolor='darkgreen') >> hold
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
+     cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<checkIfFits<font color="darkgreen"> accepted refused</font> &nbsp; >',  fontcolor='magenta') >> hold
      companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest &nbsp; >',  fontcolor='magenta') >> cargoservice
      cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; >',  fontcolor='blue') >> basicrobot
+     hold >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> webguimock
      cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag

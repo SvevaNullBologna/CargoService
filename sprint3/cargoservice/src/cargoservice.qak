@@ -8,9 +8,7 @@ Request loadrequest : loadrequest(PID)
 Request getProduct : product(ID) 
 //ProductService -> CompanySimulator 
 Reply getProductAnswer : product(JSonString) for getProduct
-//CargoService -> CargoService
-Dispatch accepted : accepted(PID, Weight, Slot)
-Dispatch refused : refused(PID, Weight)
+
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
 Event anomalyDetected : anomalyDetected(T)
@@ -33,10 +31,17 @@ Reply moverobotfailed : moverobotfailed(T)
 
 
 //CargoRobot -> webgui
-Dispatch update : update(U)
+Dispatch update : update(HoldJsonString)
 
 //CargoRobot -> Whoever is listening
 Event finishedtransport : finishedtransport(T)
+
+//CargoService -> Hold
+Request checkIfFits : checkIfFits(PID,Weight)
+//CargoService -> CargoService
+Reply accepted : accepted(JsonString) for checkIfFits
+Reply refused : refused(PID, Weight) for checkIfFits
+
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
@@ -63,26 +68,21 @@ QActor companysimulator context ctx_cargoservice{
 }
 
 QActor cargoservice context ctx_cargoservice{
-	import "main.java.Slots"
-	import "main.java.Slot"
+	import "main.java.*"
 	import "main.java.domain.Product"
 	
 	[#
-		val MaxLoad = 1000
-		lateinit var S: Slots
-		var Cur_HoldWeight = 0
-
 		var Cur_Slot_ID = -1
 		var Cur_PID = -1
 		var Cur_Weight = -1
 		var Cur_Direction = "down"
 		
+		
+		var Cur_SlotX = -1
+		var Cur_SlotY = -1
 	#]
 	State s0 initial{
 		println("cargoservice STARTS") color magenta
-		[#
-			S = Slots()
-		#]
 		delay 5000
 	}
 	Goto waitrequest
@@ -101,10 +101,9 @@ QActor cargoservice context ctx_cargoservice{
 			request productservice -m getProduct : getProduct($Cur_PID)
 		}
 	}
-	Transition t1 
-	whenReply getProductAnswer -> checkProdAnswer
-	
-	
+	Goto validateRequest ///////////////////////////////////////////////////////////////
+	/*Transition t1 
+	whenReply getProductAnswer -> checkProdAnswer*/
 	
 	State checkProdAnswer{
 		printCurrentMessage
@@ -119,27 +118,46 @@ QActor cargoservice context ctx_cargoservice{
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
-	State managerefusal{
-		println("Request refused. Back to wait.") color magenta
-	}Goto waitrequest
 	
 	State validateRequest{
-		[# 
-			Cur_Slot_ID = S.getAvaiableSlotID()
-			val canLoad = Cur_Weight > 0 && (Cur_HoldWeight + Cur_Weight) <= MaxLoad && Cur_Slot_ID != -1 
+		[#
+			Cur_PID = 1
+			Cur_Weight = 30 
 		#]
-			if[#canLoad#]{
-				autodispatch accepted : accepted($Cur_PID, $Cur_Weight, $Cur_Slot_ID)
-			}
-			else{
-				autodispatch refused : refused($Cur_PID, $Cur_Weight)
-			}	 
+		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
 	}
 	Transition t2 
-	whenMsg accepted -> waitForProduct
-	whenMsg refused -> managerefusal
+	whenReply accepted -> retrieveDataFromHold
+	whenReply refused -> managerefusal
 	
-State waitForProduct{
+	State retrieveDataFromHold{
+		printCurrentMessage
+		onMsg(accepted : accepted(JsonString)){
+			[#
+				val jsonStr = payloadArg(0).toString()
+            	val jsonObj = org.json.JSONObject(jsonStr)
+            	
+            	Cur_PID = jsonObj.getInt("pid")
+            	Cur_Weight = jsonObj.getInt("weight")
+            	Cur_Slot_ID = jsonObj.getInt("id")
+            	Cur_SlotX = jsonObj.getInt("x")
+            	Cur_SlotY = jsonObj.getInt("y")
+            	Cur_Direction = jsonObj.getString("dir")
+			#]
+			 println("Data retrieved from hold: PID=$Cur_PID, Weight=$Cur_Weight, Slot=$Cur_Slot_ID, X=$Cur_SlotX, Y=$Cur_SlotY, Dir=$Cur_Direction") color magenta
+		}
+	}Goto waitForProduct
+	
+	State managerefusal{
+		println("Request refused. Back to wait.") color magenta
+		[#
+				Cur_Slot_ID = -1
+				Cur_PID = -1
+				Cur_Weight = -1
+		#]
+	}Goto waitrequest
+	
+	State waitForProduct{
 		println("REQUEST ACCEPTED. Waiting for product on IOPort...") color magenta
 	}
 	Transition t3
@@ -148,34 +166,17 @@ State waitForProduct{
 	State serveloadrequest{
 		println("Product detected. Moving robot...") color magenta
 		println("Slot = $Cur_Slot_ID") color magenta
-		[#
-			val DestinationX = S.getDepositPositionXById(Cur_Slot_ID)
-			val DestinationY = S.getDepositPositionYById(Cur_Slot_ID)
-			val Direction = S.getSlotDepositDirectionById(Cur_Slot_ID)
-		#]
-		forward cargorobot -m command : command($DestinationX, $DestinationY, $Direction)
+		forward cargorobot -m command : command($Cur_SlotX, $Cur_SlotY, $Cur_Direction)
 	}Goto waitendofrequest
 	
 	
-State delivered{
-	
-}
-	State waitendofrequest{
+	State waitendofrequest{ 
 		println("Waiting for robot to finish its task...") color magenta
 		delay 300 	
 	}
 	Transition t4 
-	whenEvent deliveredToSlot -> registerDelivery
 	whenEvent finishedtransport -> lastoperations 
 	
-	State registerDelivery{
-		[#
-					S.registerProductInSlot(Cur_Slot_ID)
-				  	Cur_HoldWeight = Cur_HoldWeight + Cur_Weight 
-				  	val T = "loaded to $Cur_Slot_ID"
-				#]
-				println("product delivered successfully...") color magenta
-	}
 	
 	State lastoperations{
 		printCurrentMessage
@@ -248,7 +249,6 @@ QActor cargorobot context ctx_cargoservice {
 				DestSlotX = payloadArg(0).toInt()
 				DestSlotY = payloadArg(1).toInt()
 				Direction = payloadArg(2).toString()
-				
 			#]
 			
 		}
@@ -351,18 +351,64 @@ QActor cargorobot context ctx_cargoservice {
 	
 }
  
+
 QActor hold context ctx_cargoservice{
+	import "main.java.HoldData"
+	import "main.java.Slot"
 	[#
-		lateinit var S: Slots
+		lateinit var hold : HoldData 
+		var AvailableSlot: Slot? = null
+		var ProductWeight = -1
+		
 	#]
 	State s0 initial{
-		println("$name starts") color yellow
-	}Goto managing
+		println("$name starting") color yellow
+		[#
+			hold = HoldData()
+		#]
+	}Goto waiting_request
 	
-	State managing{
+	State waiting_request{ //while it waits, it sends update to the GUI
+		println("$name waiting request...") color yellow
+		println("$name sending update to webgui...") color yellow
+		[# val HoldJsonString = hold.holdToJson() #]
+		forward webguimock -m update : update(HoldJsonString)
 		
 	}
+	Transition t0 
+	whenRequest checkIfFits -> checkRequest
+	whenEvent deliveredToSlot -> registerDelivery
+	
+	State checkRequest{
+		onMsg(checkIfFits : checkIfFits(PID,Weight)){
+			[#
+				val ProductPID = payloadArg(0).toInt();
+				ProductWeight = payloadArg(1).toInt();
+				AvailableSlot = hold.getAvailableSlot();
+			#]
+			if[# hold.canLoad( AvailableSlot!!.getId(), ProductWeight) #]{
+				[# val ResultOfRequest = hold.checkResultToJson(AvailableSlot!!, ProductPID, ProductWeight) #]
+				replyTo checkIfFits with accepted : accepted($ResultOfRequest)
+			}
+			else{
+				replyTo checkIfFits with refused : refused(ProductPID, ProductWeight)
+			}
+		}
+	}Goto waiting_request
+	
+	State registerDelivery{
+		[#
+			hold.registerProductInSlot(AvailableSlot!!, ProductWeight)
+		#]
+				println("product delivered successfully...") color yellow
+		[#
+			AvailableSlot = null
+			ProductWeight = -1
+		#]
+	}Goto waiting_request
+	
 }
+
 QActor webguimock context ctx_cargoservice{
 	State s0 initial{
 		println("$name STARTING") color blue
