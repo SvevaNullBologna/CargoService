@@ -40,7 +40,7 @@ Event finishedtransport : finishedtransport(T)
 Request checkIfFits : checkIfFits(PID,Weight)
 //CargoService -> CargoService
 Reply accepted : accepted(JsonString) for checkIfFits
-Reply refused : refused(PID, Weight) for checkIfFits
+Reply refused : refused(Reason) for checkIfFits
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
@@ -149,7 +149,12 @@ QActor cargoservice context ctx_cargoservice{
 	}Goto waitForProduct
 	
 	State managerefusal{
-		println("Request refused. Back to wait.") color magenta
+		printCurrentMessage
+		onMsg(refused : refused(Reason)){
+			[# val reason = payloadArg(0).toString() #]
+			println("Request refused because of ${reason}. Back to wait.") color magenta
+		}
+		
 		[#
 				Cur_Slot_ID = -1
 				Cur_PID = -1
@@ -391,7 +396,8 @@ QActor hold context ctx_cargoservice{
 				replyTo checkIfFits with accepted : accepted($ResultOfRequest)
 			}
 			else{
-				replyTo checkIfFits with refused : refused(ProductPID, ProductWeight)
+				[# val Reason = "product does not fit in the hold"#]
+				replyTo checkIfFits with refused : refused($Reason)
 			}
 		}
 	}Goto waiting_request

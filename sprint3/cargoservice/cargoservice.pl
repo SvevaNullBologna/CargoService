@@ -19,7 +19,7 @@ dispatch( update, update(HoldJsonString) ).
 event( finishedtransport, finishedtransport(T) ).
 request( checkIfFits, checkIfFits(PID,Weight) ).
 reply( accepted, accepted(JsonString) ).  %%for checkIfFits
-reply( refused, refused(PID,Weight) ).  %%for checkIfFits
+reply( refused, refused(Reason) ).  %%for checkIfFits
 %====================================================================================
 context(ctx_cargoservice, "localhost",  "TCP", "8000").
 context(ctx_productservice, "127.0.0.1",  "TCP", "8111").
