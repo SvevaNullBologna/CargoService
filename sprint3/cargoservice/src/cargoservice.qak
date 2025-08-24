@@ -410,27 +410,18 @@ QActor hold context ctx_cargoservice{
 }
 
 QActor webgui context ctx_cargoservice{
-	import "unirest.Unirest"
 	[#
 		fun sendUpdateToWebGui(jsonString: String) {
-            try {
-                // We're making a POST request to a new endpoint on your Spring server
-                Unirest.post("http://localhost:8085/update")
-                    .header("Content-Type", "application/json")
-                    .body(jsonString)
-                    .asString()
-            } catch (e: Exception) {
-                println("ERROR: Failed to send update to web GUI: ${e.message}")
-            }
+          
         }
-	#]
+	#] 
 	State s0 initial{
-		println("///// $name starting /////") color cyan
+		println("---- $name starting ----") color cyan
 		observeResource hold msgid update
 	}Goto waitingUpdate
 	
 	State waitingUpdate{
-		println("//// $name waiting for update ////") color cyan
+		println("---- $name waiting for update ----") color cyan
 	}
 	Transition t0
 	whenMsg update -> updatingWebGui 
@@ -439,11 +430,11 @@ QActor webgui context ctx_cargoservice{
 		printCurrentMessage
 		onMsg(update : update(HoldJsonString)){
 			[# val HoldJsonString = payloadArg(0).toString() #]
-			println("//// $name received update for webgui: \n $HoldJsonString \n////") color cyan
+			println("$name received update for webgui: ${HoldJsonString}") color cyan
 			[#	
 				sendUpdateToWebGui(HoldJsonString)
 			#]
-			println("//// $name has sent an update to webgui: \n $HoldJsonString \n////") color cyan
+			println("$name has sent an update to webgui: ${HoldJsonString}") color cyan
 		}
 		
 	}Goto waitingUpdate

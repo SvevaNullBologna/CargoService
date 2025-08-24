@@ -19,7 +19,6 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
-import unirest.Unirest
 
 class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -32,20 +31,12 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
 				fun sendUpdateToWebGui(jsonString: String) {
-		            try {
-		                // We're making a POST request to a new endpoint on your Spring server
-		                Unirest.post("http://localhost:8085/update")
-		                    .header("Content-Type", "application/json")
-		                    .body(jsonString)
-		                    .asString()
-		            } catch (e: Exception) {
-		                println("ERROR: Failed to send update to web GUI: ${e.message}")
-		            }
+		          
 		        }
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outcyan("///// $name starting /////")
+						CommUtils.outcyan("---- $name starting ----")
 						observeResource("localhost","8000","ctx_cargoservice","hold","update")
 						//genTimer( actor, state )
 					}
@@ -56,7 +47,7 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 				}	 
 				state("waitingUpdate") { //this:State
 					action { //it:State
-						CommUtils.outcyan("//// $name waiting for update ////")
+						CommUtils.outcyan("---- $name waiting for update ----")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -71,14 +62,10 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 						if( checkMsgContent( Term.createTerm("update(HoldJsonString)"), Term.createTerm("update(HoldJsonString)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val HoldJsonString = payloadArg(0).toString()  
-								CommUtils.outcyan("//// $name received update for webgui: 
-								 $HoldJsonString 
-								////")
+								CommUtils.outcyan("$name received update for webgui: ${HoldJsonString}")
 									
 												sendUpdateToWebGui(HoldJsonString)
-								CommUtils.outcyan("//// $name has sent an update to webgui: 
-								 $HoldJsonString 
-								////")
+								CommUtils.outcyan("$name has sent an update to webgui: ${HoldJsonString}")
 						}
 						//genTimer( actor, state )
 					}
