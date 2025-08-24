@@ -31,8 +31,24 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
 				fun sendUpdateToWebGui(jsonString: String) {
-		          
+		    try {
+		        val url = java.net.URL("http://localhost:8085/webgui/update")
+		        with(url.openConnection() as java.net.HttpURLConnection) {
+		            requestMethod = "POST"
+		            setRequestProperty("Content-Type", "application/json; utf-8")
+		            doOutput = true
+		            outputStream.use { os ->
+		                val input = jsonString.toByteArray(Charsets.UTF_8)
+		                os.write(input, 0, input.size)
+		            }
+		            val responseCode = responseCode
+		            println("Sent JSON to webgui, response code: $responseCode")
 		        }
+		    } catch (e: Exception) {
+		        println("Error sending JSON to webgui: ${e.message}")
+		    }
+		}
+				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -62,10 +78,10 @@ class Webgui ( name: String, scope: CoroutineScope, isconfined: Boolean=false, i
 						if( checkMsgContent( Term.createTerm("update(HoldJsonString)"), Term.createTerm("update(HoldJsonString)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val HoldJsonString = payloadArg(0).toString()  
-								CommUtils.outcyan("$name received update for webgui: ${HoldJsonString}")
+								CommUtils.outcyan("$name received update for webgui")
 									
 												sendUpdateToWebGui(HoldJsonString)
-								CommUtils.outcyan("$name has sent an update to webgui: ${HoldJsonString}")
+								CommUtils.outcyan("$name has sent an update to webgui")
 						}
 						//genTimer( actor, state )
 					}

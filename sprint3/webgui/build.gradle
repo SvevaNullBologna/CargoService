@@ -16,7 +16,6 @@ java {
 
 repositories {
 	mavenCentral()
-	flatDir { dirs '../unibolibs' }
 }
 
 dependencies {
@@ -26,13 +25,6 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	
-	 //Added for WebSocket
- 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
- 	//JSON
-  	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
- 	//CUSTOM unibo
-    implementation name: 'unibo.basicomm23-1.0'
 }
 
 tasks.named('test') {

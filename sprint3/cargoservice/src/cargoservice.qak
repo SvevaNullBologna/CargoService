@@ -412,8 +412,24 @@ QActor hold context ctx_cargoservice{
 QActor webgui context ctx_cargoservice{
 	[#
 		fun sendUpdateToWebGui(jsonString: String) {
-          
+    try {
+        val url = java.net.URL("http://localhost:8085/webgui/update")
+        with(url.openConnection() as java.net.HttpURLConnection) {
+            requestMethod = "POST"
+            setRequestProperty("Content-Type", "application/json; utf-8")
+            doOutput = true
+            outputStream.use { os ->
+                val input = jsonString.toByteArray(Charsets.UTF_8)
+                os.write(input, 0, input.size)
+            }
+            val responseCode = responseCode
+            println("Sent JSON to webgui, response code: $responseCode")
         }
+    } catch (e: Exception) {
+        println("Error sending JSON to webgui: ${e.message}")
+    }
+}
+		
 	#] 
 	State s0 initial{
 		println("---- $name starting ----") color cyan
@@ -430,11 +446,11 @@ QActor webgui context ctx_cargoservice{
 		printCurrentMessage
 		onMsg(update : update(HoldJsonString)){
 			[# val HoldJsonString = payloadArg(0).toString() #]
-			println("$name received update for webgui: ${HoldJsonString}") color cyan
+			println("$name received update for webgui") color cyan
 			[#	
 				sendUpdateToWebGui(HoldJsonString)
 			#]
-			println("$name has sent an update to webgui: ${HoldJsonString}") color cyan
+			println("$name has sent an update to webgui") color cyan
 		}
 		
 	}Goto waitingUpdate
