@@ -15,8 +15,11 @@ Event anomalyDetected : anomalyDetected(T)
 Event anomalyFixed : anomalyFixed(T)
 //CargoService -> cargorobot
 Dispatch command : command(X,Y,DIR)
+//CargoService -> Hold
+Request checkIfFits : checkIfFits(PID,Weight)
 //Cargorobot -> Whoever is listening 
 Event deliveredToSlot : deliveredToSlot(T)
+Event finishedtransport : finishedtransport(T)
 //CargoRobot -> BasicRobot 
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
@@ -28,19 +31,11 @@ Reply engagedone : engagedone(E)
 Reply engagerefused : engagerefused(E) 
 Reply moverobotdone : moverobotdone(T)
 Reply moverobotfailed : moverobotfailed(T)
-
-
-//CargoRobot -> webgui
-Dispatch update : update(HoldJsonString)
-
-//CargoRobot -> Whoever is listening
-Event finishedtransport : finishedtransport(T)
-
-//CargoService -> Hold
-Request checkIfFits : checkIfFits(PID,Weight)
-//CargoService -> CargoService
+//Hold -> CargoService
 Reply accepted : accepted(JsonString) for checkIfFits
 Reply refused : refused(Reason) for checkIfFits
+//Hold -> webgui
+Dispatch update : update(HoldJsonString)
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
@@ -50,7 +45,6 @@ Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
 Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo partire il sonar sulla stessa macchina
 //Context ctx_sonarservice 			ip [host="" port=8004] //per quando deve cercare il raspberry
 
-
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
 
@@ -59,8 +53,7 @@ QActor companysimulator context ctx_cargoservice{
  	State s0 initial {
  		println("$name STARTS") color cyan
  		delay 5000
-  	}Goto sendRequest
-  	
+	}  	
   	State sendRequest{
   		println("$name sending request ") color cyan
   		request cargoservice -m loadrequest : loadrequest(10)
@@ -368,17 +361,16 @@ QActor hold context ctx_cargoservice{
 	#]
 	State s0 initial{
 		println("$name starting") color yellow
+		delay 1000
 		[#
 			hold = HoldData()
-		#]
+			val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
 	}Goto waiting_request
 	
 	State waiting_request{ //while it waits, it sends update to the GUI
 		println("$name waiting request...") color yellow
 		println("$name sending update to webgui...") color yellow
-		[# val HoldJsonString = hold.holdToJson() #]
-		forward webguimock -m update : update(HoldJsonString)
-		
 	}
 	Transition t0 
 	whenRequest checkIfFits -> checkRequest
@@ -411,25 +403,51 @@ QActor hold context ctx_cargoservice{
 			AvailableSlot = null
 			ProductWeight = -1
 		#]
+		[# val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
 	}Goto waiting_request
-	
+		
 }
 
-QActor webguimock context ctx_cargoservice{
+QActor webgui context ctx_cargoservice{
+	import "unirest.Unirest"
+	[#
+		fun sendUpdateToWebGui(jsonString: String) {
+            try {
+                // We're making a POST request to a new endpoint on your Spring server
+                Unirest.post("http://localhost:8085/update")
+                    .header("Content-Type", "application/json")
+                    .body(jsonString)
+                    .asString()
+            } catch (e: Exception) {
+                println("ERROR: Failed to send update to web GUI: ${e.message}")
+            }
+        }
+	#]
 	State s0 initial{
-		println("$name STARTING") color blue
-		delay 5000
-	}Goto waitforupdate
+		println("///// $name starting /////") color cyan
+		observeResource hold msgid update
+	}Goto waitingUpdate
 	
-	State waitforupdate{
-		println("waiting for update of gui...") color blue
-	}Transition t0 whenMsg update -> updategui
-	
-	State updategui{
-			println("updating webgui...") color blue
-	}Goto waitforupdate
+	State waitingUpdate{
+		println("//// $name waiting for update ////") color cyan
+	}
+	Transition t0
+	whenMsg update -> updatingWebGui 
+	 
+	State updatingWebGui {
+		printCurrentMessage
+		onMsg(update : update(HoldJsonString)){
+			[# val HoldJsonString = payloadArg(0).toString() #]
+			println("//// $name received update for webgui: \n $HoldJsonString \n////") color cyan
+			[#	
+				sendUpdateToWebGui(HoldJsonString)
+			#]
+			println("//// $name has sent an update to webgui: \n $HoldJsonString \n////") color cyan
+		}
+		
+	}Goto waitingUpdate
 }
-
 
 
  

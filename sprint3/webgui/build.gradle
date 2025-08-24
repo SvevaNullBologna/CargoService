@@ -1,0 +1,40 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'unibo.disi'
+version = '0.0.1-SNAPSHOT'
+description = 'GUI per il cargoservice'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+	flatDir { dirs '../unibolibs' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	 //Added for WebSocket
+ 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+ 	//JSON
+  	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+ 	//CUSTOM unibo
+    implementation name: 'unibo.basicomm23-1.0'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

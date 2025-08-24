@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HOLD - Magazzino Carico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .warehouse-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Allinea i rettangoli in basso */
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .slot {
+            width: 80px;
+            height: 200px;
+            background-color: #e0e0e0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background-color 0.4s ease; /* Transizione fluida per il colore */
+        }
+
+        .slot-label {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .slot-status {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .occupied {
+            background-color: #dc3545; /* Rosso */
+            border-color: #c82333;
+        }
+
+        .occupied .slot-status {
+            color: white;
+        }
+
+        .free {
+            background-color: #28a745; /* Verde */
+            border-color: #218838;
+        }
+
+        .free .slot-status {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Magazzino HOLD</h1>
+        <div class="warehouse-container">
+            <div class="slot" id="slot-1">
+                <div class="slot-label">Slot 1</div>
+                <div class="slot-status">Libero</div>
+            </div>
+            <div class="slot" id="slot-2">
+                <div class="slot-label">Slot 2</div>
+                <div class="slot-status">Libero</div>
+            </div>
+            <div class="slot" id="slot-3">
+                <div class="slot-label">Slot 3</div>
+                <div class="slot-status">Libero</div>
+            </div>
+            <div class="slot" id="slot-4">
+                <div class="slot-label">Slot 4</div>
+                <div class="slot-status">Libero</div>
+            </div>
+            <div class="slot" id="slot-5">
+                <div class="slot-label">Slot 5</div>
+                <div class="slot-status">Libero</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateSlot(slotNumber, isOccupied) {
+            const slotElement = document.getElementById(`slot-${slotNumber}`);
+            const statusElement = slotElement.querySelector('.slot-status');
+            
+            if (isOccupied) {
+                slotElement.classList.add('occupied');
+                slotElement.classList.remove('free');
+                statusElement.textContent = 'Occupato';
+            } else {
+                slotElement.classList.add('free');
+                slotElement.classList.remove('occupied');
+                statusElement.textContent = 'Libero';
+            }
+        }
+
+        // Esempio di utilizzo (puoi rimuoverlo quando ti connetti a Spring)
+        // Aggiorna lo stato degli slot in base ai dati
+        updateSlot(1, true);   // Occupa lo slot 1
+        updateSlot(2, false);  // Libera lo slot 2
+        updateSlot(3, true);   // Occupa lo slot 3
+        updateSlot(4, false);  // Libera lo slot 4
+        updateSlot(5, true);   // Occupa lo slot 5
+    </script>
+</body>
+</html>
