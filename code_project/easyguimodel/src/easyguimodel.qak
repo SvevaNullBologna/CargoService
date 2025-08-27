@@ -1,0 +1,26 @@
+System easyguimodel 
+
+Dispatch message : message(Msg)
+Request updatedMsg : updatedMsg(Msg)
+
+Context ctx_webgui ip[host="localhost" port=8005]
+Context ctx_easy ip[host="127.0.0.1" port=8000]
+
+ExternalQActor example context ctx_easy
+
+QActor webgui context ctx_webgui{
+	State s0 initial{
+		println("$name starts") color yellow
+		observeResource example msgid message //avvisa che la risorsa è cambiata
+	}
+	Goto observing
+	
+	
+	State observing{
+		 onMsg(message: message(Msg)){
+			[# val Msg = payloadArg(0)#]
+			println("$name prints $Msg") color yellow
+		}
+		
+	}Goto observing
+}

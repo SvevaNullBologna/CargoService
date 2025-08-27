@@ -19,6 +19,7 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
+import main.java.jsonTestMessageBuilder
 
 class Example ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -32,83 +33,29 @@ class Example ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblue("example startss")
+						CommUtils.outcyan("$name starts")
 						delay(2000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="checkproxy", cond=doswitch() )
+					 transition( edgeName="goto",targetState="sendingString", cond=doswitch() )
 				}	 
-				state("checkproxy") { //this:State
+				state("sendingString") { //this:State
 					action { //it:State
-						CommUtils.outblack("Checking if proxy is ready...")
-						delay(1000) 
+						CommUtils.outcyan("$name sending message")
+						 val Msg = jsonTestMessageBuilder.holdToJson() 
+									//val Msg = "stringa funzionante di prova"
+						updateResourceRep( Msg  
+						)
+						delay(2000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="try", cond=doswitch() )
-				}	 
-				state("try") { //this:State
-					action { //it:State
-						 val Device = "example"
-									val Length = 320
-						CommUtils.outblue("trying engage")
-						request("engage", "engage($Device,$Length)" ,"basicrobot" )  
-						delay(200) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="waitengage", cond=doswitch() )
-				}	 
-				state("waitengage") { //this:State
-					action { //it:State
-						CommUtils.outblue("waiting engage")
-						delay(200) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t00",targetState="ok",cond=whenReply("engagedone"))
-					transition(edgeName="t01",targetState="error",cond=whenReply("engagerefused"))
-				}	 
-				state("ok") { //this:State
-					action { //it:State
-						CommUtils.outblue("engage done")
-						request("moverobot", "moverobot(6,4)" ,"basicrobot" )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t12",targetState="movedone",cond=whenReply("moverobotdone"))
-					transition(edgeName="t13",targetState="error",cond=whenReply("moverobotfailed"))
-				}	 
-				state("movedone") { //this:State
-					action { //it:State
-						CommUtils.outblue("move done")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-				}	 
-				state("error") { //this:State
-					action { //it:State
-						CommUtils.outblue("error engage")
-						delay(200) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="try", cond=doswitch() )
+					 transition( edgeName="goto",targetState="sendingString", cond=doswitch() )
 				}	 
 			}
 		}

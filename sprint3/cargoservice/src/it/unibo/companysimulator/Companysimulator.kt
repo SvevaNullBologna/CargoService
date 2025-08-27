@@ -44,11 +44,13 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 					action { //it:State
 						CommUtils.outcyan("$name sending request ")
 						request("loadrequest", "loadrequest(10)" ,"cargoservice" )  
+						delay(1000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition( edgeName="goto",targetState="sendRequest", cond=doswitch() )
 				}	 
 			}
 		}

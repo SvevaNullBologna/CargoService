@@ -67,6 +67,8 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 				}	 
 				state("checkRequest") { //this:State
 					action { //it:State
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
 						if( checkMsgContent( Term.createTerm("checkIfFits(PID,Weight)"), Term.createTerm("checkIfFits(PID,Weight)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								

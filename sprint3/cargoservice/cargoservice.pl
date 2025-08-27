@@ -35,5 +35,3 @@ context(ctx_sonarservice, "127.0.0.1",  "TCP", "8004").
  static(cargorobot).
   qactor( hold, ctx_cargoservice, "it.unibo.hold.Hold").
  static(hold).
-  qactor( webgui, ctx_cargoservice, "it.unibo.webgui.Webgui").
- static(webgui).

@@ -57,7 +57,8 @@ QActor companysimulator context ctx_cargoservice{
   	State sendRequest{
   		println("$name sending request ") color cyan
   		request cargoservice -m loadrequest : loadrequest(10)
-  	}
+  		delay 1000
+  	}Goto sendRequest
 }
 
 QActor cargoservice context ctx_cargoservice{
@@ -377,6 +378,7 @@ QActor hold context ctx_cargoservice{
 	whenEvent deliveredToSlot -> registerDelivery
 	
 	State checkRequest{
+		printCurrentMessage
 		onMsg(checkIfFits : checkIfFits(PID,Weight)){
 			[#
 				val ProductPID = payloadArg(0).toInt();
@@ -409,54 +411,7 @@ QActor hold context ctx_cargoservice{
 		
 }
 
-QActor webgui context ctx_cargoservice{
-	[#
-		fun sendUpdateToWebGui(jsonString: String) {
-    try {
-        val url = java.net.URL("http://localhost:8085/webgui/update")
-        with(url.openConnection() as java.net.HttpURLConnection) {
-            requestMethod = "POST"
-            setRequestProperty("Content-Type", "application/json; utf-8")
-            doOutput = true
-            outputStream.use { os ->
-                val input = jsonString.toByteArray(Charsets.UTF_8)
-                os.write(input, 0, input.size)
-            }
-            val responseCode = responseCode
-            println("Sent JSON to webgui, response code: $responseCode")
-        }
-    } catch (e: Exception) {
-        println("Error sending JSON to webgui: ${e.message}")
-    }
-}
-		
-	#] 
-	State s0 initial{
-		println("---- $name starting ----") color cyan
-		observeResource hold msgid update
-	}Goto waitingUpdate
-	
-	State waitingUpdate{
-		println("---- $name waiting for update ----") color cyan
-	}
-	Transition t0
-	whenMsg update -> updatingWebGui 
-	 
-	State updatingWebGui {
-		printCurrentMessage
-		onMsg(update : update(HoldJsonString)){
-			[# val HoldJsonString = payloadArg(0).toString() #]
-			println("$name received update for webgui") color cyan
-			[#	
-				sendUpdateToWebGui(HoldJsonString)
-			#]
-			println("$name has sent an update to webgui") color cyan
-		}
-		
-	}Goto waitingUpdate
-}
 
 
  
  
-
