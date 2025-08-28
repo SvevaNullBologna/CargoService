@@ -154,9 +154,9 @@ task dovesiamo {
 
 distributions {
     main {
-        distributionBaseName = 'cargoservice'
+        distributionBaseName = 'sonarservice'
         contents { 
-             from './cargoservice.pl'
+             from './sonarservice.pl'
              from './sysRules.pl'
              from './facadeConfig.json'
         }

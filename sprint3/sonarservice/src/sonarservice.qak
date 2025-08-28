@@ -1,6 +1,6 @@
-System cargoservice
+System sonarservice
 
-mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
+mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
 
 //sonar_reactor -> Whoever is listening
 Event productDetected : productDetected(T)
@@ -14,7 +14,8 @@ Context ctx_sonarservice			ip [host="localhost" port=8004]
 
 
 
-/*QActor sonarsimul context ctx_sonarservice{
+QActor sonarsimul context ctx_sonarservice{
+	import "test.java.RandomDistance"
 	State s0 initial{
 		println("$name starts") color cyan
 		
@@ -22,52 +23,20 @@ Context ctx_sonarservice			ip [host="localhost" port=8004]
 	
 	State work{
 		delay 1000 // attendo che sonarlistener entri in attesa
-		
-		// misurazioni non consistenti
-		[# var M = 30 #]
-		println("emitting 30 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	    delay 1000
-	    [# M = 15 #]
-	    println("emitting 15 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	    delay 1000
-	    [# M = 10 #]
-	    println("emitting 10 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	    delay 1000
-	    [# M = 0 #]
-	    println("emitting 0 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	    delay 1000
-	    [# M = 10 #]
-	    println("emitting 10 ...") color magenta
-		emitlocalstream distance      : distance($M)
+		[# var M = RandomDistance.getDistanceValue() #]
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
 		delay 1000
-		[# M = 10 #]
-	    println("emitting 10 ...") color magenta
-		emitlocalstream distance      : distance($M)
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
 		delay 1000
-	    [# M = 10 #]
-	    println("emitting 10 ...") color magenta
-		emitlocalstream distance      : distance($M)
-		[# M = 10 #]
-	    println("emitting 10 ...") color magenta
-		emitlocalstream distance      : distance($M)
-		[# M = 40 #]
-	    println("emitting 40 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	    [# M = 0 #]
-	    println("emitting 0 ...") color magenta
-		emitlocalstream distance      : distance($M)
-		[# M = 40 #]
-	    println("emitting 40 ...") color magenta
-		emitlocalstream distance      : distance($M)
-	}
-}*/
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+	}Goto work
+}
 
 
-QActor sonar_listener context ctx_sonarservice{
+/*QActor sonar_listener context ctx_sonarservice{
 	[#
 		lateinit var reader : java.io.BufferedReader
     	lateinit var p : Process	
@@ -76,7 +45,7 @@ QActor sonar_listener context ctx_sonarservice{
 	State s0 initial{
 		println("$name turning on...") color magenta
 		[#
-			p = Runtime.getRuntime().exec("python src/resources/python/sonar.py")
+			p = Runtime.getRuntime().exec("python src/main/resources/python/sonar.py")
 			reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
 		#]
 		delay 2000
@@ -110,19 +79,20 @@ QActor sonar_listener context ctx_sonarservice{
 		}	
 		delay 1000
 	}Goto readSonarData
-}
+}*/
 
 
 QActor sonar_reactor context ctx_sonarservice{
 	[# 
 		val DFREE = 30
-		var counter = 0  
+		var productCounter = 0  
 		var anomaly = false
+		var anomalyCounter = 0;
 	#]
 	State s0 initial{
 		println("$name turning on...") color green
-		subscribeTo sonar_listener for distance
-		//subscribeTo sonarsimul for distance
+		//subscribeTo sonar_listener for distance
+		subscribeTo sonarsimul for distance
 		delay 2000
 	}Goto waitingDistance
 		
@@ -137,28 +107,41 @@ QActor sonar_reactor context ctx_sonarservice{
 			[# val distance = payloadArg(0).toInt() #]
 			println("distance detected = $distance") color magenta
 			if[# distance > DFREE || distance < 0 #]{
-				[# anomaly = true #]		
-				println("anomaly detected ") color green
-				emit anomalyDetected : anomalyDetected(T)
+				[# productCounter = 0 #]
+				[# anomalyCounter ++ #]
+				if[# anomalyCounter >= 3#]{
+					[# anomaly = true 
+						anomalyCounter = 0
+					#]		
+					println("anomaly detected ") color green
+					emit anomalyDetected : anomalyDetected(T)
+				}
+				else{
+					println("possible anomaly. Keep detecting ") color green
+				}
+				
 			} 
 			else{ // 0 < distance < DFREE  
+				[#
+					anomalyCounter = 0
+				#]
+				
 				if[# anomaly #]{
 					[# anomaly = false #]
 					emit anomalyFixed : anomalyFixed(T)
 					println("anomaly fixed") color green	
 				}
 				if[# distance < DFREE/2 #]{ // 0 < distance < DFREE/2
-					[# counter++ #]
-					if[# counter >= 3 #]{
-						[# counter = 0 
-					   	 #]
+					[# productCounter++ #]
+					if[# productCounter >= 3 #]{
+						[# productCounter = 0 #]
 						println("productDetected") color green
 						emit productDetected : productDetected(T)
 					}	
 				}
 				else{
 					println("needs more detecting") color green
-					[# counter = 0 #]
+					[# productCounter = 0 #]
 				}
 			// DFREE/2 <= distance <= DFREE 
 			}
@@ -183,17 +166,17 @@ QActor led_device context ctx_sonarservice{
 	
 	State turnlighton{
 		println("$name turning light on") color yellow
-		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25On.py") #]
+		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25On.py") #]
 	}Goto waitingcommand
 	
 	State turnlightoff{
 		println("$name turning light off") color yellow
-		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25Off.py") #]
+		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25Off.py") #]
 	}Goto waitingcommand
 	
 	State blinklight{
 		println("$name blinking light") color yellow 
-		[# Runtime.getRuntime().exec("python src/resources/python/ledPython25Blink.py") #]
+		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25Blink.py") #]
 	}Goto waitingcommand
 	
 }

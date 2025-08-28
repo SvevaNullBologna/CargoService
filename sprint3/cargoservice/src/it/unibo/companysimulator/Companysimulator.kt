@@ -32,25 +32,39 @@ class Companysimulator ( name: String, scope: CoroutineScope, isconfined: Boolea
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name STARTS")
+						CommUtils.outblue("$name STARTS")
 						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition( edgeName="goto",targetState="sendRequest", cond=doswitch() )
 				}	 
 				state("sendRequest") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name sending request ")
+						CommUtils.outblue("$name sending request ")
 						request("loadrequest", "loadrequest(10)" ,"cargoservice" )  
-						delay(1000) 
+						delay(8000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="sendRequest", cond=doswitch() )
+					 transition(edgeName="t00",targetState="printEndOfRequest",cond=whenReply("resultrequest"))
+				}	 
+				state("printEndOfRequest") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("resultrequest(Rst)"), Term.createTerm("resultrequest(Rst)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val result = payloadArg(0)  
+								CommUtils.outblue("$result")
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 			}
 		}

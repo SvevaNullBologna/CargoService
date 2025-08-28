@@ -1,12 +1,14 @@
 System cargoservice
  
-mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
+mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
 //MESSAGES AND EVENTS 
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
+//CargoService -> companysimulator
+Reply resultrequest : resultrequest(Rst) for loadrequest
 //CargoService -> ProductService 
 Request getProduct : product(ID) 
-//ProductService -> CompanySimulator 
+//ProductService -> CargoService
 Reply getProductAnswer : product(JSonString) for getProduct
 
 //SonarService -> Whoever is listening
@@ -24,7 +26,7 @@ Event finishedtransport : finishedtransport(T)
 Request engage : engage(device, length)
 Request moverobot : moverobot(x, y)
 Dispatch setdirection : dir( D )  //up|down|left|right
-Event alarm : alarm(reason) //to stop robot completely
+Event alarm : alarm(reason) //to stop robot completely  
 Event info : info(x)
 //basicRobot -> CargoRobot
 Reply engagedone : engagedone(E)
@@ -51,14 +53,22 @@ ExternalQActor productservice context ctx_productservice
 
 QActor companysimulator context ctx_cargoservice{
  	State s0 initial {
- 		println("$name STARTS") color cyan
+ 		println("$name STARTS") color blue
  		delay 5000
-	}  	
+	}Goto sendRequest
   	State sendRequest{
-  		println("$name sending request ") color cyan
+  		println("$name sending request ") color blue
   		request cargoservice -m loadrequest : loadrequest(10)
-  		delay 1000
-  	}Goto sendRequest
+  		delay 8000
+  	}Transition t0 
+  	whenReply resultrequest -> printEndOfRequest
+  	
+  	State printEndOfRequest{
+  		onMsg(resultrequest : resultrequest(Rst)){
+  			[# val result = payloadArg(0) #]
+  			println("$result") color blue	
+  		}
+  	}
 }
 
 QActor cargoservice context ctx_cargoservice{
@@ -95,11 +105,12 @@ QActor cargoservice context ctx_cargoservice{
 			request productservice -m getProduct : getProduct($Cur_PID)
 		}
 	}
-	Goto validateRequest ///////////////////////////////////////////////////////////////
 	/*Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer*/
+	Goto validateRequest
 	
 	State checkProdAnswer{
+		println("arrived here") color red
 		printCurrentMessage
 		onMsg(getProductAnswer : product(PJson)){
 			[#
@@ -107,15 +118,17 @@ QActor cargoservice context ctx_cargoservice{
 				val p = Product(jsonStr)
 				Cur_Weight = p.getWeight()
 				Cur_PID = p.getProductId()
-			#]
+			#]  
+			println("checking prod answer") color magenta
 		}
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
 	
 	
 	State validateRequest{
+		println("validating request") color magenta
 		[#
-			Cur_PID = 1
+			Cur_PID = 10
 			Cur_Weight = 30 
 		#]
 		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
@@ -145,8 +158,13 @@ QActor cargoservice context ctx_cargoservice{
 	State managerefusal{
 		printCurrentMessage
 		onMsg(refused : refused(Reason)){
-			[# val reason = payloadArg(0).toString() #]
-			println("Request refused because of ${reason}. Back to wait.") color magenta
+			[# 
+				val reason = payloadArg(0).toString() 
+				val Rst = "Request refused because of ${reason}"
+			#]
+			
+			println("$Rst. Back to wait.") color magenta
+			replyTo loadrequest with resultrequest : resultrequest($Rst) 
 		}
 		
 		[#
@@ -154,6 +172,8 @@ QActor cargoservice context ctx_cargoservice{
 				Cur_PID = -1
 				Cur_Weight = -1
 		#]
+		
+		
 	}Goto waitrequest
 	
 	State waitForProduct{
@@ -180,13 +200,18 @@ QActor cargoservice context ctx_cargoservice{
 	State lastoperations{
 		printCurrentMessage
 		onMsg(finishedtransport : finishedtransport(T)){
-			[# val msg = payloadArg(0).toString()#]
-			if[# msg=="failure" #]{
+			[# 
+				val Msg = payloadArg(0).toString()
+			#]
+			if[# Msg=="failure" #]{
 				println("There was a fatal error with the load. Load request rejected") color magenta
-				
+				[# val Rst = "Request failed because of fatal error" #]
+				replyTo loadrequest with resultrequest : resultrequest($Rst)
 			}
 			else{
 				println("end of robot's operations with success.") color magenta
+				[# val Rst = "Request accomplished with success"  #]
+				replyTo loadrequest with resultrequest : resultrequest($Rst)
 			}
 			[#
 				Cur_Slot_ID = -1
@@ -269,7 +294,7 @@ QActor cargorobot context ctx_cargoservice {
 	whenInterruptEvent anomalyDetected -> handleAnomaly
 	
 	State delivery{
-		delay 3000
+		delay 5000
 		println("Delivering product to slot...") color yellow
       		[#
         		CurrentDestX = DestSlotX
@@ -285,9 +310,9 @@ QActor cargorobot context ctx_cargoservice {
 	whenInterruptEvent anomalyDetected -> handleAnomaly
 	
 	State deposit{
-		forward basicrobot -m setdirection : dir($Direction)
 		println("depositing product on slot...") color yellow
-		delay 3000
+		forward basicrobot -m setdirection : dir($Direction)
+		delay 5000
 		emit  deliveredToSlot : deliveredToSlot(ok)
 	}
 	Goto return 

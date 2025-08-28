@@ -62,8 +62,8 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t025",targetState="checkRequest",cond=whenRequest("checkIfFits"))
-					transition(edgeName="t026",targetState="registerDelivery",cond=whenEvent("deliveredToSlot"))
+					 transition(edgeName="t026",targetState="checkRequest",cond=whenRequest("checkIfFits"))
+					transition(edgeName="t027",targetState="registerDelivery",cond=whenEvent("deliveredToSlot"))
 				}	 
 				state("checkRequest") { //this:State
 					action { //it:State

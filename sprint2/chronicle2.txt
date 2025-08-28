@@ -1,0 +1,16 @@
+link al testo dei requisiti del committente:https://github.com/anatali/issLab2025/blob/main/iss25Material/docs/_build/html/TemaFinale25.html
+link allo sprint precedente :  https://github.com/SvevaNullBologna/CargoService/tree/main/sprint1
+immagine dell'architettura al termine dello sprint precedente :	https://github.com/SvevaNullBologna/CargoService/tree/main/sprint1/cargoservice
+GOAL dello sprint:
+1. Enunciazione esplicita dei requisiti del sonarservice
+2. Analisi dei requisiti enunciati
+3. Definizione dell’architettura logica con modello eseguibile in qak
+4. Progetto e realizzazione
+
+piano di testing :
+- test sonarservice :
+	test notifica rilevamento prodotto
+	test reazione al rilevamento del prodotto
+	test reazione al rilevamento di un'anomalia
+	test reazione alla correzione di un'anomalia
+	test attesa fino al prossimo evento

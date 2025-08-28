@@ -60,7 +60,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="getweight",cond=whenRequest("loadrequest"))
+					 transition(edgeName="t01",targetState="getweight",cond=whenRequest("loadrequest"))
 				}	 
 				state("getweight") { //this:State
 					action { //it:State
@@ -82,6 +82,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("checkProdAnswer") { //this:State
 					action { //it:State
+						CommUtils.outred("arrived here")
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
 						if( checkMsgContent( Term.createTerm("product(JSonString)"), Term.createTerm("product(PJson)"), 
@@ -91,6 +92,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 												val p = Product(jsonStr)
 												Cur_Weight = p.getWeight()
 												Cur_PID = p.getProductId()
+								CommUtils.outmagenta("checking prod answer")
 						}
 						//genTimer( actor, state )
 					}
@@ -104,8 +106,9 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("validateRequest") { //this:State
 					action { //it:State
+						CommUtils.outmagenta("validating request")
 						
-									Cur_PID = 1
+									Cur_PID = 10
 									Cur_Weight = 30 
 						request("checkIfFits", "checkIfFits($Cur_PID,$Cur_Weight)" ,"hold" )  
 						//genTimer( actor, state )
@@ -113,8 +116,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t21",targetState="retrieveDataFromHold",cond=whenReply("accepted"))
-					transition(edgeName="t22",targetState="managerefusal",cond=whenReply("refused"))
+					 transition(edgeName="t22",targetState="retrieveDataFromHold",cond=whenReply("accepted"))
+					transition(edgeName="t23",targetState="managerefusal",cond=whenReply("refused"))
 				}	 
 				state("retrieveDataFromHold") { //this:State
 					action { //it:State
@@ -147,8 +150,11 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						 	   
 						if( checkMsgContent( Term.createTerm("refused(Reason)"), Term.createTerm("refused(Reason)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val reason = payloadArg(0).toString()  
-								CommUtils.outmagenta("Request refused because of ${reason}. Back to wait.")
+								 
+												val reason = payloadArg(0).toString() 
+												val Rst = "Request refused because of ${reason}"
+								CommUtils.outmagenta("$Rst. Back to wait.")
+								answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 						}
 						
 										Cur_Slot_ID = -1
@@ -169,7 +175,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t33",targetState="serveloadrequest",cond=whenEvent("productDetected"))
+					 transition(edgeName="t34",targetState="serveloadrequest",cond=whenEvent("productDetected"))
 				}	 
 				state("serveloadrequest") { //this:State
 					action { //it:State
@@ -192,7 +198,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t44",targetState="lastoperations",cond=whenEvent("finishedtransport"))
+					 transition(edgeName="t45",targetState="lastoperations",cond=whenEvent("finishedtransport"))
 				}	 
 				state("lastoperations") { //this:State
 					action { //it:State
@@ -200,12 +206,17 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						 	   
 						if( checkMsgContent( Term.createTerm("finishedtransport(T)"), Term.createTerm("finishedtransport(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val msg = payloadArg(0).toString() 
-								if(  msg=="failure"  
+								 
+												val Msg = payloadArg(0).toString()
+								if(  Msg=="failure"  
 								 ){CommUtils.outmagenta("There was a fatal error with the load. Load request rejected")
+								 val Rst = "Request failed because of fatal error"  
+								answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 								}
 								else
 								 {CommUtils.outmagenta("end of robot's operations with success.")
+								  val Rst = "Request accomplished with success"   
+								 answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 								 }
 								
 												Cur_Slot_ID = -1

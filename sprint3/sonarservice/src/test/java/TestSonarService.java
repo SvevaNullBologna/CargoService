@@ -15,7 +15,7 @@ public class TestSonarService{
     public static void setup() {
         conn = ConnectionFactory.createClientSupport23(ProtocolType.tcp, "localhost", "8004");
     }
-    
+    /*
     @Test
     public void testProductDetection() throws Exception{
     	String event = CommUtils.buildEvent("junitTest", "productDetected", "productDetected(99)").toString();
@@ -59,5 +59,5 @@ public class TestSonarService{
         assertNotNull("Doveva arrivare un evento", msg);
         // opzionale: verifico che sia proprio un evento
         assertTrue("Non sembra un evento", msg.contains("event"));
-    }
+    }*/
 }

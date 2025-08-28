@@ -1,7 +1,7 @@
 services:
   mongodb:
     image: mongo:6.0.4
-    container_name: mongodb  
+    container_name: mongodb
     mem_limit: 512m
     environment:
       - MONGO_INITDB_DATABASE=cargodb # Nome del database da inizializzare
@@ -23,7 +23,7 @@ services:
 
   basicrobot24:
     container_name: basicrobot24
-    image: docker.io/natbodocker/basicrobot24:3.0
+    image: pretty2/basicrobot:2.13
     mem_limit: 512m
     ports:
       - 8020:8020/udp
@@ -68,19 +68,26 @@ services:
       - iss-network
 
   cargoserviceqak:
-    container_name: cargoserviceqak
+    container_name: cargoserviceqak 
     image: docker.io/natbodocker/cargoserviceqak:1.0
     environment:
       - MONGO_HOST=mongodb
-      - SERVICE_IP=192.168.1.18
+      - SERVICE_IP=192.168.1.189
     ports:
       - 8111:8111/tcp
       - 8111:8111/udp
-    depends_on:
-      - mongodb
-      - eureka
     networks:
       - iss-network
+    depends_on:
+      mongodb:
+        condition: service_started
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://eureka:8761/eureka/apps/CTXCARGOSERVICE"] # Assicurati che 'CARGOSERVICEQAK' sia il nome corretto
+      interval: 10s
+      timeout: 10s
+      retries: 12
 
 networks:
   iss-network:
