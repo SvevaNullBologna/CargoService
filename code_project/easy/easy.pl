@@ -2,7 +2,9 @@
 % easy description   
 %====================================================================================
 dispatch( message, message(Msg) ).
+request( sendrequest, sendrequest(PID) ).
+reply( sendAnswerToRequest, sendAnswerToRequest(Answ) ).  %%for sendrequest
 %====================================================================================
 context(ctx_easy, "localhost",  "TCP", "8000").
- qactor( example, ctx_easy, "it.unibo.example.Example").
- static(example).
+ qactor( companyrequestreceiver, ctx_easy, "it.unibo.companyrequestreceiver.Companyrequestreceiver").
+ static(companyrequestreceiver).

@@ -57,6 +57,9 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 					action { //it:State
 						CommUtils.outyellow("$name waiting request...")
 						CommUtils.outyellow("$name sending update to webgui...")
+						 val HoldJsonString = hold.holdToJson()  
+						updateResourceRep(HoldJsonString 
+						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -99,9 +102,6 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 						
 									AvailableSlot = null
 									ProductWeight = -1
-						 val HoldJsonString = hold.holdToJson()  
-						updateResourceRep(HoldJsonString 
-						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

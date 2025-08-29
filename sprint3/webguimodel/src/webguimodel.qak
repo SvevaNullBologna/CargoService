@@ -2,47 +2,18 @@ System webguimodel
 
 Dispatch update : update(HoldJsonString)
 
+//webgui -> companyrequestreceiver  
+Request sendrequest : sendrequest(PID)
+//companyrequestreceiver -> webgui
+Reply sendAnswerToRequest : sendAnswerToRequest(Answ) for sendrequest
+//companyrequestreceiver -> cargoservice
+Request loadrequest : loadrequest(PID) 
+//CargoService -> companyrequestreceiver
+Reply resultrequest : resultrequest(Rst) for loadrequest
+
+
 Context ctx_webguimodel ip[host="local" port=8006]
 Context ctx_cargoservice ip[host="127.0.0.1" port=8000]
-Context ctx_springboot_webgui ip[host="127.0.0.1" port=8085]
 
-ExternalQActor hold context ctx_cargoservice 
-ExternalQActor webgui context ctx_springboot_webgui
-
-QActor webguimodel context ctx_webguimodel{
-	State s0 initial{
-		println("---- $name starting ----") color cyan
-		observeResource hold msgid update
-	}Goto waitingUpdate
-	
-	State waitingUpdate{
-		println("---- $name waiting for update ----") color cyan
-	}
-	Transition t0
-	whenMsg update -> observingUpdatesForWebGui 
-	 
-	State observingUpdatesForWebGui {
-		printCurrentMessage
-		onMsg(update : update(HoldJsonString)){
-			[# val HoldJsonString = payloadArg(0).toString() #]
-			println("$name received update for webgui") color cyan
-		}
-		
-	}Goto waitingUpdate
-}
-
-
-////////////////////////////configuriamo dopo
-
-QActor gui_request_handler context ctx_webguimodel{
-	State s0 initial{
-		println("---- $name starts ----") color green
-	}
-}
-
-QActor gui_api_gateway context ctx_webguimodel{ //configura la delega delle richieste
-	State s0 initial{
-		println("---- $name starts ----") color yellow
-	}
-}
+ExternalQActor cargoservice context ctx_cargoservice
 

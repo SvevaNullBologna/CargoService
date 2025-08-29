@@ -60,7 +60,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t01",targetState="getweight",cond=whenRequest("loadrequest"))
+					 transition(edgeName="t00",targetState="getweight",cond=whenRequest("loadrequest"))
 				}	 
 				state("getweight") { //this:State
 					action { //it:State
@@ -78,14 +78,14 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="validateRequest", cond=doswitch() )
+					 transition(edgeName="t11",targetState="checkProdAnswer",cond=whenReply("getProductAnswer"))
 				}	 
 				state("checkProdAnswer") { //this:State
 					action { //it:State
 						CommUtils.outred("arrived here")
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
-						if( checkMsgContent( Term.createTerm("product(JSonString)"), Term.createTerm("product(PJson)"), 
+						if( checkMsgContent( Term.createTerm("getProductAnswer(JSonString)"), Term.createTerm("getProductAnswer(PJson)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
 												val jsonStr = payloadArg(0)
@@ -107,9 +107,6 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("validateRequest") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("validating request")
-						
-									Cur_PID = 10
-									Cur_Weight = 30 
 						request("checkIfFits", "checkIfFits($Cur_PID,$Cur_Weight)" ,"hold" )  
 						//genTimer( actor, state )
 					}

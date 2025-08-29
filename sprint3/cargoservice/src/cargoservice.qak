@@ -2,14 +2,19 @@ System cargoservice
  
 mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
 //MESSAGES AND EVENTS 
-//Companysimulator -> CargoService
-Request loadrequest : loadrequest(PID)
-//CargoService -> companysimulator
+//webgui -> companyrequestreceiver  
+Request sendrequest : sendrequest(PID)
+//companyrequestreceiver -> webgui
+Reply sendrequestAnswer : sendrequestAnswer(Answ) for sendrequest
+//companyrequestreceiver -> cargoservice
+Request loadrequest : loadrequest(PID) 
+//CargoService -> companyrequestreceiver
 Reply resultrequest : resultrequest(Rst) for loadrequest
+
 //CargoService -> ProductService 
-Request getProduct : product(ID) 
+Request getProduct : getProduct(ID) 
 //ProductService -> CargoService
-Reply getProductAnswer : product(JSonString) for getProduct
+Reply getProductAnswer : getProductAnswer(JSonString) for getProduct
 
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
@@ -43,33 +48,12 @@ Dispatch update : update(HoldJsonString)
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
 Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
 Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
-//Context ctx_companysim 				ip [host="localhost" port=8003]
 Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo partire il sonar sulla stessa macchina
 //Context ctx_sonarservice 			ip [host="" port=8004] //per quando deve cercare il raspberry
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
 
-
-QActor companysimulator context ctx_cargoservice{
- 	State s0 initial {
- 		println("$name STARTS") color blue
- 		delay 5000
-	}Goto sendRequest
-  	State sendRequest{
-  		println("$name sending request ") color blue
-  		request cargoservice -m loadrequest : loadrequest(10)
-  		delay 8000
-  	}Transition t0 
-  	whenReply resultrequest -> printEndOfRequest
-  	
-  	State printEndOfRequest{
-  		onMsg(resultrequest : resultrequest(Rst)){
-  			[# val result = payloadArg(0) #]
-  			println("$result") color blue	
-  		}
-  	}
-}
 
 QActor cargoservice context ctx_cargoservice{
 	import "main.java.*"
@@ -105,14 +89,14 @@ QActor cargoservice context ctx_cargoservice{
 			request productservice -m getProduct : getProduct($Cur_PID)
 		}
 	}
-	/*Transition t1 
-	whenReply getProductAnswer -> checkProdAnswer*/
-	Goto validateRequest
+	Transition t1 
+	whenReply getProductAnswer -> checkProdAnswer
+	//Goto validateRequest
 	
 	State checkProdAnswer{
 		println("arrived here") color red
 		printCurrentMessage
-		onMsg(getProductAnswer : product(PJson)){
+		onMsg(getProductAnswer : getProductAnswer(PJson)){
 			[#
 				val jsonStr = payloadArg(0)
 				val p = Product(jsonStr)
@@ -127,10 +111,13 @@ QActor cargoservice context ctx_cargoservice{
 	
 	State validateRequest{
 		println("validating request") color magenta
-		[#
+		/*
+		 * [#
 			Cur_PID = 10
 			Cur_Weight = 30 
 		#]
+		 */
+		
 		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
 	}
 	Transition t2 
@@ -397,6 +384,8 @@ QActor hold context ctx_cargoservice{
 	State waiting_request{ //while it waits, it sends update to the GUI
 		println("$name waiting request...") color yellow
 		println("$name sending update to webgui...") color yellow
+		[# val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
 	}
 	Transition t0 
 	whenRequest checkIfFits -> checkRequest
@@ -429,13 +418,61 @@ QActor hold context ctx_cargoservice{
 		[#
 			AvailableSlot = null
 			ProductWeight = -1
-		#]
-		[# val HoldJsonString = hold.holdToJson() #]
-		updateResource [#HoldJsonString#]
+		#]		
 	}Goto waiting_request
 		
 }
 
+
+QActor companyrequestreceiver context ctx_cargoservice{
+	[#
+		var systemIsOccupied = false
+		val Errormsg = "\"the system is occupied with another request\""
+		val Msg = "\"the system is taking care of your request\""
+	#]
+ 	State s0 initial {
+ 		println("$name STARTS") color blue
+ 		delay 5000
+	}Goto waiting
+	
+  	State waiting{
+  		println("$name waiting to receive a request") color blue
+  	}
+  	Transition t0 
+  	whenRequest sendrequest -> handleRequest
+  	whenReply resultrequest -> handleResult
+  	
+  	State handleRequest{
+  		printCurrentMessage
+  		onMsg(sendrequest : sendrequest(PID)){
+  			[#
+  				val PID = payloadArg(0) 
+  			#]
+  			if[# systemIsOccupied #]{
+  				replyTo sendrequest with sendrequestAnswer: sendrequestAnswer($Errormsg)
+  				//println("$name sending request to cargoservice ") color blue
+  				//request cargoservice -m loadrequest: loadrequest($PID)
+  			}
+  			else{
+  				[# systemIsOccupied = true #]
+  				replyTo sendrequest with sendrequestAnswer: sendrequestAnswerToRequest($Msg)
+  				
+  			}
+  		}	
+  	}Goto waiting 
+  	
+  	State handleResult{
+  		printCurrentMessage 
+  		onMsg(resultrequest : resultrequest(Rst)){
+  			[# 
+  				val Result = payloadArg(0)
+  				systemIsOccupied = false
+  			#]
+  			//replyTo sendrequest with sendrequest : sendAnswerToRequest($Result)
+  		}
+  	}Goto waiting
+  
+}
 
 
  

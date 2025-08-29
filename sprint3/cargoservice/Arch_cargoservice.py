@@ -26,10 +26,10 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_cargoservice', graph_attr=nodeattr):
-          companysimulator=Custom('companysimulator','./qakicons/symActorWithobjSmall.png')
           cargoservice=Custom('cargoservice','./qakicons/symActorWithobjSmall.png')
           cargorobot=Custom('cargorobot','./qakicons/symActorWithobjSmall.png')
           hold=Custom('hold','./qakicons/symActorWithobjSmall.png')
+          companyrequestreceiver=Custom('companyrequestreceiver','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_productservice', graph_attr=nodeattr):
           productservice=Custom('productservice(ext)','./qakicons/externalQActor.png')
      with Cluster('ctx_basicrobot', graph_attr=nodeattr):
@@ -44,7 +44,6 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<checkIfFits<font color="darkgreen"> accepted refused</font> &nbsp; >',  fontcolor='magenta') >> hold
-     companysimulator >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest<font color="darkgreen"> resultrequest</font> &nbsp; >',  fontcolor='magenta') >> cargoservice
      cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; >',  fontcolor='blue') >> basicrobot
      cargoservice >> Edge(color='blue', style='solid',  decorate='true', label='<command &nbsp; >',  fontcolor='blue') >> cargorobot
 diag

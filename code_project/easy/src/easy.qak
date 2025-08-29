@@ -1,10 +1,14 @@
 System easy
  
 Dispatch message : message(Msg)
+//webgui -> companyrequestreceiver  
+Request sendrequest : sendrequest(PID)
+//companyrequestreceiver -> webgui
+Reply sendAnswerToRequest : sendAnswerToRequest(Answ) for sendrequest
 
 Context ctx_easy ip[host="localhost" port=8000]
 
-QActor example context ctx_easy {
+/*QActor example context ctx_easy {
 	import "main.java.jsonTestMessageBuilder"
 	State s0 initial {
 		println("$name starts") color cyan
@@ -19,4 +23,26 @@ QActor example context ctx_easy {
 		updateResource [# Msg #]
 		delay 2000
 	}Goto sendingString
+}*/
+
+
+QActor companyrequestreceiver context ctx_easy{
+	State s0 initial{
+		println("$name starts") color green
+	}Goto waiting
+	
+	State waiting{
+		println("$name waiting for message") color green
+	}
+	Transition t0 whenRequest sendrequest -> handleMessage
+	
+	State handleMessage{
+		printCurrentMessage
+		onMsg(sendrequest : sendrequest(X)){
+			[# val Received = payloadArg(0) #]
+			println("request received: $Received") color green
+			replyTo sendrequest with sendAnswerToRequest : sendAnswerToRequest($Received)
+		}
+	}Goto waiting
+	
 }

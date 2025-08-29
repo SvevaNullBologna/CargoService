@@ -3,138 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hold Status</title>
+    <title>Cargo Dashboard</title>
     <style>
-        
-		body {
-		    font-family: 'Segoe UI', sans-serif;
-		    background-color: #1c1c1c;
-		    color: #ffffff;
-		    display: flex;
-		    flex-direction: column;
-		    align-items: center;
-		    padding: 20px;
-		}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1c1c1c;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 40px;
+        }
 
-		.container {
-		    background-color: #2a2a2a;
-		    border-radius: 8px;
-		    padding: 25px;
-		    width: 100%;
-		    max-width: 600px;
-		    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-		}
+        .container {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
 
-		h1 {
-		    color: #ffffff;
-		    font-size: 28px;
-		    text-align: center;
-		    margin-bottom: 20px;
-		    border-bottom: 2px solid #444;
-		    padding-bottom: 10px;
-		}
+        h1 {
+            color: #ffffff;
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
 
-		.ship-load {
-		    background-color: #444;
-		    color: #00ffff;
-		    padding: 10px;
-		    border-radius: 5px;
-		    font-size: 18px;
-		    text-align: center;
-		    margin-bottom: 20px;
-		    font-weight: bold;
-		}
+        /* --- Hold Status --- */
+        .ship-load {
+            background-color: #444;
+            color: #00ffff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
 
-		.slots-container {
-		    display: grid;
-		    grid-template-columns: repeat(5, 1fr);
-		    gap: 10px;
-		    margin-bottom: 20px;
-		}
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-		.slot {
-		    background-color: #333;
-		    border: 2px solid #666;
-		    border-radius: 6px;
-		    height: 100px;
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: center;
-		    align-items: center;
-		    font-size: 16px;
-		    font-weight: bold;
-		    color: #fff;
-		}
+        .slot {
+            background-color: #333;
+            border: 2px solid #666;
+            border-radius: 6px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+        }
 
-		.slot-id {
-		    font-size: 14px;
-		    margin-bottom: 5px;
-		    color: #ccc;
-		}
+        .slot-id {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
 
-		.slot-status {
-		    font-size: 18px;
-		    padding: 5px 10px;
-		    border-radius: 4px;
-		}
+        .slot-status {
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
 
-		.libero .slot-status {
-		    background-color: #00ff00;
-		    color: #000;
-		}
+        .libero .slot-status {
+            background-color: #00ff00;
+            color: #000;
+        }
 
-		.pieno .slot-status {
-		    background-color: #ff0000;
-		    color: #000;
-		}
+        .pieno .slot-status {
+            background-color: #ff0000;
+            color: #000;
+        }
 
-		.connection-status {
-		    font-size: 14px;
-		    padding: 10px;
-		    border-radius: 4px;
-		    text-align: center;
-		    font-weight: bold;
-		}
+        .connection-status {
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
 
-		.connected {
-		    background-color: #00ff00;
-		    color: #000;
-		}
+        .connected {
+            background-color: #00ff00;
+            color: #000;
+        }
 
-		.disconnected {
-		    background-color: #ff0000;
-		    color: #000;
-		}
+        .disconnected {
+            background-color: #ff0000;
+            color: #000;
+        }
 
-		.last-update {
-		    font-size: 12px;
-		    color: #aaa;
-		    text-align: center;
-		    margin-top: 10px;
-		}
+        .last-update {
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 10px;
+        }
 
-		
+        /* --- Request Sender --- */
+        .form-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            width: 150px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            background-color: #00ffff;
+            color: #000;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #00cccc;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
+    <!-- Hold Status -->
     <div class="container">
         <h1>Hold Status</h1>
-        
         <div class="ship-load">
             Carico Nave: <span id="shipLoadValue">0</span> kg
         </div>
-        
+
         <div class="slots-container">
             <div class="slot" id="slot1">
                 <div class="slot-id">Slot 1</div>
                 <div class="slot-status">...</div>
             </div>
-            <div class="slot" id="slot3">
-                <div class="slot-id">Slot 3</div>
-                <div class="slot-status">...</div>
-            </div>
             <div class="slot" id="slot2">
                 <div class="slot-id">Slot 2</div>
+                <div class="slot-status">...</div>
+            </div>
+            <div class="slot" id="slot3">
+                <div class="slot-id">Slot 3</div>
                 <div class="slot-status">...</div>
             </div>
             <div class="slot" id="slot4">
@@ -142,60 +182,53 @@
                 <div class="slot-status">...</div>
             </div>
         </div>
-        
+
         <div class="connection-status disconnected" id="connectionStatus">
             DISCONNESSO DAL SERVER
         </div>
-        
+
         <div class="last-update" id="lastUpdate">
             Ultimo aggiornamento: mai
         </div>
     </div>
-    
+
+    <!-- Company Request Sender -->
+    <div class="container">
+        <h1>Company Request Sender</h1>
+        <div class="form-group">
+            <input type="number" id="requestValue" placeholder="Inserisci numero">
+            <button onclick="sendRequest()">SEND</button>
+        </div>
+        <div class="message" id="messageBox">In attesa di input...</div>
+        <div class="message" id="responseBox"></div>
+    </div>
+
     <script>
-        let socket;
-        
-        //Funzione per connettersi al WebSocket
-        function connectWebSocket() {
-			const socketUrl = "ws://" + window.location.host + "/status-updates";
-            
-            //Crea la connessione WebSocket
+        /* ---- WebSocket + Hold Status ---- */
+        let socket; //crea una variabile socket per tenere la connessione WebSocket aperta con il server
+        function connectWebSocket() { //funzione che apre una connessione WebSocket al server
+            const socketUrl = "ws://" + window.location.host + "/status-updates"; 
             socket = new WebSocket(socketUrl);
-            
-            //Gestione eventi WebSocket
-            socket.onopen = function(event) {
-                console.log("Connessione WebSocket stabilita");
-                updateConnectionStatus(true);
-            };
-            
-            socket.onmessage = function(event) {
-                console.log("Messaggio ricevuto:", event.data);
+
+            socket.onopen = () => updateConnectionStatus(true); //quando apre la connessione 
+            socket.onmessage = (event) => { //arriva un messaggio event.data
                 try {
-                    const data = JSON.parse(event.data);
-                    updateUI(data);
-                    updateLastUpdate();
+                    const data = JSON.parse(event.data); //lettura event.data
+                    updateUI(data); //aggiorna l'interfaccia
+                    updateLastUpdate();//aggiorna l'orario di ultimo update
                 } catch (e) {
-                    console.error("Errore nel parsing del JSON:", e);
+                    console.error("Errore parsing JSON:", e);
                 }
             };
-            
-            socket.onclose = function(event) {
-                console.log("Connessione WebSocket chiusa");
+            socket.onclose = () => { //se la connessione si chiude, viene mostrato disconnesso. 
                 updateConnectionStatus(false);
-                
-                setTimeout(connectWebSocket, 5000);
+                setTimeout(connectWebSocket, 5000); //prova a riconnettersi dopo 5 secondi
             };
-            
-            socket.onerror = function(error) {
-                console.error("Errore WebSocket:", error);
-                updateConnectionStatus(false);
-            };
+            socket.onerror = () => updateConnectionStatus(false); //se c'è un errore, viene mostrato lo stato disconnesso
         }
-        
-        // Funzione per aggiornare lo stato della connessione
-        function updateConnectionStatus(connected) {
+
+        function updateConnectionStatus(connected) {//funzione che aggiorna il box che riguarda la connessione
             const statusElement = document.getElementById("connectionStatus");
-            
             if (connected) {
                 statusElement.textContent = "CONNESSO AL SERVER";
                 statusElement.className = "connection-status connected";
@@ -204,50 +237,70 @@
                 statusElement.className = "connection-status disconnected";
             }
         }
-        
-        // Funzione per aggiornare l'interfaccia con i nuovi dati
-        function updateUI(data) {
-            // Aggiorna il carico della nave
+
+        function updateUI(data) {//funzione che aggiorna la UI con i dati ricevuti
             if (data.shipLoad !== undefined) {
                 document.getElementById("shipLoadValue").textContent = data.shipLoad;
             }
-            
-            // Aggiorna lo stato degli slot
-            if (data.slots && Array.isArray(data.slots)) {
+            if (data.slots && Array.isArray(data.slots)) { //aggiornamento slot
                 for (let i = 0; i < 4; i++) {
                     const slotElement = document.getElementById(`slot${i+1}`);
                     const statusElement = slotElement.querySelector(".slot-status");
-                    const status = data.slots[i] || "libero"; // Default a "libero" se non specificato
-                    
+                    const status = data.slots[i] || "libero";
                     statusElement.textContent = status.toUpperCase();
                     slotElement.className = "slot " + status;
                 }
             }
         }
-        
-		// 
-        function updateLastUpdate() {
+
+        function updateLastUpdate() { //funzione che aggiorna la data e l'ora dell'ultimo aggiornamento
             const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            const dateString = now.toLocaleDateString();
             document.getElementById("lastUpdate").textContent = 
-                `Ultimo aggiornamento: ${timeString} - ${dateString}`;
+                `Ultimo aggiornamento: ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
         }
-      
-        window.onload = function() {
-            connectWebSocket();
-			
-			//Ogni volta che si collega riceve tramite richiesta Get fatta a holdstate lo stato attuale del doposito
-			fetch("/holdstate")
-			        .then(response => response.json())
-			        .then(data => {
-			            console.log("Stato iniziale ricevuto:", data);
-			            updateUI(data);           // aggiorna l'interfaccia
-			            updateLastUpdate();       // aggiorna data/ora ultimo aggiornamento
-			        })
-			        .catch(error => {
-			            console.error("Errore nel recupero dello stato iniziale:", error);
-			        });
+
+        /* ---- Request Sender ---- */
+        function sendRequest() { //legge il valore nella casella di input e prende i due box per l'output
+            const value = document.getElementById("requestValue").value;
+            const messageBox = document.getElementById("messageBox");
+            const responseBox = document.getElementById("responseBox");
+
+            if (value === "") { //se nei box non c'è scritto nulla, mostra errore
+                messageBox.textContent = "Inserisci un numero prima di inviare!";
+                messageBox.style.color = "#ff6666";
+                return;
+            }
+
+            messageBox.textContent = `Invio richiesta con valore: ${value}...`; //altrimenti mostra che sta inviando la richiesta
+            messageBox.style.color = "#00ffff";
+
+            fetch(`/caller?pid=${encodeURIComponent(value)}`) //invia richiesta HTTP al server con pid = ciò che c'è scritto nel box
+                .then(response => {
+                    if (!response.ok) throw new Error("Errore HTTP: " + response.status);
+                    return response.text();
+                })
+                .then(data => {
+                    messageBox.textContent = "Richiesta mandata!";
+                    messageBox.style.color = "#00ff00";
+                    responseBox.textContent = "Risposta server: " + data;
+                })
+                .catch(error => {
+                    messageBox.textContent = "❌ Errore durante la richiesta.";
+                    messageBox.style.color = "#ff6666";
+                    responseBox.textContent = error.message;
+                });
+        }
+
+        /* ---- Start ---- */ //viene avviato in automatico all'apertura della pagina
+        window.onload = () => { 
+            connectWebSocket();//si apre la connessione websocket
+            fetch("/holdstate") //fa chiamata Http per conoscere lo stato della stiva
+                .then(r => r.json())
+                .then(data => {
+                    updateUI(data);
+                    updateLastUpdate();
+                })
+                .catch(err => console.error("Errore recupero stato iniziale:", err));
         };
     </script>
 </body>
