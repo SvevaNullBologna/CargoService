@@ -203,105 +203,144 @@
         <div class="message" id="responseBox"></div>
     </div>
 
-    <script>
-        /* ---- WebSocket + Hold Status ---- */
-        let socket; //crea una variabile socket per tenere la connessione WebSocket aperta con il server
-        function connectWebSocket() { //funzione che apre una connessione WebSocket al server
-            const socketUrl = "ws://" + window.location.host + "/status-updates"; 
-            socket = new WebSocket(socketUrl);
+	<script>
+	/* ---- WebSocket + Hold Status ---- */
+	let socket; //crea una variabile socket per tenere la connessione WebSocket aperta con il server
 
-            socket.onopen = () => updateConnectionStatus(true); //quando apre la connessione 
-            socket.onmessage = (event) => { //arriva un messaggio event.data
-                try {
-                    const data = JSON.parse(event.data); //lettura event.data
-                    updateUI(data); //aggiorna l'interfaccia
-                    updateLastUpdate();//aggiorna l'orario di ultimo update
-                } catch (e) {
-                    console.error("Errore parsing JSON:", e);
-                }
-            };
-            socket.onclose = () => { //se la connessione si chiude, viene mostrato disconnesso. 
-                updateConnectionStatus(false);
-                setTimeout(connectWebSocket, 5000); //prova a riconnettersi dopo 5 secondi
-            };
-            socket.onerror = () => updateConnectionStatus(false); //se c'è un errore, viene mostrato lo stato disconnesso
-        }
+	function connectWebSocket() {
+	    //funzione che apre una connessione WebSocket al server
+	    const socketUrl = "ws://" + window.location.host + "/status-updates";
+	    socket = new WebSocket(socketUrl);
 
-        function updateConnectionStatus(connected) {//funzione che aggiorna il box che riguarda la connessione
-            const statusElement = document.getElementById("connectionStatus");
-            if (connected) {
-                statusElement.textContent = "CONNESSO AL SERVER";
-                statusElement.className = "connection-status connected";
-            } else {
-                statusElement.textContent = "DISCONNESSO DAL SERVER - Tentativo di riconnessione...";
-                statusElement.className = "connection-status disconnected";
-            }
-        }
+	    socket.onopen = () => updateConnectionStatus(true); //quando apre la connessione
 
-        function updateUI(data) {//funzione che aggiorna la UI con i dati ricevuti
-            if (data.shipLoad !== undefined) {
-                document.getElementById("shipLoadValue").textContent = data.shipLoad;
-            }
-            if (data.slots && Array.isArray(data.slots)) { //aggiornamento slot
-                for (let i = 0; i < 4; i++) {
-                    const slotElement = document.getElementById(`slot${i+1}`);
-                    const statusElement = slotElement.querySelector(".slot-status");
-                    const status = data.slots[i] || "libero";
-                    statusElement.textContent = status.toUpperCase();
-                    slotElement.className = "slot " + status;
-                }
-            }
-        }
+	    socket.onmessage = (event) => {
+	        //arriva un messaggio event.data
+	        try {
+	            const data = JSON.parse(event.data); //lettura event.data
+	            updateUI(data);                      //aggiorna l'interfaccia
+	            updateLastUpdate();                  //aggiorna l'orario di ultimo update
+	        } catch (e) {
+	            console.error("Errore parsing JSON:", e);
+	        }
+	    };
 
-        function updateLastUpdate() { //funzione che aggiorna la data e l'ora dell'ultimo aggiornamento
-            const now = new Date();
-            document.getElementById("lastUpdate").textContent = 
-                `Ultimo aggiornamento: ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
-        }
+	    socket.onclose = () => {
+	        //se la connessione si chiude, viene mostrato disconnesso.
+	        updateConnectionStatus(false);
+	        setTimeout(connectWebSocket, 5000); //prova a riconnettersi dopo 5 secondi
+	    };
 
-        /* ---- Request Sender ---- */
-        function sendRequest() { //legge il valore nella casella di input e prende i due box per l'output
-            const value = document.getElementById("requestValue").value;
-            const messageBox = document.getElementById("messageBox");
-            const responseBox = document.getElementById("responseBox");
+	    socket.onerror = () => updateConnectionStatus(false); //se c'è un errore, viene mostrato lo stato disconnesso
+	}
 
-            if (value === "") { //se nei box non c'è scritto nulla, mostra errore
-                messageBox.textContent = "Inserisci un numero prima di inviare!";
-                messageBox.style.color = "#ff6666";
-                return;
-            }
+	function updateConnectionStatus(connected) {
+	    //funzione che aggiorna il box che riguarda la connessione
+	    const statusElement = document.getElementById("connectionStatus");
+	    if (connected) {
+	        statusElement.textContent = "CONNESSO AL SERVER";
+	        statusElement.className = "connection-status connected";
+	    } else {
+	        statusElement.textContent = "DISCONNESSO DAL SERVER - Tentativo di riconnessione...";
+	        statusElement.className = "connection-status disconnected";
+	    }
+	}
 
-            messageBox.textContent = `Invio richiesta con valore: ${value}...`; //altrimenti mostra che sta inviando la richiesta
-            messageBox.style.color = "#00ffff";
+	/*function updateUI(data) {
+	    // funzione che aggiorna la UI con i dati ricevuti
+	    if (data.shipLoad !== undefined) {
+	        document.getElementById("shipLoadValue").textContent = data.shipLoad;
+	    }
 
-            fetch(`/caller?pid=${encodeURIComponent(value)}`) //invia richiesta HTTP al server con pid = ciò che c'è scritto nel box
-                .then(response => {
-                    if (!response.ok) throw new Error("Errore HTTP: " + response.status);
-                    return response.text();
-                })
-                .then(data => {
-                    messageBox.textContent = "Richiesta mandata!";
-                    messageBox.style.color = "#00ff00";
-                    responseBox.textContent = "Risposta server: " + data;
-                })
-                .catch(error => {
-                    messageBox.textContent = "❌ Errore durante la richiesta.";
-                    messageBox.style.color = "#ff6666";
-                    responseBox.textContent = error.message;
-                });
-        }
+	    if (data.slots && Array.isArray(data.slots)) {
+	        // aggiornamento slot
+	        for (let i = 0; i < 4; i++) {
+	            const slotElement = document.getElementById(`slot${i + 1}`);
+	            const statusElement = slotElement.querySelector(".slot-status");
+	            const status = data.slots[i] || "libero";
+	            statusElement.textContent = status.toUpperCase();
+	            slotElement.className = "slot " + status;
+	        }
+	    }
+	}*/
 
-        /* ---- Start ---- */ //viene avviato in automatico all'apertura della pagina
-        window.onload = () => { 
-            connectWebSocket();//si apre la connessione websocket
-            fetch("/holdstate") //fa chiamata Http per conoscere lo stato della stiva
-                .then(r => r.json())
-                .then(data => {
-                    updateUI(data);
-                    updateLastUpdate();
-                })
-                .catch(err => console.error("Errore recupero stato iniziale:", err));
-        };
-    </script>
+	
+	function updateUI(data) {
+	    if (data.type === "holdUpdate") {
+	        document.getElementById("shipLoadValue").textContent = data.shipLoad;
+	        if (data.slots && Array.isArray(data.slots)) {
+	            for (let i = 0; i < 4; i++) {
+	                const slotElement = document.getElementById(`slot${i + 1}`);
+	                const statusElement = slotElement.querySelector(".slot-status");
+	                const status = data.slots[i] || "libero";
+	                statusElement.textContent = status.toUpperCase();
+	                slotElement.className = "slot " + status;
+	            }
+	        }
+	    } else if (data.type === "endOfRequest") {
+	        // Qui puoi aggiornare la GUI dei messaggi della richiesta
+	        const responseBox = document.getElementById("responseBox");
+	        responseBox.textContent = "Esito richiesta: " + data.result;
+	    }
+	}
+
+
+	function updateLastUpdate() {
+	    //funzione che aggiorna la data e l'ora dell'ultimo aggiornamento
+	    const now = new Date();
+	    document.getElementById("lastUpdate").textContent =
+	        `Ultimo aggiornamento: ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
+	}
+
+	/* ---- Request Sender ---- */
+	function sendRequest() {
+	    //legge il valore nella casella di input e prende i due box per l'output
+	    const value = document.getElementById("requestValue").value;
+	    const messageBox = document.getElementById("messageBox");
+	    const responseBox = document.getElementById("responseBox");
+
+	    if (value === "") {
+	        //se nei box non c'è scritto nulla, mostra errore
+	        messageBox.textContent = "Inserisci un numero prima di inviare!";
+	        messageBox.style.color = "#ff6666";
+	        return;
+	    }
+
+	    //altrimenti mostra che sta inviando la richiesta
+	    messageBox.textContent = `Invio richiesta con valore: ${value}...`;
+	    messageBox.style.color = "#00ffff";
+
+	    fetch(`/caller?pid=${encodeURIComponent(value)}`) //invia richiesta HTTP al server con pid = ciò che c'è scritto nel box
+	        .then(response => {
+	            if (!response.ok) throw new Error("Errore HTTP: " + response.status);
+	            return response.text();
+	        })
+	        .then(data => {
+	            messageBox.textContent = "Richiesta mandata!";
+	            messageBox.style.color = "#00ff00";
+	            responseBox.textContent = "Risposta server: " + data;
+	        })
+	        .catch(error => {
+	            messageBox.textContent = "❌ Errore durante la richiesta.";
+	            messageBox.style.color = "#ff6666";
+	            responseBox.textContent = error.message;
+	        });
+	}
+
+	/* ---- Start ---- */
+	//viene avviato in automatico all'apertura della pagina
+	window.onload = () => {
+	    connectWebSocket(); //si apre la connessione websocket
+
+	    fetch("/holdstate") //fa chiamata Http per conoscere lo stato della stiva
+	        .then(r => r.json())
+	        .then(data => {
+	            updateUI(data);
+	            updateLastUpdate();
+	        })
+	        .catch(err => console.error("Errore recupero stato iniziale:", err));
+	};
+	</script>
+
 </body>
 </html>

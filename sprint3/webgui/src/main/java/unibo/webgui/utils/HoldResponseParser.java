@@ -26,20 +26,39 @@ public class HoldResponseParser {
 
 	    // Parsing del JSON originale
 	    JSONObject original = new JSONObject(jsonString);
-	    int currentLoad = original.getInt("current_hold_weight");
-	    JSONArray slotsArray = original.getJSONArray("slots");
+	    
+	    //controllo del tipo di messaggio
+	    String type = original.optString("type", "unknown");
+        payload.put("type", type);
+        
+        switch(type) {
+        case "holdUpdate":
+            int currentLoad = original.getInt("current_hold_weight");
+            JSONArray slotsArray = original.getJSONArray("slots");
 
-	    List<String> slotStatusList = new ArrayList<>();
-	    for (int i = 0; i < slotsArray.length(); i++) {
-	        JSONObject slot = slotsArray.getJSONObject(i);
-	        boolean available = slot.getBoolean("available");
-	        slotStatusList.add(available ? "libero" : "pieno");
-	    }
+            List<String> slotStatusList = new ArrayList<>();
+            for (int i = 0; i < slotsArray.length(); i++) {
+                JSONObject slot = slotsArray.getJSONObject(i);
+                boolean available = slot.getBoolean("available");
+                slotStatusList.add(available ? "libero" : "pieno");
+            }
+            
+            payload.put("shipLoad", currentLoad);
+            payload.put("slots", slotStatusList);
+            break;
 
-	    payload.put("shipLoad", currentLoad);
-	    payload.put("slots", slotStatusList);
+        case "endOfRequest":
+            String result = original.optString("result", "unknown");
+            payload.put("result", result);
+            break;
 
-	    return payload;
+        default:
+            System.err.println("Tipo di messaggio non riconosciuto: " + type);
+            break;
+        }
+        
+        return payload;
+	   
 	}
 }
 

@@ -25,6 +25,12 @@ with Diagram('webguimodelArch', show=False, outformat='png', graph_attr=graphatt
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
+     with Cluster('ctx_webguimodel', graph_attr=nodeattr):
+          companyrequestreceiver=Custom('companyrequestreceiver','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_cargoservice', graph_attr=nodeattr):
           cargoservice=Custom('cargoservice(ext)','./qakicons/externalQActor.png')
+     with Cluster('ctx_webgui', graph_attr=nodeattr):
+          webgui=Custom('webgui(ext)','./qakicons/externalQActor.png')
+     companyrequestreceiver >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest<font color="darkgreen"> resultrequest</font> &nbsp; >',  fontcolor='magenta') >> cargoservice
+     companyrequestreceiver >> Edge(color='blue', style='solid',  decorate='true', label='<sendendofrequesttogui &nbsp; >',  fontcolor='blue') >> webgui
 diag

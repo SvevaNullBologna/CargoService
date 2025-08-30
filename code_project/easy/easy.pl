@@ -6,5 +6,5 @@ request( sendrequest, sendrequest(PID) ).
 reply( sendAnswerToRequest, sendAnswerToRequest(Answ) ).  %%for sendrequest
 %====================================================================================
 context(ctx_easy, "localhost",  "TCP", "8000").
- qactor( companyrequestreceiver, ctx_easy, "it.unibo.companyrequestreceiver.Companyrequestreceiver").
- static(companyrequestreceiver).
+ qactor( example, ctx_easy, "it.unibo.example.Example").
+ static(example).

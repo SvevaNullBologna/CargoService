@@ -44,10 +44,24 @@ class Example ( name: String, scope: CoroutineScope, isconfined: Boolean=false, 
 				}	 
 				state("sendingString") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name sending message")
+						CommUtils.outcyan("$name sending hold json")
 						 val Msg = jsonTestMessageBuilder.holdToJson() 
-									//val Msg = "stringa funzionante di prova"
+									
 						updateResourceRep( Msg  
+						)
+						delay(2000) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="sendingothermsg", cond=doswitch() )
+				}	 
+				state("sendingothermsg") { //this:State
+					action { //it:State
+						CommUtils.outcyan("$name sending success json")
+						 val Tsg = jsonTestMessageBuilder.otherMsg()  
+						updateResourceRep( Tsg  
 						)
 						delay(2000) 
 						//genTimer( actor, state )

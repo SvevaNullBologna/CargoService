@@ -35,7 +35,6 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 				lateinit var hold : HoldData 
 				var AvailableSlot: Slot? = null
 				var ProductWeight = -1
-				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -43,7 +42,7 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 						delay(1000) 
 						
 									hold = HoldData()
-									val HoldJsonString = hold.holdToJson()  
+									val HoldJsonString = hold.holdToJson()
 						updateResourceRep(HoldJsonString 
 						)
 						//genTimer( actor, state )

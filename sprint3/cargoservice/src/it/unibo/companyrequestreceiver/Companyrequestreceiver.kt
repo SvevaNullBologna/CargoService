@@ -30,9 +30,9 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
 		
-				var systemIsOccupied = false
 				val Errormsg = "\"the system is occupied with another request\""
 				val Msg = "\"the system is taking care of your request\""
+				var PID = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -54,7 +54,6 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t028",targetState="handleRequest",cond=whenRequest("sendrequest"))
-					transition(edgeName="t029",targetState="handleResult",cond=whenReply("resultrequest"))
 				}	 
 				state("handleRequest") { //this:State
 					action { //it:State
@@ -63,21 +62,48 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 						if( checkMsgContent( Term.createTerm("sendrequest(PID)"), Term.createTerm("sendrequest(PID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-								  				val PID = payloadArg(0) 
-								if(  systemIsOccupied  
-								 ){answer("sendrequest", "sendrequestAnswer", "sendrequestAnswer($Errormsg)"   )  
-								}
-								else
-								 { systemIsOccupied = true  
-								 answer("sendrequest", "sendrequestAnswer", "sendrequestAnswerToRequest($Msg)"   )  
-								 }
+								  				PID = payloadArg(0) 
+								answer("sendrequest", "sendrequestAnswer", "sendrequestAnswerToRequest($Msg)"   )  
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waiting", cond=doswitch() )
+					 transition( edgeName="goto",targetState="forwardRequest", cond=doswitch() )
+				}	 
+				state("forwardRequest") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name sending cargoservice the request")
+						request("loadrequest", "loadrequest($PID)" ,"cargoservice" )  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="occupiedWaiting", cond=doswitch() )
+				}	 
+				state("occupiedWaiting") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name is waiting for the system to free itself ")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t129",targetState="rejectRequest",cond=whenRequest("sendrequest"))
+					transition(edgeName="t130",targetState="handleResult",cond=whenReply("resultrequest"))
+				}	 
+				state("rejectRequest") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name rejecting request")
+						answer("sendrequest", "sendrequestAnswer", "sendrequestAnswer($Errormsg)"   )  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="occupiedWaiting", cond=doswitch() )
 				}	 
 				state("handleResult") { //this:State
 					action { //it:State
@@ -87,7 +113,10 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
 								  				val Result = payloadArg(0)
-								  				systemIsOccupied = false
+								  				val EndJson = """{"type":"endOfRequest","result":"$Result"}"""
+								CommUtils.outblue("$name sending end of result to gui: $EndJson")
+								updateResourceRep(EndJson 
+								)
 						}
 						//genTimer( actor, state )
 					}

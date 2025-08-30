@@ -42,6 +42,7 @@ with Diagram('cargoserviceArch', show=False, outformat='png', graph_attr=graphat
      sys >> Edge( label='anomalyFixed', **evattr, decorate='true', fontcolor='darkgreen') >> cargorobot
      sys >> Edge( label='deliveredToSlot', **evattr, decorate='true', fontcolor='darkgreen') >> hold
      cargorobot >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     companyrequestreceiver >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest<font color="darkgreen"> resultrequest</font> &nbsp; >',  fontcolor='magenta') >> cargoservice
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
      cargoservice >> Edge(color='magenta', style='solid', decorate='true', label='<checkIfFits<font color="darkgreen"> accepted refused</font> &nbsp; >',  fontcolor='magenta') >> hold
      cargorobot >> Edge(color='blue', style='solid',  decorate='true', label='<setdirection &nbsp; >',  fontcolor='blue') >> basicrobot

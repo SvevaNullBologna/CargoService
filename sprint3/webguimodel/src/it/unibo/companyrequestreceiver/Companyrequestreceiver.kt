@@ -29,7 +29,10 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
-		 var systemIsOccupied = false  
+		
+				val Errormsg = "\"the system is occupied with another request\""
+				val Msg = "\"the system is taking care of your request\""
+				var PID = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -51,7 +54,6 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t00",targetState="handleRequest",cond=whenRequest("sendrequest"))
-					transition(edgeName="t01",targetState="handleResult",cond=whenReply("resultrequest"))
 				}	 
 				state("handleRequest") { //this:State
 					action { //it:State
@@ -60,24 +62,48 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 						if( checkMsgContent( Term.createTerm("sendrequest(PID)"), Term.createTerm("sendrequest(PID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-								  				val PID = payloadArg(0) 
-								if(  systemIsOccupied  
-								 ){ val Errormsg = "the system is occupied with another request"  
-								answer("sendrequest", "sendAnswerToRequest", "sendAnswerToRequest($Errormsg)"   )  
-								}
-								else
-								 { systemIsOccupied = true  
-								  val Msg = "the system is taking care of your request"  
-								 answer("sendrequest", "sendAnswerToRequest", "sendAnswerToRequest($Msg)"   )  
-								 request("loadrequest", "loadrequest($PID)" ,"cargoservice" )  
-								 }
+								  				PID = payloadArg(0) 
+								answer("sendrequest", "sendrequestAnswer", "sendrequestAnswerToRequest($Msg)"   )  
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waiting", cond=doswitch() )
+					 transition( edgeName="goto",targetState="forwardRequest", cond=doswitch() )
+				}	 
+				state("forwardRequest") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name sending cargoservice the request")
+						request("loadrequest", "loadrequest($PID)" ,"cargoservice" )  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="occupiedWaiting", cond=doswitch() )
+				}	 
+				state("occupiedWaiting") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name is waiting for the system to free itself ")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t11",targetState="rejectRequest",cond=whenRequest("sendrequest"))
+					transition(edgeName="t12",targetState="handleResult",cond=whenReply("resultrequest"))
+				}	 
+				state("rejectRequest") { //this:State
+					action { //it:State
+						CommUtils.outblue("$name rejecting request")
+						answer("sendrequest", "sendrequestAnswer", "sendrequestAnswer($Errormsg)"   )  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="occupiedWaiting", cond=doswitch() )
 				}	 
 				state("handleResult") { //this:State
 					action { //it:State
@@ -87,8 +113,8 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
 								  				val Result = payloadArg(0)
-								  				systemIsOccupied = false
-								answer("sendrequest", "sendAnswerToRequest", "sendAnswerToRequest($Result)"   )  
+								CommUtils.outblue("$name should forward the request to cargoservice")
+								forward("sendendofrequesttogui", "sendendofrequesttogui(Result)" ,"webgui" ) 
 						}
 						//genTimer( actor, state )
 					}

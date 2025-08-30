@@ -1,19 +1,81 @@
 System webguimodel
 
-Dispatch update : update(HoldJsonString)
-
 //webgui -> companyrequestreceiver  
 Request sendrequest : sendrequest(PID)
 //companyrequestreceiver -> webgui
-Reply sendAnswerToRequest : sendAnswerToRequest(Answ) for sendrequest
+Reply sendrequestAnswer : sendrequestAnswer(Answ) for sendrequest
 //companyrequestreceiver -> cargoservice
 Request loadrequest : loadrequest(PID) 
 //CargoService -> companyrequestreceiver
 Reply resultrequest : resultrequest(Rst) for loadrequest
+//companyrequestreceiver -> 
+Dispatch sendendofrequesttogui : sendendofrequesttogui(Result)
 
-
-Context ctx_webguimodel ip[host="local" port=8006]
-Context ctx_cargoservice ip[host="127.0.0.1" port=8000]
+Context ctx_webguimodel ip [host="localhost" port=8005]
+Context ctx_cargoservice ip [host="127.0.0.1" port=8000]
+Context ctx_webgui ip [host="127.0.0.1" port=8080]
 
 ExternalQActor cargoservice context ctx_cargoservice
+ExternalQActor webgui context ctx_webgui
 
+QActor companyrequestreceiver context ctx_webguimodel{
+	[#
+		val Errormsg = "\"the system is occupied with another request\""
+		val Msg = "\"the system is taking care of your request\""
+		var PID = ""
+	#]
+ 	State s0 initial {
+ 		println("$name STARTS") color blue
+ 		delay 5000
+	}Goto waiting
+	
+  	State waiting{
+  		println("$name waiting to receive a request") color blue
+  	}
+  	Transition t0 
+  	whenRequest sendrequest -> handleRequest
+  	
+  	
+  	State handleRequest{
+  		printCurrentMessage
+  		onMsg(sendrequest : sendrequest(PID)){
+  			[#
+  				PID = payloadArg(0) 
+  			#]
+  			replyTo sendrequest with sendrequestAnswer: sendrequestAnswerToRequest($Msg)
+
+  		}	
+  	}Goto forwardRequest 
+  	
+  	State forwardRequest{
+  		println("$name sending cargoservice the request") color blue
+  		request cargoservice -m loadrequest: loadrequest($PID)
+  	}
+  	Goto occupiedWaiting
+  	
+  	State occupiedWaiting
+  	{
+  		println("$name is waiting for the system to free itself ") color blue
+  	}
+  	Transition t1
+  	whenRequest sendrequest -> rejectRequest
+  	whenReply resultrequest -> handleResult
+  	
+  	State rejectRequest{
+  		println("$name rejecting request") color blue
+  		replyTo sendrequest with sendrequestAnswer: sendrequestAnswer($Errormsg)
+  	}
+  	Goto occupiedWaiting
+  	
+  	State handleResult{
+  		printCurrentMessage 
+  		onMsg(resultrequest : resultrequest(Rst)){
+  			[# 
+  				val Result = payloadArg(0)
+  			#]
+  			println("$name should forward the request to cargoservice") color blue
+  			forward  webgui -m sendendofrequesttogui : sendendofrequesttogui(Result)
+  		}
+  	}Goto waiting
+  
+}

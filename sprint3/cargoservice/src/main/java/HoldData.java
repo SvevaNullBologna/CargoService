@@ -43,6 +43,7 @@ public class HoldData{
 	
 	public String holdToJson() {
 	    JSONObject obj = new JSONObject();
+	    obj.put("type", "holdUpdate");
 	    obj.put("maxload", MaxLoad);
 	    obj.put("current_hold_weight", Cur_HoldWeight);
 

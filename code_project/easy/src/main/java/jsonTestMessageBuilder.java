@@ -18,6 +18,7 @@ public class jsonTestMessageBuilder {
 
         for (int i = 1; i <= 5; i++) {
             JSONObject slotObj = new JSONObject();
+            obj.put("type", "holdUpdate");
             slotObj.put("id", i);
             slotObj.put("x", i);
             slotObj.put("y", i);
@@ -28,5 +29,10 @@ public class jsonTestMessageBuilder {
 
         obj.put("slots", slotsArray);
         return "'" + obj.toString() + "'";
+    }
+    
+    public static String otherMsg(){
+    	return "{\"type\":\"endOfRequest\",\"result\":\"success\"}";
+
     }
 }
