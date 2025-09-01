@@ -12,9 +12,8 @@ Request loadrequest : loadrequest(PID)
 Reply resultrequest : resultrequest(Rst) for loadrequest
 
 //CargoService -> ProductService 
-Request getProduct : getProduct(ID) 
-//ProductService -> CargoService
-Reply getProductAnswer : getProductAnswer(JSonString) for getProduct
+Request getProduct : product( ID )    
+Reply   getProductAnswer: product( JSonString ) for getProduct 
 
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
@@ -86,24 +85,28 @@ QActor cargoservice context ctx_cargoservice{
 			[# Cur_PID = payloadArg(0).toInt() #]
 			println("received request with PID : $Cur_PID") color magenta
 			println("sending request to productservice") color magenta
-			request productservice -m getProduct : getProduct($Cur_PID)
+			request productservice -m getProduct : product($Cur_PID)
 		}
+	}
+	Goto waitAnswer
+	
+	State waitAnswer{
+		println("$name waiting answer from productservice") color magenta
 	}
 	Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer
-	//Goto validateRequest
 	
 	State checkProdAnswer{
-		println("arrived here") color red
+		println("received answer from productservice") color magenta
 		printCurrentMessage
-		onMsg(getProductAnswer : getProductAnswer(PJson)){
+		onMsg(getProductAnswer : product( JsonString )){
 			[#
 				val jsonStr = payloadArg(0)
 				val p = Product(jsonStr)
 				Cur_Weight = p.getWeight()
 				Cur_PID = p.getProductId()
 			#]  
-			println("checking prod answer") color magenta
+			println("$jsonStr") color magenta
 		}
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
@@ -111,13 +114,6 @@ QActor cargoservice context ctx_cargoservice{
 	
 	State validateRequest{
 		println("validating request") color magenta
-		/*
-		 * [#
-			Cur_PID = 10
-			Cur_Weight = 30 
-		#]
-		 */
-		
 		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
 	}
 	Transition t2 

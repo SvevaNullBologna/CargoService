@@ -1,14 +1,56 @@
 System easy
  
-Dispatch message : message(Msg)
+/*Dispatch message : message(Msg)
 //webgui -> companyrequestreceiver  
 Request sendrequest : sendrequest(PID)
 //companyrequestreceiver -> webgui
 Reply sendAnswerToRequest : sendAnswerToRequest(Answ) for sendrequest
+*/
+Request getProduct : product( ID )    
+Reply   getProductAnswer: product( JSonString ) for getProduct 
+
 
 Context ctx_easy ip[host="localhost" port=8000]
 
-QActor example context ctx_easy {
+Context ctx_productservice ip[host="127.0.0.1" port=8111]
+
+ExternalQActor productservice context ctx_productservice
+
+
+QActor tryproductservice context ctx_easy {
+	State s0 initial{
+		println("$name starts") color yellow
+	}
+	Goto sendRequest
+	
+	State sendRequest{
+		[# val PID = 10 #]
+		request productservice -m getProduct : product($PID)
+	}Goto waitingresponse
+	
+	State waitingresponse{
+		println("$name waiting answer from product service") color yellow
+	}
+	Transition t0
+	whenReply getProductAnswer -> receivedAnswer
+	
+	State receivedAnswer{
+		onMsg(getProductAnswer: product( JSonString )){
+			[# val Product = payloadArg(0) #]
+			println("received product: $Product")
+		}
+		delay 3000
+	}
+	Goto sendRequest
+	
+	
+	
+}
+
+
+
+
+/*QActor example context ctx_easy {
 	import "main.java.jsonTestMessageBuilder"
 	State s0 initial {
 		println("$name starts") color cyan
@@ -31,6 +73,7 @@ QActor example context ctx_easy {
 		updateResource [# Tsg #]
 		delay 2000
 	}Goto sendingString
-}
+}*/
+
 
 

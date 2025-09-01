@@ -6,8 +6,8 @@ request( sendrequest, sendrequest(PID) ).
 reply( sendrequestAnswer, sendrequestAnswer(Answ) ).  %%for sendrequest
 request( loadrequest, loadrequest(PID) ).
 reply( resultrequest, resultrequest(Rst) ).  %%for loadrequest
-request( getProduct, getProduct(ID) ).
-reply( getProductAnswer, getProductAnswer(JSonString) ).  %%for getProduct
+request( getProduct, product(ID) ).
+reply( getProductAnswer, product(JSonString) ).  %%for getProduct
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).

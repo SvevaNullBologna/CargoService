@@ -71,8 +71,18 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 								 Cur_PID = payloadArg(0).toInt()  
 								CommUtils.outmagenta("received request with PID : $Cur_PID")
 								CommUtils.outmagenta("sending request to productservice")
-								request("getProduct", "getProduct($Cur_PID)" ,"productservice" )  
+								request("getProduct", "product($Cur_PID)" ,"productservice" )  
 						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitAnswer", cond=doswitch() )
+				}	 
+				state("waitAnswer") { //this:State
+					action { //it:State
+						CommUtils.outmagenta("$name waiting answer from productservice")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -82,17 +92,17 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				}	 
 				state("checkProdAnswer") { //this:State
 					action { //it:State
-						CommUtils.outred("arrived here")
+						CommUtils.outmagenta("received answer from productservice")
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
-						if( checkMsgContent( Term.createTerm("getProductAnswer(JSonString)"), Term.createTerm("getProductAnswer(PJson)"), 
+						if( checkMsgContent( Term.createTerm("product(JSonString)"), Term.createTerm("product(JsonString)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
 												val jsonStr = payloadArg(0)
 												val p = Product(jsonStr)
 												Cur_Weight = p.getWeight()
 												Cur_PID = p.getProductId()
-								CommUtils.outmagenta("checking prod answer")
+								CommUtils.outmagenta("$jsonStr")
 						}
 						//genTimer( actor, state )
 					}

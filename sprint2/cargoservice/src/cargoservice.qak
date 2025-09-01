@@ -5,9 +5,8 @@ mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events"
 //Companysimulator -> CargoService
 Request loadrequest : loadrequest(PID)
 //CargoService -> ProductService 
-Request getProduct : product(ID) 
-//ProductService -> CompanySimulator 
-Reply getProductAnswer : product(JSonString) for getProduct
+Request getProduct : product( ID )    
+Reply   getProductAnswer: product( JSonString ) for getProduct 
 //CargoService -> CargoService
 Dispatch accepted : accepted(PID, Weight, Slot)
 Dispatch refused : refused(PID, Weight)
@@ -98,23 +97,28 @@ QActor cargoservice context ctx_cargoservice{
 			[# Cur_PID = payloadArg(0).toInt() #]
 			println("received request with PID : $Cur_PID") color magenta
 			println("sending request to productservice") color magenta
-			request productservice -m getProduct : getProduct($Cur_PID)
+			request productservice -m getProduct : product($Cur_PID)
 		}
+	}
+	Goto waitAnswer
+
+	State waitAnswer{
+		println("$name waiting answer from productservice") color magenta
 	}
 	Transition t1 
 	whenReply getProductAnswer -> checkProdAnswer
 	
-	
-	
 	State checkProdAnswer{
+		println("received answer from productservice") color magenta
 		printCurrentMessage
-		onMsg(getProductAnswer : product(PJson)){
+		onMsg(getProductAnswer: product( JSonString )){
 			[#
 				val jsonStr = payloadArg(0)
 				val p = Product(jsonStr)
 				Cur_Weight = p.getWeight()
 				Cur_PID = p.getProductId()
 			#]
+			println("$jsonStr") color magenta
 		}
 	}
 	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal

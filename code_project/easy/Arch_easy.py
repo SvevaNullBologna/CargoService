@@ -26,5 +26,8 @@ with Diagram('easyArch', show=False, outformat='png', graph_attr=graphattr) as d
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_easy', graph_attr=nodeattr):
-          example=Custom('example','./qakicons/symActorWithobjSmall.png')
+          tryproductservice=Custom('tryproductservice','./qakicons/symActorWithobjSmall.png')
+     with Cluster('ctx_productservice', graph_attr=nodeattr):
+          productservice=Custom('productservice(ext)','./qakicons/externalQActor.png')
+     tryproductservice >> Edge(color='magenta', style='solid', decorate='true', label='<getProduct<font color="darkgreen"> getProductAnswer</font> &nbsp; >',  fontcolor='magenta') >> productservice
 diag
