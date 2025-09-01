@@ -43,8 +43,6 @@ Reply accepted : accepted(JsonString) for checkIfFits
 Reply refused : refused(Reason) for checkIfFits
 //Hold -> webgui
 Dispatch update : update(HoldJsonString)
-//conwayrequestreceiver -> whoever is listening
-Event endOfRequest : endOfRequest(Rst)
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]

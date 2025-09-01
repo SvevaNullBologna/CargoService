@@ -26,11 +26,11 @@ with Diagram('webguimodelArch', show=False, outformat='png', graph_attr=graphatt
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_webguimodel', graph_attr=nodeattr):
-          companyrequestreceiver=Custom('companyrequestreceiver','./qakicons/symActorWithobjSmall.png')
+          loadrequestsendpage=Custom('loadrequestsendpage','./qakicons/symActorWithobjSmall.png')
      with Cluster('ctx_cargoservice', graph_attr=nodeattr):
-          cargoservice=Custom('cargoservice(ext)','./qakicons/externalQActor.png')
-     with Cluster('ctx_webgui', graph_attr=nodeattr):
-          webgui=Custom('webgui(ext)','./qakicons/externalQActor.png')
-     companyrequestreceiver >> Edge(color='magenta', style='solid', decorate='true', label='<loadrequest<font color="darkgreen"> resultrequest</font> &nbsp; >',  fontcolor='magenta') >> cargoservice
-     companyrequestreceiver >> Edge(color='blue', style='solid',  decorate='true', label='<sendendofrequesttogui &nbsp; >',  fontcolor='blue') >> webgui
+          holdshowpage=Custom('holdshowpage','./qakicons/symActorWithobjSmall.png')
+          hold=Custom('hold(ext)','./qakicons/externalQActor.png')
+          companyrequestreceiver=Custom('companyrequestreceiver(ext)','./qakicons/externalQActor.png')
+     loadrequestsendpage >> Edge(color='magenta', style='solid', decorate='true', label='<sendrequest<font color="darkgreen"> sendrequestAnswer</font> &nbsp; >',  fontcolor='magenta') >> companyrequestreceiver
+     hold >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> holdshowpage
 diag

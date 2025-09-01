@@ -331,14 +331,6 @@
 	//viene avviato in automatico all'apertura della pagina
 	window.onload = () => {
 	    connectWebSocket(); //si apre la connessione websocket
-
-	    fetch("/holdstate") //fa chiamata Http per conoscere lo stato della stiva
-	        .then(r => r.json())
-	        .then(data => {
-	            updateUI(data);
-	            updateLastUpdate();
-	        })
-	        .catch(err => console.error("Errore recupero stato iniziale:", err));
 	};
 	</script>
 

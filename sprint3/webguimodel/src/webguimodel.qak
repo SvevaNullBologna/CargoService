@@ -1,81 +1,79 @@
 System webguimodel
 
-//webgui -> companyrequestreceiver  
+Dispatch update : update(HoldJsonString)
 Request sendrequest : sendrequest(PID)
-//companyrequestreceiver -> webgui
 Reply sendrequestAnswer : sendrequestAnswer(Answ) for sendrequest
-//companyrequestreceiver -> cargoservice
-Request loadrequest : loadrequest(PID) 
-//CargoService -> companyrequestreceiver
-Reply resultrequest : resultrequest(Rst) for loadrequest
-//companyrequestreceiver -> 
-Dispatch sendendofrequesttogui : sendendofrequesttogui(Result)
 
 Context ctx_webguimodel ip [host="localhost" port=8005]
 Context ctx_cargoservice ip [host="127.0.0.1" port=8000]
-Context ctx_webgui ip [host="127.0.0.1" port=8080]
 
-ExternalQActor cargoservice context ctx_cargoservice
-ExternalQActor webgui context ctx_webgui
+ExternalQActor hold context ctx_cargoservice
+ExternalQActor companyrequestreceiver context ctx_cargoservice
 
-QActor companyrequestreceiver context ctx_webguimodel{
-	[#
-		val Errormsg = "\"the system is occupied with another request\""
-		val Msg = "\"the system is taking care of your request\""
-		var PID = ""
-	#]
+QActor loadrequestsendpage context ctx_webguimodel{
  	State s0 initial {
- 		println("$name STARTS") color blue
+ 		println("$name STARTS") color yellow
  		delay 5000
-	}Goto waiting
+	}Goto waitinginput
 	
-  	State waiting{
-  		println("$name waiting to receive a request") color blue
+	State waitinginput{
+		println("$name waiting input") color yellow
+		delay 6000		
+	}Goto sendrequest
+	
+  	State sendrequest{//simulating request
+  		[# val Rnds = (0..100).random() #]
+  		println("$name sending request") color yellow
+  		request companyrequestreceiver -m sendrequest : sendrequest($Rnds)
+  		delay 6000
   	}
-  	Transition t0 
-  	whenRequest sendrequest -> handleRequest
+  	Transition t0
+  	whenReply sendrequestAnswer -> printAnswer
   	
-  	
-  	State handleRequest{
-  		printCurrentMessage
-  		onMsg(sendrequest : sendrequest(PID)){
+  	State printAnswer{
+  		onMsg(sendrequestAnswer : sendrequestAnswer(Answ)){
   			[#
-  				PID = payloadArg(0) 
+  				val AnswerToRequest = payloadArg(0) color yellow
   			#]
-  			replyTo sendrequest with sendrequestAnswer: sendrequestAnswerToRequest($Msg)
-
-  		}	
-  	}Goto forwardRequest 
-  	
-  	State forwardRequest{
-  		println("$name sending cargoservice the request") color blue
-  		request cargoservice -m loadrequest: loadrequest($PID)
-  	}
-  	Goto occupiedWaiting
-  	
-  	State occupiedWaiting
-  	{
-  		println("$name is waiting for the system to free itself ") color blue
-  	}
-  	Transition t1
-  	whenRequest sendrequest -> rejectRequest
-  	whenReply resultrequest -> handleResult
-  	
-  	State rejectRequest{
-  		println("$name rejecting request") color blue
-  		replyTo sendrequest with sendrequestAnswer: sendrequestAnswer($Errormsg)
-  	}
-  	Goto occupiedWaiting
-  	
-  	State handleResult{
-  		printCurrentMessage 
-  		onMsg(resultrequest : resultrequest(Rst)){
-  			[# 
-  				val Result = payloadArg(0)
-  			#]
-  			println("$name should forward the request to cargoservice") color blue
-  			forward  webgui -m sendendofrequesttogui : sendendofrequesttogui(Result)
+  			println($AnswerToRequest) color yellow
   		}
-  	}Goto waiting
-  
+  	}Goto waitinginput
+  	
+  	
+  	
+}
+
+
+QActor holdshowpage context ctx_cargoservice{//simuliamo la pagina hold
+	[#
+		var CurrentState = "hold"
+		
+		fun update(json: String){
+			CurrentState = json
+		}
+	#]
+	State s0 initial{
+		println("$name STARTS") color blue
+ 		delay 5000
+	}Goto waitingUpdate
+	
+	State waitingUpdate{
+		println("$name waiting update") color blue
+		observeResource hold msgid update 
+	}Transition t0
+	whenMsg update -> handleHoldState 
+	
+	State handleHoldState{
+		println("$name received update")
+		
+		onMsg(update : update(HoldJsonString)){
+			[#
+				val received = payloadArg(0)
+				update(received)
+			#]
+			println("$name updated hold") color blue
+			
+		}
+	}Goto waitingUpdate
+	
 }
