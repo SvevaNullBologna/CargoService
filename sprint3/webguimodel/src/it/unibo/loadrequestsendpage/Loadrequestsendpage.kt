@@ -19,6 +19,7 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
+import org.json.simple.JSONArray
 
 class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -29,56 +30,126 @@ class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boo
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
 		//IF actor.withobj !== null val actor.withobj.name» = actor.withobj.method»ENDIF
+		 
+		   		var CurrentShownMessage = "waiting for request"
+		   		fun updateMessage(message: String){
+		       		CurrentShownMessage = message
+		   		}
+		
+		   		fun handleHoldUpdate(json: String): String? {
+		    		return try {
+		        		val parser = org.json.simple.parser.JSONParser()
+		        		val parsed = parser.parse(json) as org.json.simple.JSONObject
+		
+		        		val type = parsed["type"] as? String ?: "unknown"
+		        		if (type == "endOfRequest") {
+		            		val result = parsed["result"] as? String ?: "unknown"
+		            		"Esito richiesta: $result"
+		        		} else {
+		            		null
+		        		}
+		    		} catch (e: Exception) {
+		        		println("Errore parsing JSON: ${e.message}")
+		        		null
+		    		}
+				}
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outyellow("$name STARTS")
+						observeResource("127.0.0.1","8000","ctx_cargoservice","hold","update")
 						delay(5000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waitinginput", cond=doswitch() )
+					 transition( edgeName="goto",targetState="waiting", cond=doswitch() )
 				}	 
-				state("waitinginput") { //this:State
+				state("waiting") { //this:State
 					action { //it:State
-						CommUtils.outyellow("$name waiting input")
+						CommUtils.outyellow("$CurrentShownMessage")
 						delay(6000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="sendrequest", cond=doswitch() )
+					 transition(edgeName="t01",targetState="showMessage",cond=whenEvent("filteredupdate"))
+					transition(edgeName="t02",targetState="sendRequest",cond=whenDispatch("hitsend"))
 				}	 
-				state("sendrequest") { //this:State
+				state("showMessage") { //this:State
 					action { //it:State
-						 val Rnds = (0..100).random()  
-						CommUtils.outyellow("$name sending request")
-						request("sendrequest", "sendrequest($Rnds)" ,"companyrequestreceiver" )  
-						delay(6000) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t00",targetState="printAnswer",cond=whenReply("sendrequestAnswer"))
-				}	 
-				state("printAnswer") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("sendrequestAnswer(Answ)"), Term.createTerm("sendrequestAnswer(Answ)"), 
+						if( checkMsgContent( Term.createTerm("filteredupdate(Update)"), Term.createTerm("filteredupdate(Update)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-								  				val AnswerToRequest = payloadArg(0) color yellow
-								CommUtils.outyellow($AnswerToRequest)
+												val update = payloadArg(0)
+												val filtered = handleHoldUpdate(update)
+								if(  filtered != null  
+								 ){ updateMessage(filtered)  
+								}
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="waitinginput", cond=doswitch() )
+				}	 
+				state("sendRequest") { //this:State
+					action { //it:State
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("hitsend(PID)"), Term.createTerm("hitsend(PID)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val PID = payloadArg(0)  
+								request("sendrequest", "sendrequest($PID)" ,"companyrequestreceiver" )  
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t13",targetState="printMessage",cond=whenReply("sendrequestAnswer"))
+				}	 
+				state("printMessage") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("sendrequestAnswer(Answ)"), Term.createTerm("sendrequestAnswer(Answ)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val Answer = payloadArg(0)  
+								CommUtils.outyellow("$Answer")
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waitSystemFinish", cond=doswitch() )
+				}	 
+				state("waitSystemFinish") { //this:State
+					action { //it:State
+						CommUtils.outyellow("$name waiting for the system to end the task")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t14",targetState="updateMessage",cond=whenDispatch("update"))
+				}	 
+				state("updateMessage") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("update(HoldJsonString)"), Term.createTerm("update(HoldJsonString)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								
+								  				val msg = payloadArg(0) 
+								  				updateMessage(msg)
+								CommUtils.outyellow("$msg")
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="waiting", cond=doswitch() )
 				}	 
 			}
 		}

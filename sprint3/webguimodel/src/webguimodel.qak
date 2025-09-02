@@ -1,8 +1,13 @@
 System webguimodel
 
 Dispatch update : update(HoldJsonString)
+Event filteredupdate : filteredupdate(Update)
+Dispatch hitsend : hitsend(PID)
+
 Request sendrequest : sendrequest(PID)
 Reply sendrequestAnswer : sendrequestAnswer(Answ) for sendrequest
+
+
 
 Context ctx_webguimodel ip [host="localhost" port=8005]
 Context ctx_cargoservice ip [host="127.0.0.1" port=8000]
@@ -10,58 +15,184 @@ Context ctx_cargoservice ip [host="127.0.0.1" port=8000]
 ExternalQActor hold context ctx_cargoservice
 ExternalQActor companyrequestreceiver context ctx_cargoservice
 
-QActor loadrequestsendpage context ctx_webguimodel{
- 	State s0 initial {
- 		println("$name STARTS") color yellow
- 		delay 5000
-	}Goto waitinginput
+QActor webgui context ctx_webguimodel{
+	import "main.java.HoldResponseParser"
+	State s0 initial{
+		println("$name starts") color magenta
+		observeResource hold msgid update
+		delay 5000
+	}Goto waitingupdate
 	
-	State waitinginput{
-		println("$name waiting input") color yellow
-		delay 6000		
-	}Goto sendrequest
+	State waitingupdate{
+		println("$name waiting update from cargoservice") color magenta
+	}
+	Transition t0 
+	whenMsg update -> filterupdate
 	
-  	State sendrequest{//simulating request
-  		[# val Rnds = (0..100).random() #]
-  		println("$name sending request") color yellow
-  		request companyrequestreceiver -m sendrequest : sendrequest($Rnds)
-  		delay 6000
-  	}
-  	Transition t0
-  	whenReply sendrequestAnswer -> printAnswer
-  	
-  	State printAnswer{
-  		onMsg(sendrequestAnswer : sendrequestAnswer(Answ)){
-  			[#
-  				val AnswerToRequest = payloadArg(0) color yellow
-  			#]
-  			println($AnswerToRequest) color yellow
-  		}
-  	}Goto waitinginput
-  	
-  	
-  	
+	State filterupdate{
+		printCurrentMessage
+		onMsg(update : update(HoldJsonString)){
+			[# 
+				val Msg = payloadArg(0)
+				val FilteredJsonMsg = HoldResponseParser.parseHoldState(Msg).toString()
+			#]
+			emit filteredupdate : filteredupdate($FilteredJsonMsg)//è un evento perché viene mandato a tutti
+		}
+	}Goto waitingupdate
+	
 }
 
 
-QActor holdshowpage context ctx_cargoservice{//simuliamo la pagina hold
+QActor loadrequestsendpage context ctx_webguimodel{	
+	import "org.json.simple.JSONArray"
+	[# 
+   		var CurrentShownMessage = "waiting for request"
+   		fun updateMessage(message: String){
+       		CurrentShownMessage = message
+   		}
+
+   		fun handleHoldUpdate(json: String): String? {
+    		return try {
+        		val parser = org.json.simple.parser.JSONParser()
+        		val parsed = parser.parse(json) as org.json.simple.JSONObject
+
+        		val type = parsed["type"] as? String ?: "unknown"
+        		if (type == "endOfRequest") {
+            		val result = parsed["result"] as? String ?: "unknown"
+            		"Esito richiesta: $result"
+        		} else {
+            		null
+        		}
+    		} catch (e: Exception) {
+        		println("Errore parsing JSON: ${e.message}")
+        		null
+    		}
+		}
+	#]
+	
+	
+ 	State s0 initial {
+ 		println("$name STARTS") color yellow
+ 		observeResource hold msgid update 
+ 		delay 5000
+	}Goto waiting
+	
+	State waiting{
+		println("$CurrentShownMessage") color yellow
+		delay 6000		
+	}
+	Transition t0 
+	whenEvent filteredupdate -> showMessage
+	whenMsg hitsend -> sendRequest 
+	
+	State showMessage{
+		onMsg(filteredupdate : filteredupdate(Update)){
+			[#
+				val update = payloadArg(0)
+				val filtered = handleHoldUpdate(update)
+			#]
+			if[# filtered != null #]{
+				[# updateMessage(filtered) #]
+			}
+		}
+	}
+	
+	State sendRequest{
+		printCurrentMessage 
+		onMsg(hitsend : hitsend(PID)){
+			[# val PID = payloadArg(0) #]
+			request companyrequestreceiver -m sendrequest : sendrequest($PID)
+		}	
+	}
+	Transition t1 
+	whenReply sendrequestAnswer -> printMessage
+	
+  	State printMessage{
+  		onMsg(sendrequestAnswer : sendrequestAnswer(Answ)){
+  			[# val Answer = payloadArg(0) #]
+  			println("$Answer") color yellow
+  		}
+  	}Goto waitSystemFinish
+  	
+  	State waitSystemFinish{
+  		println("$name waiting for the system to end the task") color yellow
+  	}
+  	Transition t1
+  	whenMsg update -> updateMessage
+  	
+  	State updateMessage{
+  		onMsg(update : update(HoldJsonString)){
+  			[#
+  				val msg = payloadArg(0) 
+  				updateMessage(msg)
+  			#]
+  			println("$msg") color yellow
+  		}
+  	}Goto waiting
+  	
+}
+  	
+  	
+
+QActor holdshowpage context ctx_webguimodel{//simuliamo la pagina hold
+	import "org.json.simple.JSONArray"
 	[#
 		var CurrentState = "hold"
 		
 		fun update(json: String){
 			CurrentState = json
 		}
+		
+		fun fetchUI(json: String): String {
+    		val parser = JSONParser()
+    		val result = mutableMapOf<String, Any>()
+
+    		try {
+        		val obj = parser.parse(json) as JSONObject
+
+        		// type
+        		result["type"] = obj["type"]?.toString() ?: "holdUpdate"
+
+        		// shipLoad
+        		if (obj.containsKey("shipLoad")) {
+            		result["shipLoad"] = (obj["shipLoad"] as Long).toInt()
+        		}
+
+        		// slots
+        		if (obj.containsKey("slots")) {
+            		val slotsArray = obj["slots"] as JSONArray
+            		val slots = mutableListOf<String>()
+            		for (i in 0 until slotsArray.size) {
+                		slots.add(slotsArray[i]?.toString() ?: "libero")
+            		}
+            		result["slots"] = slots
+        		}
+
+        		// result
+        		if (obj.containsKey("result")) {
+            		result["result"] = obj["result"].toString()
+        		}
+
+    		} catch (e: Exception) {
+        		println("Errore in fetchUI: ${e.message}")
+        		result["error"] = e.message ?: "Errore sconosciuto"
+    		}
+
+    		// ritorna una stringa con il formato che vuoi (JSON)
+    		return JSONObject(result).toJSONString()
+		}
+    
 	#]
 	State s0 initial{
 		println("$name STARTS") color blue
+		observeResource hold msgid update 
  		delay 5000
 	}Goto waitingUpdate
 	
 	State waitingUpdate{
 		println("$name waiting update") color blue
-		observeResource hold msgid update 
 	}Transition t0
-	whenMsg update -> handleHoldState 
+	whenEvent filteredupdate -> handleHoldState 
 	
 	State handleHoldState{
 		println("$name received update")
@@ -69,11 +200,28 @@ QActor holdshowpage context ctx_cargoservice{//simuliamo la pagina hold
 		onMsg(update : update(HoldJsonString)){
 			[#
 				val received = payloadArg(0)
-				update(received)
+				val holdstate = fetchUI(received)
+				update(holdstate)
 			#]
 			println("$name updated hold") color blue
+			println("$holdstate")
 			
 		}
 	}Goto waitingUpdate
 	
+}
+
+QActor usersim context ctx_webguimodel{
+	State s0 initial{
+		
+	}Goto sendrequest
+	
+	 
+  	State sendrequest{//simulating request
+  		[# val Rnds = (0..100).random() #]
+  		println("$name sending request") color yellow
+  		forward loadrequestsendpage -m hitsend : hitsend($Rnds)
+  		delay 6000
+  	}Transition t0
+
 }

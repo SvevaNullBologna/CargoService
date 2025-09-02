@@ -26,11 +26,19 @@ with Diagram('webguimodelArch', show=False, outformat='png', graph_attr=graphatt
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctx_webguimodel', graph_attr=nodeattr):
+          webgui=Custom('webgui','./qakicons/symActorWithobjSmall.png')
           loadrequestsendpage=Custom('loadrequestsendpage','./qakicons/symActorWithobjSmall.png')
-     with Cluster('ctx_cargoservice', graph_attr=nodeattr):
           holdshowpage=Custom('holdshowpage','./qakicons/symActorWithobjSmall.png')
+          usersim=Custom('usersim','./qakicons/symActorWithobjSmall.png')
+     with Cluster('ctx_cargoservice', graph_attr=nodeattr):
           hold=Custom('hold(ext)','./qakicons/externalQActor.png')
           companyrequestreceiver=Custom('companyrequestreceiver(ext)','./qakicons/externalQActor.png')
+     webgui >> Edge( label='filteredupdate', **eventedgeattr, decorate='true', fontcolor='red') >> sys
+     sys >> Edge( label='filteredupdate', **evattr, decorate='true', fontcolor='darkgreen') >> loadrequestsendpage
+     sys >> Edge( label='filteredupdate', **evattr, decorate='true', fontcolor='darkgreen') >> holdshowpage
      loadrequestsendpage >> Edge(color='magenta', style='solid', decorate='true', label='<sendrequest<font color="darkgreen"> sendrequestAnswer</font> &nbsp; >',  fontcolor='magenta') >> companyrequestreceiver
+     usersim >> Edge(color='blue', style='solid',  decorate='true', label='<hitsend &nbsp; >',  fontcolor='blue') >> loadrequestsendpage
+     hold >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> webgui
      hold >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> holdshowpage
+     hold >> Edge(color='blue', style='solid',  decorate='true', label='<update &nbsp; >',  fontcolor='blue') >> loadrequestsendpage
 diag

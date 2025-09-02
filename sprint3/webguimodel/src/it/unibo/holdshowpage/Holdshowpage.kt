@@ -19,6 +19,7 @@ import org.json.simple.JSONObject
 
 
 //User imports JAN2024
+import org.json.simple.JSONArray
 
 class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isdynamic: Boolean=false ) : 
           ActorBasicFsm( name, scope, confined=isconfined, dynamically=isdynamic ){
@@ -35,10 +36,51 @@ class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				fun update(json: String){
 					CurrentState = json
 				}
+				
+				fun fetchUI(json: String): String {
+		    		val parser = JSONParser()
+		    		val result = mutableMapOf<String, Any>()
+		
+		    		try {
+		        		val obj = parser.parse(json) as JSONObject
+		
+		        		// type
+		        		result["type"] = obj["type"]?.toString() ?: "holdUpdate"
+		
+		        		// shipLoad
+		        		if (obj.containsKey("shipLoad")) {
+		            		result["shipLoad"] = (obj["shipLoad"] as Long).toInt()
+		        		}
+		
+		        		// slots
+		        		if (obj.containsKey("slots")) {
+		            		val slotsArray = obj["slots"] as JSONArray
+		            		val slots = mutableListOf<String>()
+		            		for (i in 0 until slotsArray.size) {
+		                		slots.add(slotsArray[i]?.toString() ?: "libero")
+		            		}
+		            		result["slots"] = slots
+		        		}
+		
+		        		// result
+		        		if (obj.containsKey("result")) {
+		            		result["result"] = obj["result"].toString()
+		        		}
+		
+		    		} catch (e: Exception) {
+		        		println("Errore in fetchUI: ${e.message}")
+		        		result["error"] = e.message ?: "Errore sconosciuto"
+		    		}
+		
+		    		// ritorna una stringa con il formato che vuoi (JSON)
+		    		return JSONObject(result).toJSONString()
+				}
+		    
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name STARTS")
+						observeResource("127.0.0.1","8000","ctx_cargoservice","hold","update")
 						delay(5000) 
 						//genTimer( actor, state )
 					}
@@ -50,13 +92,12 @@ class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 				state("waitingUpdate") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name waiting update")
-						observeResource("127.0.0.1","8000","ctx_cargoservice","hold","update")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t01",targetState="handleHoldState",cond=whenDispatch("update"))
+					 transition(edgeName="t05",targetState="handleHoldState",cond=whenEvent("filteredupdate"))
 				}	 
 				state("handleHoldState") { //this:State
 					action { //it:State
@@ -65,8 +106,10 @@ class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
 												val received = payloadArg(0)
-												update(received)
+												val holdstate = fetchUI(received)
+												update(holdstate)
 								CommUtils.outblue("$name updated hold")
+								CommUtils.outblack("$holdstate")
 						}
 						//genTimer( actor, state )
 					}
