@@ -8,6 +8,8 @@ request( loadrequest, loadrequest(PID) ).
 reply( resultrequest, resultrequest(Rst) ).  %%for loadrequest
 request( getProduct, product(ID) ).
 reply( getProductAnswer, product(JSonString) ).  %%for getProduct
+dispatch( tovalidate, tovalidate(T) ).
+dispatch( torefuse, torefuse(T) ).
 event( productDetected, productDetected(T) ).
 event( anomalyDetected, anomalyDetected(T) ).
 event( anomalyFixed, anomalyFixed(T) ).

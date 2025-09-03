@@ -14,6 +14,10 @@ Reply resultrequest : resultrequest(Rst) for loadrequest
 //CargoService -> ProductService 
 Request getProduct : product( ID )    
 Reply   getProductAnswer: product( JSonString ) for getProduct 
+//Cargoservice autodispatch
+Dispatch tovalidate: tovalidate(T)
+Dispatch torefuse : torefuse(T)
+
 
 //SonarService -> Whoever is listening
 Event productDetected : productDetected(T)
@@ -109,12 +113,12 @@ QActor cargoservice context ctx_cargoservice{
 			#]  
 			println("$jsonStr") color magenta
 		}
+		
 	}
-	Goto validateRequest if [# Cur_Weight > 0 #] else managerefusal
-	
+	Goto validateRequest
 	
 	State validateRequest{
-		println("validating request") color magenta
+		println("checking if product fits") color magenta
 		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
 	}
 	Transition t2 
@@ -143,11 +147,9 @@ QActor cargoservice context ctx_cargoservice{
 		printCurrentMessage
 		onMsg(refused : refused(Reason)){
 			[# 
-				val reason = payloadArg(0).toString() 
-				val Rst = "\"Request refused because of ${reason}\""
+				val Rst = "Request refused"
 			#]
-			
-			println("$Rst. Back to wait.") color magenta
+			println("refusing request") color magenta
 			replyTo loadrequest with resultrequest : resultrequest($Rst) 
 		}
 		
@@ -411,7 +413,7 @@ QActor hold context ctx_cargoservice{
 			}
 			else{
 				[# val Reason = "product does not fit in the hold"#]
-				replyTo checkIfFits with refused : refused($Reason)
+				replyTo checkIfFits with refused : refused(Reason)
 			}
 		}
 	}Goto waiting_request

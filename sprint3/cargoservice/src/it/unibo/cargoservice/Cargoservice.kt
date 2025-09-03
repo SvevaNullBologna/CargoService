@@ -109,14 +109,11 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="validateRequest", cond=doswitchGuarded({ Cur_Weight > 0  
-					}) )
-					transition( edgeName="goto",targetState="managerefusal", cond=doswitchGuarded({! ( Cur_Weight > 0  
-					) }) )
+					 transition( edgeName="goto",targetState="validateRequest", cond=doswitch() )
 				}	 
 				state("validateRequest") { //this:State
 					action { //it:State
-						CommUtils.outmagenta("validating request")
+						CommUtils.outmagenta("checking if product fits")
 						request("checkIfFits", "checkIfFits($Cur_PID,$Cur_Weight)" ,"hold" )  
 						//genTimer( actor, state )
 					}
@@ -158,9 +155,8 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						if( checkMsgContent( Term.createTerm("refused(Reason)"), Term.createTerm("refused(Reason)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
-												val reason = payloadArg(0).toString() 
-												val Rst = "\"Request refused because of ${reason}\""
-								CommUtils.outmagenta("$Rst. Back to wait.")
+												val Rst = "Request refused"
+								CommUtils.outmagenta("refusing request")
 								answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 						}
 						

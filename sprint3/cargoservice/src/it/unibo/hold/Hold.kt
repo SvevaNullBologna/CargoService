@@ -98,7 +98,7 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 								}
 								else
 								 { val Reason = "product does not fit in the hold" 
-								 answer("checkIfFits", "refused", "refused($Reason)"   )  
+								 answer("checkIfFits", "refused", "refused(Reason)"   )  
 								 }
 						}
 						//genTimer( actor, state )
