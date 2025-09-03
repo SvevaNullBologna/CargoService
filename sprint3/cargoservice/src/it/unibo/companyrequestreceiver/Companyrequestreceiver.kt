@@ -92,7 +92,7 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t129",targetState="rejectRequest",cond=whenRequest("sendrequest"))
-					transition(edgeName="t130",targetState="handleResult",cond=whenReply("resultrequest"))
+					transition(edgeName="t130",targetState="waiting",cond=whenReply("resultrequest"))
 				}	 
 				state("rejectRequest") { //this:State
 					action { //it:State
@@ -104,26 +104,6 @@ class Companyrequestreceiver ( name: String, scope: CoroutineScope, isconfined: 
 					sysaction { //it:State
 					}	 	 
 					 transition( edgeName="goto",targetState="occupiedWaiting", cond=doswitch() )
-				}	 
-				state("handleResult") { //this:State
-					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
-						if( checkMsgContent( Term.createTerm("resultrequest(Rst)"), Term.createTerm("resultrequest(Rst)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 
-								  				val Result = payloadArg(0)
-								  				val EndJson = """{"type":"endOfRequest","result":"$Result"}"""
-								CommUtils.outblue("$name sending end of result to gui: $EndJson")
-								updateResourceRep(EndJson 
-								)
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="waiting", cond=doswitch() )
 				}	 
 			}
 		}

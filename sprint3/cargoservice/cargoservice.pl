@@ -23,6 +23,7 @@ event( info, info(x) ).
 reply( accepted, accepted(JsonString) ).  %%for checkIfFits
 reply( refused, refused(Reason) ).  %%for checkIfFits
 dispatch( update, update(HoldJsonString) ).
+dispatch( repeatUpdate, repeatUpdate(M) ).
 %====================================================================================
 context(ctx_cargoservice, "localhost",  "TCP", "8000").
 context(ctx_productservice, "127.0.0.1",  "TCP", "8111").

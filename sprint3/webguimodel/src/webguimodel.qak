@@ -51,23 +51,6 @@ QActor loadrequestsendpage context ctx_webguimodel{
        		CurrentShownMessage = message
    		}
 
-   		fun handleHoldUpdate(json: String): String? {
-    		return try {
-        		val parser = org.json.simple.parser.JSONParser()
-        		val parsed = parser.parse(json) as org.json.simple.JSONObject
-
-        		val type = parsed["type"] as? String ?: "unknown"
-        		if (type == "endOfRequest") {
-            		val result = parsed["result"] as? String ?: "unknown"
-            		"Esito richiesta: $result"
-        		} else {
-            		null
-        		}
-    		} catch (e: Exception) {
-        		println("Errore parsing JSON: ${e.message}")
-        		null
-    		}
-		}
 	#]
 	
 	
@@ -82,21 +65,8 @@ QActor loadrequestsendpage context ctx_webguimodel{
 		delay 6000		
 	}
 	Transition t0 
-	whenEvent filteredupdate -> showMessage
 	whenMsg hitsend -> sendRequest 
-	
-	State showMessage{
-		onMsg(filteredupdate : filteredupdate(Update)){
-			[#
-				val update = payloadArg(0)
-				val filtered = handleHoldUpdate(update)
-			#]
-			if[# filtered != null #]{
-				[# updateMessage(filtered) #]
-			}
-		}
-	}
-	
+
 	State sendRequest{
 		printCurrentMessage 
 		onMsg(hitsend : hitsend(PID)){
@@ -131,7 +101,7 @@ QActor loadrequestsendpage context ctx_webguimodel{
   	}Goto waiting
   	
 }
-  	
+
   	
 
 QActor holdshowpage context ctx_webguimodel{//simuliamo la pagina hold
@@ -149,9 +119,6 @@ QActor holdshowpage context ctx_webguimodel{//simuliamo la pagina hold
 
     		try {
         		val obj = parser.parse(json) as JSONObject
-
-        		// type
-        		result["type"] = obj["type"]?.toString() ?: "holdUpdate"
 
         		// shipLoad
         		if (obj.containsKey("shipLoad")) {

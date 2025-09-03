@@ -159,7 +159,7 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 
 												val reason = payloadArg(0).toString() 
-												val Rst = "Request refused because of ${reason}"
+												val Rst = "\"Request refused because of ${reason}\""
 								CommUtils.outmagenta("$Rst. Back to wait.")
 								answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 						}
@@ -217,12 +217,12 @@ class Cargoservice ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 												val Msg = payloadArg(0).toString()
 								if(  Msg=="failure"  
 								 ){CommUtils.outmagenta("There was a fatal error with the load. Load request rejected")
-								 val Rst = "Request failed because of fatal error"  
+								 val Rst = "\"Request failed because of fatal error\""  
 								answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 								}
 								else
 								 {CommUtils.outmagenta("end of robot's operations with success.")
-								  val Rst = "Request accomplished with success"   
+								  val Rst = "\"Request accomplished with success\""   
 								 answer("loadrequest", "resultrequest", "resultrequest($Rst)"   )  
 								 }
 								

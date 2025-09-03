@@ -246,7 +246,7 @@
 	    }
 	}
 
-	/*function updateUI(data) {
+	function updateUI(data) {
 	    // funzione che aggiorna la UI con i dati ricevuti
 	    if (data.shipLoad !== undefined) {
 	        document.getElementById("shipLoadValue").textContent = data.shipLoad;
@@ -261,26 +261,6 @@
 	            statusElement.textContent = status.toUpperCase();
 	            slotElement.className = "slot " + status;
 	        }
-	    }
-	}*/
-
-	
-	function updateUI(data) {
-	    if (data.type === "holdUpdate") {
-	        document.getElementById("shipLoadValue").textContent = data.shipLoad;
-	        if (data.slots && Array.isArray(data.slots)) {
-	            for (let i = 0; i < 4; i++) {
-	                const slotElement = document.getElementById(`slot${i + 1}`);
-	                const statusElement = slotElement.querySelector(".slot-status");
-	                const status = data.slots[i] || "libero";
-	                statusElement.textContent = status.toUpperCase();
-	                slotElement.className = "slot " + status;
-	            }
-	        }
-	    } else if (data.type === "endOfRequest") {
-	        // Qui puoi aggiornare la GUI dei messaggi della richiesta
-	        const responseBox = document.getElementById("responseBox");
-	        responseBox.textContent = "Esito richiesta: " + data.result;
 	    }
 	}
 

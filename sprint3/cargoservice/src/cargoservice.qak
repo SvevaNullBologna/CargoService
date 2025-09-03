@@ -42,6 +42,8 @@ Reply accepted : accepted(JsonString) for checkIfFits
 Reply refused : refused(Reason) for checkIfFits
 //Hold -> webgui
 Dispatch update : update(HoldJsonString)
+//Hold -> hold
+Dispatch repeatUpdate : repeatUpdate(M)
 
 
 Context ctx_cargoservice 			ip [host="localhost" port=8000]
@@ -52,7 +54,6 @@ Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 
-
 
 QActor cargoservice context ctx_cargoservice{
 	import "main.java.*"
@@ -143,7 +144,7 @@ QActor cargoservice context ctx_cargoservice{
 		onMsg(refused : refused(Reason)){
 			[# 
 				val reason = payloadArg(0).toString() 
-				val Rst = "Request refused because of ${reason}"
+				val Rst = "\"Request refused because of ${reason}\""
 			#]
 			
 			println("$Rst. Back to wait.") color magenta
@@ -188,12 +189,12 @@ QActor cargoservice context ctx_cargoservice{
 			#]
 			if[# Msg=="failure" #]{
 				println("There was a fatal error with the load. Load request rejected") color magenta
-				[# val Rst = "Request failed because of fatal error" #]
+				[# val Rst = "\"Request failed because of fatal error\"" #]
 				replyTo loadrequest with resultrequest : resultrequest($Rst)
 			}
 			else{
 				println("end of robot's operations with success.") color magenta
-				[# val Rst = "Request accomplished with success"  #]
+				[# val Rst = "\"Request accomplished with success\""  #]
 				replyTo loadrequest with resultrequest : resultrequest($Rst)
 			}
 			[#
@@ -369,11 +370,20 @@ QActor hold context ctx_cargoservice{
 	#]
 	State s0 initial{
 		println("$name starting") color yellow
-		delay 1000
 		[#
 			hold = HoldData()
 			val HoldJsonString = hold.holdToJson()
 		#]
+		delay 1000
+		updateResource [#HoldJsonString#]
+	}Goto firstUpdate
+	
+	State firstUpdate{
+		delay 5000
+		[#
+			val HoldJsonString = hold.holdToJson()
+		#]
+		delay 1000
 		updateResource [#HoldJsonString#]
 	}Goto waiting_request
 	
@@ -415,6 +425,8 @@ QActor hold context ctx_cargoservice{
 			AvailableSlot = null
 			ProductWeight = -1
 		#]		
+		[# val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
 	}Goto waiting_request
 }
 
@@ -459,25 +471,13 @@ QActor companyrequestreceiver context ctx_cargoservice{
   	}
   	Transition t1
   	whenRequest sendrequest -> rejectRequest
-  	whenReply resultrequest -> handleResult
+  	whenReply resultrequest -> waiting
   	
   	State rejectRequest{
   		println("$name rejecting request") color blue
   		replyTo sendrequest with sendrequestAnswer: sendrequestAnswer($Errormsg)
   	}
   	Goto occupiedWaiting
-  	
-  	State handleResult{
-  		printCurrentMessage 
-  		onMsg(resultrequest : resultrequest(Rst)){
-  			[# 
-  				val Result = payloadArg(0)
-  				val EndJson = """{"type":"endOfRequest","result":"$Result"}"""
-  			#]
-  			println("$name sending end of result to gui: $EndJson") color blue
-			updateResource [#EndJson#]
-  		}
-  	}Goto waiting
   
 }
 

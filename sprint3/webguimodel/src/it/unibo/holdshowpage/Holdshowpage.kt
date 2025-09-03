@@ -44,9 +44,6 @@ class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 		    		try {
 		        		val obj = parser.parse(json) as JSONObject
 		
-		        		// type
-		        		result["type"] = obj["type"]?.toString() ?: "holdUpdate"
-		
 		        		// shipLoad
 		        		if (obj.containsKey("shipLoad")) {
 		            		result["shipLoad"] = (obj["shipLoad"] as Long).toInt()
@@ -97,7 +94,7 @@ class Holdshowpage ( name: String, scope: CoroutineScope, isconfined: Boolean=fa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t05",targetState="handleHoldState",cond=whenEvent("filteredupdate"))
+					 transition(edgeName="t04",targetState="handleHoldState",cond=whenEvent("filteredupdate"))
 				}	 
 				state("handleHoldState") { //this:State
 					action { //it:State

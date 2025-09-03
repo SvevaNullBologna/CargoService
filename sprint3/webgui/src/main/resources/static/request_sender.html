@@ -93,15 +93,7 @@
 	        socket = new WebSocket(socketUrl);
 
 	        socket.onmessage = (event) => {
-	            try {
-	                const data = JSON.parse(event.data);
-	                if (data.type === "endOfRequest") {
-	                    const responseBox = document.getElementById("responseBox");
-	                    responseBox.textContent = "Esito richiesta: " + data.result;
-	                }
-	            } catch (e) {
-	                console.error("Errore parsing JSON:", e);
-	            }
+	            console.log("Messaggio ricevuto dal server:", event.data);
 	        };
 
 	        socket.onclose = () => setTimeout(connectWebSocket, 5000);

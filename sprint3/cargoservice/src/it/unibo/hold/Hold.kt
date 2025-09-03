@@ -39,10 +39,25 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outyellow("$name starting")
-						delay(1000) 
 						
 									hold = HoldData()
 									val HoldJsonString = hold.holdToJson()
+						delay(1000) 
+						updateResourceRep(HoldJsonString 
+						)
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="firstUpdate", cond=doswitch() )
+				}	 
+				state("firstUpdate") { //this:State
+					action { //it:State
+						delay(5000) 
+						
+									val HoldJsonString = hold.holdToJson()
+						delay(1000) 
 						updateResourceRep(HoldJsonString 
 						)
 						//genTimer( actor, state )
@@ -101,6 +116,9 @@ class Hold ( name: String, scope: CoroutineScope, isconfined: Boolean=false, isd
 						
 									AvailableSlot = null
 									ProductWeight = -1
+						 val HoldJsonString = hold.holdToJson()  
+						updateResourceRep(HoldJsonString 
+						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

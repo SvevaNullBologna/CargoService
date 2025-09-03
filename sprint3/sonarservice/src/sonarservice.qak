@@ -22,8 +22,9 @@ QActor sonarsimul context ctx_sonarservice{
 	}Goto work 
 	
 	State work{
-		delay 1000 // attendo che sonarlistener entri in attesa
-		[# var M = RandomDistance.getDistanceValue() #]
+		delay 5000 // attendo che sonarlistener entri in attesa
+		//[# var M = RandomDistance.getDistanceValue() #]
+		[# var M = 10 #]
 		println("emitting $M ...") color magenta
 		emitlocalstream distance : distance($M)
 		delay 1000
@@ -32,6 +33,7 @@ QActor sonarsimul context ctx_sonarservice{
 		delay 1000
 		println("emitting $M ...") color magenta
 		emitlocalstream distance : distance($M)
+		delay 20000
 	}Goto work
 }
 

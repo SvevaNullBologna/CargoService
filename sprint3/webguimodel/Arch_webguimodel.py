@@ -34,7 +34,6 @@ with Diagram('webguimodelArch', show=False, outformat='png', graph_attr=graphatt
           hold=Custom('hold(ext)','./qakicons/externalQActor.png')
           companyrequestreceiver=Custom('companyrequestreceiver(ext)','./qakicons/externalQActor.png')
      webgui >> Edge( label='filteredupdate', **eventedgeattr, decorate='true', fontcolor='red') >> sys
-     sys >> Edge( label='filteredupdate', **evattr, decorate='true', fontcolor='darkgreen') >> loadrequestsendpage
      sys >> Edge( label='filteredupdate', **evattr, decorate='true', fontcolor='darkgreen') >> holdshowpage
      loadrequestsendpage >> Edge(color='magenta', style='solid', decorate='true', label='<sendrequest<font color="darkgreen"> sendrequestAnswer</font> &nbsp; >',  fontcolor='magenta') >> companyrequestreceiver
      usersim >> Edge(color='blue', style='solid',  decorate='true', label='<hitsend &nbsp; >',  fontcolor='blue') >> loadrequestsendpage

@@ -149,63 +149,74 @@
     </div>
 
     <script>
-        let socket;
+		/* ---- WebSocket + Hold Status ---- */
+			let socket; //crea una variabile socket per tenere la connessione WebSocket aperta con il server
 
-        function connectWebSocket() {
-            const socketUrl = "ws://" + window.location.host + "/status-updates";
-            socket = new WebSocket(socketUrl);
+			function connectWebSocket() {
+			    //funzione che apre una connessione WebSocket al server
+			    const socketUrl = "ws://" + window.location.host + "/status-updates";
+			    socket = new WebSocket(socketUrl);
 
-            socket.onopen = () => updateConnectionStatus(true);
+			    socket.onopen = () => updateConnectionStatus(true); //quando apre la connessione
 
-            socket.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    updateUI(data);
-                    updateLastUpdate();
-                } catch (e) {
-                    console.error("Errore parsing JSON:", e);
-                }
-            };
+			    socket.onmessage = (event) => {
+			        //arriva un messaggio event.data
+			        try {
+			            const data = JSON.parse(event.data); //lettura event.data
+			            updateUI(data);                      //aggiorna l'interfaccia
+			            updateLastUpdate();                  //aggiorna l'orario di ultimo update
+			        } catch (e) {
+			            console.error("Errore parsing JSON:", e);
+			        }
+			    };
 
-            socket.onclose = () => {
-                updateConnectionStatus(false);
-                setTimeout(connectWebSocket, 5000);
-            };
+			    socket.onclose = () => {
+			        //se la connessione si chiude, viene mostrato disconnesso.
+			        updateConnectionStatus(false);
+			        setTimeout(connectWebSocket, 5000); //prova a riconnettersi dopo 5 secondi
+			    };
 
-            socket.onerror = () => updateConnectionStatus(false);
-        }
+			    socket.onerror = () => updateConnectionStatus(false); //se c'è un errore, viene mostrato lo stato disconnesso
+			}
 
-        function updateConnectionStatus(connected) {
-            const statusElement = document.getElementById("connectionStatus");
-            if (connected) {
-                statusElement.textContent = "CONNESSO AL SERVER";
-                statusElement.className = "connection-status connected";
-            } else {
-                statusElement.textContent = "DISCONNESSO DAL SERVER - Tentativo di riconnessione...";
-                statusElement.className = "connection-status disconnected";
-            }
-        }
+			function updateConnectionStatus(connected) {
+			    //funzione che aggiorna il box che riguarda la connessione
+			    const statusElement = document.getElementById("connectionStatus");
+			    if (connected) {
+			        statusElement.textContent = "CONNESSO AL SERVER";
+			        statusElement.className = "connection-status connected";
+			    } else {
+			        statusElement.textContent = "DISCONNESSO DAL SERVER - Tentativo di riconnessione...";
+			        statusElement.className = "connection-status disconnected";
+			    }
+			}
 
-        function updateUI(data) {
-            if (data.type === "holdUpdate") {
-                document.getElementById("shipLoadValue").textContent = data.shipLoad;
-                if (data.slots && Array.isArray(data.slots)) {
-                    for (let i = 0; i < 4; i++) {
-                        const slotElement = document.getElementById(`slot${i + 1}`);
-                        const statusElement = slotElement.querySelector(".slot-status");
-                        const status = data.slots[i] || "libero";
-                        statusElement.textContent = status.toUpperCase();
-                        slotElement.className = "slot " + status;
-                    }
-                }
-            }
-        }
+			function updateUI(data) {
+			    // funzione che aggiorna la UI con i dati ricevuti
+			    if (data.shipLoad !== undefined) {
+			        document.getElementById("shipLoadValue").textContent = data.shipLoad;
+			    }
 
-        function updateLastUpdate() {
-            const now = new Date();
-            document.getElementById("lastUpdate").textContent =
-                `Ultimo aggiornamento: ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
-        }
+			    if (data.slots && Array.isArray(data.slots)) {
+			        // aggiornamento slot
+			        for (let i = 0; i < 4; i++) {
+			            const slotElement = document.getElementById(`slot${i + 1}`);
+			            const statusElement = slotElement.querySelector(".slot-status");
+			            const status = data.slots[i] || "libero";
+			            statusElement.textContent = status.toUpperCase();
+			            slotElement.className = "slot " + status;
+			        }
+			    }
+			}
+
+
+			function updateLastUpdate() {
+			    //funzione che aggiorna la data e l'ora dell'ultimo aggiornamento
+			    const now = new Date();
+			    document.getElementById("lastUpdate").textContent =
+			        `Ultimo aggiornamento: ${now.toLocaleTimeString()} - ${now.toLocaleDateString()}`;
+			}
+
 
         window.onload = () => connectWebSocket();
     </script>

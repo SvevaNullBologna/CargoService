@@ -36,23 +36,6 @@ class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boo
 		       		CurrentShownMessage = message
 		   		}
 		
-		   		fun handleHoldUpdate(json: String): String? {
-		    		return try {
-		        		val parser = org.json.simple.parser.JSONParser()
-		        		val parsed = parser.parse(json) as org.json.simple.JSONObject
-		
-		        		val type = parsed["type"] as? String ?: "unknown"
-		        		if (type == "endOfRequest") {
-		            		val result = parsed["result"] as? String ?: "unknown"
-		            		"Esito richiesta: $result"
-		        		} else {
-		            		null
-		        		}
-		    		} catch (e: Exception) {
-		        		println("Errore parsing JSON: ${e.message}")
-		        		null
-		    		}
-				}
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -75,25 +58,7 @@ class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boo
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t01",targetState="showMessage",cond=whenEvent("filteredupdate"))
-					transition(edgeName="t02",targetState="sendRequest",cond=whenDispatch("hitsend"))
-				}	 
-				state("showMessage") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("filteredupdate(Update)"), Term.createTerm("filteredupdate(Update)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-												val update = payloadArg(0)
-												val filtered = handleHoldUpdate(update)
-								if(  filtered != null  
-								 ){ updateMessage(filtered)  
-								}
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
+					 transition(edgeName="t01",targetState="sendRequest",cond=whenDispatch("hitsend"))
 				}	 
 				state("sendRequest") { //this:State
 					action { //it:State
@@ -109,7 +74,7 @@ class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boo
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t13",targetState="printMessage",cond=whenReply("sendrequestAnswer"))
+					 transition(edgeName="t12",targetState="printMessage",cond=whenReply("sendrequestAnswer"))
 				}	 
 				state("printMessage") { //this:State
 					action { //it:State
@@ -133,7 +98,7 @@ class Loadrequestsendpage ( name: String, scope: CoroutineScope, isconfined: Boo
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t14",targetState="updateMessage",cond=whenDispatch("update"))
+					 transition(edgeName="t13",targetState="updateMessage",cond=whenDispatch("update"))
 				}	 
 				state("updateMessage") { //this:State
 					action { //it:State
