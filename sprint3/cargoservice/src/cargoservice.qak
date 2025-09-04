@@ -1,6 +1,7 @@
 System cargoservice
  
-mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
+//mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
+mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
 //MESSAGES AND EVENTS 
 //webgui -> companyrequestreceiver  
 Request sendrequest : sendrequest(PID)
@@ -50,11 +51,16 @@ Dispatch update : update(HoldJsonString)
 Dispatch repeatUpdate : repeatUpdate(M)
 
 
-Context ctx_cargoservice 			ip [host="localhost" port=8000]
-Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
-Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
-Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo partire il sonar sulla stessa macchina
-//Context ctx_sonarservice 			ip [host="" port=8004] //per quando deve cercare il raspberry
+Context ctx_cargoservice 			ip [host="cargoservice" port=8000]
+//Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_productservice 			ip [host="cargoserviceqak" port=8111]
+//Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
+Context ctx_basicrobot 				ip [host= "basicrobot24" port=8020]
+//Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
+Context ctx_sonarservice			ip [host="raspberrypi.local" port=8004]
+//Context ctx_sonarservice			ip [host="127.0.0.1" port=8004] //per quando facciamo partire il sonar sulla stessa macchina
+
+
 
 ExternalQActor basicrobot context ctx_basicrobot
 ExternalQActor productservice context ctx_productservice 

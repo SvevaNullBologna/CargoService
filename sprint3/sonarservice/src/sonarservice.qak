@@ -1,6 +1,8 @@
 System sonarservice
 
+//mqttBroker "192.168.138.38" : 1883 eventTopic "unibo/qak/events" 
 mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
+
 
 //sonar_reactor -> Whoever is listening
 Event productDetected : productDetected(T)
@@ -47,7 +49,7 @@ QActor sonarsimul context ctx_sonarservice{
 	State s0 initial{
 		println("$name turning on...") color magenta
 		[#
-			p = Runtime.getRuntime().exec("python src/main/resources/python/sonar.py")
+			p = Runtime.getRuntime().exec("python /home/sveva/python/sonar.py")
 			reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
 		#]
 		delay 2000
@@ -59,15 +61,11 @@ QActor sonarsimul context ctx_sonarservice{
 			
 			if(data!=null){
 				try{
-					val vd = data.toFloat()
-					val v = vd.toInt()
+					val match = Regex("""\d+(\.\d+)?""").find(data)
+        			val vd = match?.value?.toFloat() ?: 0f
+        			val v = vd.toInt()
 					
-					if(v <= 100){
-						Distance = v 
-					}
-					else{
-						Distance = 0
-					}
+					Distance = if(v <= 100) v else 0 
 				}
 				catch(e: Exception){
 					CommUtils.outred("$name readSonarDataError: $e")
@@ -168,17 +166,17 @@ QActor led_device context ctx_sonarservice{
 	
 	State turnlighton{
 		println("$name turning light on") color yellow
-		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25On.py") #]
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25On.py") #]
 	}Goto waitingcommand
 	
 	State turnlightoff{
 		println("$name turning light off") color yellow
-		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25Off.py") #]
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25Off.py") #]
 	}Goto waitingcommand
 	
 	State blinklight{
 		println("$name blinking light") color yellow 
-		[# Runtime.getRuntime().exec("python src/main/resources/python/ledPython25Blink.py") #]
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25Blink.py") #]
 	}Goto waitingcommand
 	
 }

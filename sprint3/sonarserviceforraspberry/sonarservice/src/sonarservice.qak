@@ -1,0 +1,183 @@
+System sonarservice
+
+mqttBroker "192.168.138.38" : 1883 eventTopic "unibo/qak/events" 
+//mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
+
+
+//sonar_reactor -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
+//sonar_listener -> localstream
+Event distance : distance(D)
+
+
+Context ctx_sonarservice			ip [host="localhost" port=8004] 
+
+
+
+/*QActor sonarsimul context ctx_sonarservice{
+	import "test.java.RandomDistance"
+	State s0 initial{
+		println("$name starts") color cyan
+		
+	}Goto work 
+	
+	State work{
+		delay 5000 // attendo che sonarlistener entri in attesa
+		//[# var M = RandomDistance.getDistanceValue() #]
+		[# var M = 10 #]
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 1000
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 1000
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 20000
+	}Goto work
+}*/
+
+
+QActor sonar_listener context ctx_sonarservice{
+	[#
+		lateinit var reader : java.io.BufferedReader
+    	lateinit var p : Process	
+    	var Distance = 0
+	#]
+	State s0 initial{
+		println("$name turning on...") color magenta
+		[#
+			p = Runtime.getRuntime().exec("python /home/sveva/python/sonar.py")
+			reader = java.io.BufferedReader(java.io.InputStreamReader(p.getInputStream()))
+		#]
+		delay 2000
+	}Goto readSonarData
+	
+	State readSonarData{
+		[#
+			var data = reader.readLine()
+			
+			if(data!=null){
+				try{
+					val match = Regex("""\d+(\.\d+)?""").find(data)
+        			val vd = match?.value?.toFloat() ?: 0f
+        			val v = vd.toInt()
+					
+					Distance = if(v <= 100) v else 0 
+				}
+				catch(e: Exception){
+					CommUtils.outred("$name readSonarDataError: $e")
+				}
+			}
+		#]
+		if[#Distance >= 0 #]
+		{
+			println("readsonardata : $data") color magenta
+			emitlocalstream distance : distance($Distance)
+		}	
+		delay 1000
+	}Goto readSonarData
+}
+
+
+QActor sonar_reactor context ctx_sonarservice{
+	[# 
+		val DFREE = 30
+		var productCounter = 0  
+		var anomaly = false
+		var anomalyCounter = 0;
+	#]
+	State s0 initial{
+		println("$name turning on...") color green
+		subscribeTo sonar_listener for distance
+		//subscribeTo sonarsimul for distance
+		delay 2000
+	}Goto waitingDistance
+		
+	State waitingDistance{
+		println("$name waiting command...") color green
+	}Transition t0
+	whenEvent distance -> filterDistance
+	
+	State filterDistance{
+		printCurrentMessage
+		onMsg(distance : distance(D)){
+			[# val distance = payloadArg(0).toInt() #]
+			println("distance detected = $distance") color magenta
+			if[# distance > DFREE || distance < 0 #]{
+				[# productCounter = 0 #]
+				[# anomalyCounter ++ #]
+				if[# anomalyCounter >= 3#]{
+					[# anomaly = true 
+						anomalyCounter = 0
+					#]		
+					println("anomaly detected ") color green
+					emit anomalyDetected : anomalyDetected(T)
+				}
+				else{
+					println("possible anomaly. Keep detecting ") color green
+				}
+				
+			} 
+			else{ // 0 < distance < DFREE  
+				[#
+					anomalyCounter = 0
+				#]
+				
+				if[# anomaly #]{
+					[# anomaly = false #]
+					emit anomalyFixed : anomalyFixed(T)
+					println("anomaly fixed") color green	
+				}
+				if[# distance < DFREE/2 #]{ // 0 < distance < DFREE/2
+					[# productCounter++ #]
+					if[# productCounter >= 3 #]{
+						[# productCounter = 0 #]
+						println("productDetected") color green
+						emit productDetected : productDetected(T)
+					}	
+				}
+				else{
+					println("needs more detecting") color green
+					[# productCounter = 0 #]
+				}
+			// DFREE/2 <= distance <= DFREE 
+			}
+		}
+	}Goto waitingDistance
+	
+}
+
+QActor led_device context ctx_sonarservice{
+	State s0 initial{
+		println("$name starts") color yellow
+	}
+	Goto waitingcommand
+	
+	State waitingcommand{
+		println("$name waiting command") color yellow
+	}
+	Transition t0 
+	whenEvent anomalyDetected -> turnlighton 
+	whenEvent anomalyFixed -> turnlightoff
+	whenEvent productDetected -> blinklight
+	
+	State turnlighton{
+		println("$name turning light on") color yellow
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25On.py") #]
+	}Goto waitingcommand
+	
+	State turnlightoff{
+		println("$name turning light off") color yellow
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25Off.py") #]
+	}Goto waitingcommand
+	
+	State blinklight{
+		println("$name blinking light") color yellow 
+		[# Runtime.getRuntime().exec("python /home/sveva/python/ledPython25Blink.py") #]
+	}Goto waitingcommand
+	
+}
+

@@ -84,10 +84,44 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://eureka:8761/eureka/apps/CTXCARGOSERVICE"] # Assicurati che 'CARGOSERVICEQAK' sia il nome corretto
+      test: ["CMD", "curl", "-f", "http://eureka:8761/eureka/apps/CTXCARGOSERVICE"]
       interval: 10s
       timeout: 10s
       retries: 12
+
+  cargoservice:
+    container_name: cargoservice
+    image: cargoservice-1.0   # nome dell'immagine che hai buildato
+    environment:
+      - MONGO_HOST=mongodb
+      - SERVICE_IP=cargoservice
+      - MQTTBROKER=mosquittoalone
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+    ports:
+      - 8000:8000
+    depends_on:
+      - mongodb
+      - eureka
+      - mosquitto
+    networks:
+      - iss-network
+
+  webgui:
+    container_name: webgui
+    image: webgui:1.0
+    environment:
+      - CARGOSERVICE_HOST=cargoservice
+      - CARGOSERVICE_PORT=8000
+      - MQTTBROKER=mosquittoalone
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eurekaserver:8761/eureka/
+    ports:
+      - 8080:8080
+    depends_on:
+      - cargoservice
+      - mosquitto
+      - eureka
+    networks:
+      - iss-network
 
 networks:
   iss-network:
