@@ -37,6 +37,20 @@ QActor sonarsimul context ctx_sonarservice{
 		emitlocalstream distance : distance($M)
 		delay 20000
 	}Goto work
+	
+	State anomaly{
+		[# var M = 32 #]
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 1000
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 1000
+		println("emitting $M ...") color magenta
+		emitlocalstream distance : distance($M)
+		delay 20000
+	}Goto work
+
 }
 
 

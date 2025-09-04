@@ -1,7 +1,7 @@
 %====================================================================================
 % cargoservice description   
 %====================================================================================
-mqttBroker("mosquittoalone", "1883", "unibo/qak/events").
+mqttBroker("localhost", "1883", "unibo/qak/events").
 request( sendrequest, sendrequest(PID) ).
 reply( sendrequestAnswer, sendrequestAnswer(Answ) ).  %%for sendrequest
 request( loadrequest, loadrequest(PID) ).
@@ -27,10 +27,9 @@ reply( refused, refused(Reason) ).  %%for checkIfFits
 dispatch( update, update(HoldJsonString) ).
 dispatch( repeatUpdate, repeatUpdate(M) ).
 %====================================================================================
-context(ctx_cargoservice, "cargoservice",  "TCP", "8000").
-context(ctx_productservice, "cargoserviceqak",  "TCP", "8111").
-context(ctx_basicrobot, "basicrobot24",  "TCP", "8020").
-context(ctx_sonarservice, "raspberrypi.local",  "TCP", "8004").
+context(ctx_cargoservice, "localhost",  "TCP", "8000").
+context(ctx_productservice, "127.0.0.1",  "TCP", "8111").
+context(ctx_basicrobot, "127.0.0.1",  "TCP", "8020").
  qactor( basicrobot, ctx_basicrobot, "external").
   qactor( productservice, ctx_productservice, "external").
   qactor( cargoservice, ctx_cargoservice, "it.unibo.cargoservice.Cargoservice").

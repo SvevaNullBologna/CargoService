@@ -1,0 +1,493 @@
+System cargoservice
+ 
+//mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
+mqttBroker "mosquittoalone" : 1883 eventTopic "unibo/qak/events" 
+//MESSAGES AND EVENTS 
+//webgui -> companyrequestreceiver  
+Request sendrequest : sendrequest(PID)
+//companyrequestreceiver -> webgui
+Reply sendrequestAnswer : sendrequestAnswer(Answ) for sendrequest
+//companyrequestreceiver -> cargoservice
+Request loadrequest : loadrequest(PID) 
+//CargoService -> companyrequestreceiver
+Reply resultrequest : resultrequest(Rst) for loadrequest
+
+//CargoService -> ProductService 
+Request getProduct : product( ID )    
+Reply   getProductAnswer: product( JSonString ) for getProduct 
+//Cargoservice autodispatch
+Dispatch tovalidate: tovalidate(T)
+Dispatch torefuse : torefuse(T)
+
+
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
+//CargoService -> cargorobot
+Dispatch command : command(X,Y,DIR)
+//CargoService -> Hold
+Request checkIfFits : checkIfFits(PID,Weight)
+//Cargorobot -> Whoever is listening 
+Event deliveredToSlot : deliveredToSlot(T)
+Event finishedtransport : finishedtransport(T)
+//CargoRobot -> BasicRobot 
+Request engage : engage(device, length)
+Request moverobot : moverobot(x, y)
+Dispatch setdirection : dir( D )  //up|down|left|right
+Event alarm : alarm(reason) //to stop robot completely  
+Event info : info(x)
+//basicRobot -> CargoRobot
+Reply engagedone : engagedone(E)
+Reply engagerefused : engagerefused(E) 
+Reply moverobotdone : moverobotdone(T)
+Reply moverobotfailed : moverobotfailed(T)
+//Hold -> CargoService
+Reply accepted : accepted(JsonString) for checkIfFits
+Reply refused : refused(Reason) for checkIfFits
+//Hold -> webgui
+Dispatch update : update(HoldJsonString)
+//Hold -> hold
+Dispatch repeatUpdate : repeatUpdate(M)
+
+
+Context ctx_cargoservice 			ip [host="localhost" port=8000]
+//Context ctx_cargoservice 			ip [host="localhost" port=8000]
+Context ctx_productservice 			ip [host="cargoserviceqak" port=8111]
+//Context ctx_productservice 			ip [host="127.0.0.1" port=8111]
+Context ctx_basicrobot 				ip [host= "basicrobot24" port=8020]
+//Context ctx_basicrobot 				ip [host= "127.0.0.1" port=8020]
+
+
+ExternalQActor basicrobot context ctx_basicrobot
+ExternalQActor productservice context ctx_productservice 
+
+QActor cargoservice context ctx_cargoservice{
+	import "main.java.*"
+	import "main.java.domain.Product"
+	
+	[#
+		var Cur_Slot_ID = -1
+		var Cur_PID = -1
+		var Cur_Weight = -1
+		var Cur_Direction = "down"
+		
+		
+		var Cur_SlotX = -1
+		var Cur_SlotY = -1
+	#]
+	State s0 initial{
+		println("cargoservice STARTS") color magenta
+		delay 5000
+	}
+	Goto waitrequest
+	
+	State waitrequest{
+		println("WAITING FOR LOAD REQUEST...") color magenta
+	} 
+	Transition t0 whenRequest loadrequest -> getweight
+	
+	State getweight{
+		printCurrentMessage
+		onMsg(loadrequest: loadrequest(PID)){
+			[# Cur_PID = payloadArg(0).toInt() #]
+			println("received request with PID : $Cur_PID") color magenta
+			println("sending request to productservice") color magenta
+			request productservice -m getProduct : product($Cur_PID)
+		}
+	}
+	Goto waitAnswer
+	
+	State waitAnswer{
+		println("$name waiting answer from productservice") color magenta
+	}
+	Transition t1 
+	whenReply getProductAnswer -> checkProdAnswer
+	
+	State checkProdAnswer{
+		println("received answer from productservice") color magenta
+		printCurrentMessage
+		onMsg(getProductAnswer : product( JsonString )){
+			[#
+				val jsonStr = payloadArg(0)
+				val p = Product(jsonStr)
+				Cur_Weight = p.getWeight()
+				Cur_PID = p.getProductId()
+			#]  
+			println("$jsonStr") color magenta
+		}
+		
+	}
+	Goto validateRequest
+	
+	State validateRequest{
+		println("checking if product fits") color magenta
+		request hold -m checkIfFits : checkIfFits($Cur_PID, $Cur_Weight)
+	}
+	Transition t2 
+	whenReply accepted -> retrieveDataFromHold
+	whenReply refused -> managerefusal
+	
+	State retrieveDataFromHold{
+		printCurrentMessage
+		onMsg(accepted : accepted(JsonString)){
+			[#
+				val jsonStr = payloadArg(0).toString()
+            	val jsonObj = org.json.JSONObject(jsonStr)
+            	
+            	Cur_PID = jsonObj.getInt("pid")
+            	Cur_Weight = jsonObj.getInt("weight")
+            	Cur_Slot_ID = jsonObj.getInt("id")
+            	Cur_SlotX = jsonObj.getInt("x")
+            	Cur_SlotY = jsonObj.getInt("y")
+            	Cur_Direction = jsonObj.getString("dir")
+			#]
+			 println("Data retrieved from hold: PID=$Cur_PID, Weight=$Cur_Weight, Slot=$Cur_Slot_ID, X=$Cur_SlotX, Y=$Cur_SlotY, Dir=$Cur_Direction") color magenta
+		}
+	}Goto waitForProduct
+	
+	State managerefusal{
+		printCurrentMessage
+		onMsg(refused : refused(Reason)){
+			[# 
+				val Rst = "Request refused"
+			#]
+			println("refusing request") color magenta
+			replyTo loadrequest with resultrequest : resultrequest($Rst) 
+		}
+		
+		[#
+				Cur_Slot_ID = -1
+				Cur_PID = -1
+				Cur_Weight = -1
+		#]
+		
+		
+	}Goto waitrequest
+	
+	State waitForProduct{
+		println("REQUEST ACCEPTED. Waiting for product on IOPort...") color magenta
+	}
+	Transition t3
+	whenEvent productDetected -> serveloadrequest
+	
+	State serveloadrequest{
+		println("Product detected. Moving robot...") color magenta
+		println("Slot = $Cur_Slot_ID") color magenta
+		forward cargorobot -m command : command($Cur_SlotX, $Cur_SlotY, $Cur_Direction)
+	}Goto waitendofrequest
+	
+	
+	State waitendofrequest{ 
+		println("Waiting for robot to finish its task...") color magenta
+		delay 300 	
+	}
+	Transition t4 
+	whenEvent finishedtransport -> lastoperations 
+	
+	
+	State lastoperations{
+		printCurrentMessage
+		onMsg(finishedtransport : finishedtransport(T)){
+			[# 
+				val Msg = payloadArg(0).toString()
+			#]
+			if[# Msg=="failure" #]{
+				println("There was a fatal error with the load. Load request rejected") color magenta
+				[# val Rst = "\"Request failed because of fatal error\"" #]
+				replyTo loadrequest with resultrequest : resultrequest($Rst)
+			}
+			else{
+				println("end of robot's operations with success.") color magenta
+				[# val Rst = "\"Request accomplished with success\""  #]
+				replyTo loadrequest with resultrequest : resultrequest($Rst)
+			}
+			[#
+				Cur_Slot_ID = -1
+				Cur_PID = -1
+				Cur_Weight = -1
+			#]
+		}
+		
+	}Goto waitrequest
+	
+	
+}
+
+QActor cargorobot context ctx_cargoservice {
+	[#
+		val StepTime = 350
+		val HomeX = 0
+		val HomeY = 0 
+		val IoX = 0
+		val IoY = 4
+
+		var DestSlotX = 0
+		var DestSlotY = 0
+		var CurrentDestX = 0
+		var CurrentDestY = 0
+		
+		var Direction = "down"
+		
+		var endWithFailure = false
+	#]
+
+	State s0 initial {
+		println("$name RUNNING") color yellow
+		delay 500
+	}Goto engageRobot
+
+	State engageRobot {
+		println("Engaging basic-robot...") color yellow
+		request basicrobot -m engage : engage(cargorobot, $StepTime)
+	}
+	Transition t0
+	whenReply engagedone -> waitForCommand
+	whenReply engagerefused -> retryEngage
+
+	State retryEngage {
+		println("Engage refused, retrying...") color yellow
+		delay 500
+	}Goto engageRobot
+
+	State waitForCommand {
+		println("Waiting for command") color yellow
+	}
+	Transition t1 whenMsg command -> prepareDelivery
+
+	State prepareDelivery {
+		printCurrentMessage
+		onMsg(command : command(X,Y,DIR)) {
+			[# 
+				DestSlotX = payloadArg(0).toInt()
+				DestSlotY = payloadArg(1).toInt()
+				Direction = payloadArg(2).toString()
+			#]
+			
+		}
+	}Goto pickup
+	
+	State pickup{
+		println("Going to IOPort to pick up product...") color yellow
+		[#
+        	CurrentDestX = IoX
+        	CurrentDestY = IoY
+      	#]
+      	println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY") color yellow
+      	request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
+	}
+	Transition t2
+	whenReply moverobotdone -> delivery
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State delivery{
+		delay 5000
+		println("Delivering product to slot...") color yellow
+      		[#
+        		CurrentDestX = DestSlotX
+        		CurrentDestY = DestSlotY
+      		#]
+      		println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY") color yellow
+      		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
+	}
+	Transition t3 
+	whenReply moverobotdone -> deposit
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State deposit{
+		println("depositing product on slot...") color yellow
+		forward basicrobot -m setdirection : dir($Direction)
+		delay 5000
+		emit  deliveredToSlot : deliveredToSlot(ok)
+	}
+	Goto return 
+	
+	State return{
+		println("Returning to home position...") color yellow
+      		[#
+        		CurrentDestX = HomeX
+        		CurrentDestY = HomeY
+      		#]
+      		println("CurrentDestX = $CurrentDestX; CurrentDestY = $CurrentDestY")
+      		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
+	}
+	Transition t4
+	whenReply moverobotdone -> endOfTask 
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+	
+	State endOfTask{
+		if[# endWithFailure #]{
+			println("Robot move failed. Check system status.") color red
+			emit finishedtransport : finishedtransport(failure)
+		}
+		else{
+			println("Transport complete. Emitting finishedtransport.") color yellow
+      		emit finishedtransport : finishedtransport(ok)
+		}
+		[# val Dir = "down"#]
+		forward basicrobot -m setdirection : dir($Dir)
+	}
+	Transition t5
+	whenReply moverobotdone -> waitForCommand
+	whenReply moverobotfailed -> handleFailure
+	whenInterruptEvent alarm -> handleAnomaly
+	whenInterruptEvent anomalyDetected -> handleAnomaly
+
+
+	State handleFailure {
+		[# endWithFailure = true #]		
+	}Goto return 
+	
+	
+	State handleAnomaly {
+		println("Anomaly detected. Stopping robot...") color yellow
+		emit alarm : alarm(blocca)
+	}Goto waitFix
+
+	State waitFix {
+		println("Waiting for anomaly to be fixed...") color yellow
+		delay 200
+	}
+	Transition t5 whenEvent anomalyFixed  -> resuming
+	
+	State resuming{
+		println("Anomaly fixed. Resuming ...") color yellow
+		request basicrobot -m moverobot : moverobot($CurrentDestX, $CurrentDestY)
+		returnFromInterrupt 
+	}
+	
+}
+ 
+
+QActor hold context ctx_cargoservice{
+	import "main.java.HoldData"
+	import "main.java.Slot"
+	[#
+		lateinit var hold : HoldData 
+		var AvailableSlot: Slot? = null
+		var ProductWeight = -1
+	#]
+	State s0 initial{
+		println("$name starting") color yellow
+		[#
+			hold = HoldData()
+			val HoldJsonString = hold.holdToJson()
+		#]
+		delay 1000
+		updateResource [#HoldJsonString#]
+	}Goto firstUpdate
+	
+	State firstUpdate{
+		delay 5000
+		[#
+			val HoldJsonString = hold.holdToJson()
+		#]
+		delay 1000
+		updateResource [#HoldJsonString#]
+	}Goto waiting_request
+	
+	State waiting_request{ //while it waits, it sends update to the GUI
+		println("$name waiting request...") color yellow
+		println("$name sending update to webgui...") color yellow
+		[# val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
+	}
+	Transition t0 
+	whenRequest checkIfFits -> checkRequest
+	whenEvent deliveredToSlot -> registerDelivery
+
+	State checkRequest{
+		printCurrentMessage
+		onMsg(checkIfFits : checkIfFits(PID,Weight)){
+			[#
+				val ProductPID = payloadArg(0).toInt();
+				ProductWeight = payloadArg(1).toInt();
+				AvailableSlot = hold.getAvailableSlot();
+			#]
+			if[# hold.canLoad( AvailableSlot!!.getId(), ProductWeight) #]{
+				[# val ResultOfRequest = hold.checkResultToJson(AvailableSlot!!, ProductPID, ProductWeight) #]
+				replyTo checkIfFits with accepted : accepted($ResultOfRequest)
+			}
+			else{
+				[# val Reason = "product does not fit in the hold"#]
+				replyTo checkIfFits with refused : refused(Reason)
+			}
+		}
+	}Goto waiting_request
+	 
+	State registerDelivery{
+		[#
+			hold.registerProductInSlot(AvailableSlot!!, ProductWeight)
+		#]
+				println("product delivered successfully...") color yellow
+		[#
+			AvailableSlot = null
+			ProductWeight = -1
+		#]		
+		[# val HoldJsonString = hold.holdToJson() #]
+		updateResource [#HoldJsonString#]
+	}Goto waiting_request
+}
+
+QActor companyrequestreceiver context ctx_cargoservice{
+	[#
+		val Errormsg = "\"the system is occupied with another request\""
+		val Msg = "\"the system is taking care of your request\""
+		var PID = ""
+	#]
+ 	State s0 initial {
+ 		println("$name STARTS") color blue
+ 		delay 5000
+	}Goto waiting
+	
+  	State waiting{
+  		println("$name waiting to receive a request") color blue
+  	}
+  	Transition t0 
+  	whenRequest sendrequest -> handleRequest
+  	
+  	
+  	State handleRequest{
+  		printCurrentMessage
+  		onMsg(sendrequest : sendrequest(PID)){
+  			[#
+  				PID = payloadArg(0) 
+  			#]
+  			replyTo sendrequest with sendrequestAnswer: sendrequestAnswerToRequest($Msg)
+
+  		}	
+  	}Goto forwardRequest 
+  	
+  	State forwardRequest{
+  		println("$name sending cargoservice the request") color blue
+  		request cargoservice -m loadrequest: loadrequest($PID)
+  	}
+  	Goto occupiedWaiting
+  	
+  	State occupiedWaiting
+  	{
+  		println("$name is waiting for the system to free itself ") color blue
+  	}
+  	Transition t1
+  	whenRequest sendrequest -> rejectRequest
+  	whenReply resultrequest -> waiting
+  	
+  	State rejectRequest{
+  		println("$name rejecting request") color blue
+  		replyTo sendrequest with sendrequestAnswer: sendrequestAnswer($Errormsg)
+  	}
+  	Goto occupiedWaiting
+  
+}
+
+
+
+
+ 
+ 

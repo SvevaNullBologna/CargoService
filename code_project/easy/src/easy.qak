@@ -1,4 +1,6 @@
 System easy
+
+mqttBroker "localhost" : 1883 eventTopic "unibo/qak/events" 
  
 /*Dispatch message : message(Msg)
 //webgui -> companyrequestreceiver  
@@ -6,18 +8,23 @@ Request sendrequest : sendrequest(PID)
 //companyrequestreceiver -> webgui
 Reply sendAnswerToRequest : sendAnswerToRequest(Answ) for sendrequest
 */
-Request getProduct : product( ID )    
+/*Request getProduct : product( ID )    
 Reply   getProductAnswer: product( JSonString ) for getProduct 
+*/
+//SonarService -> Whoever is listening
+Event productDetected : productDetected(T)
+Event anomalyDetected : anomalyDetected(T)
+Event anomalyFixed : anomalyFixed(T)
 
 
 Context ctx_easy ip[host="localhost" port=8000]
 
-Context ctx_productservice ip[host="127.0.0.1" port=8111]
+//Context ctx_productservice ip[host="127.0.0.1" port=8111]
 
-ExternalQActor productservice context ctx_productservice
+//ExternalQActor productservice context ctx_productservice
 
 
-QActor tryproductservice context ctx_easy {
+/*QActor tryproductservice context ctx_easy {
 	State s0 initial{
 		println("$name starts") color yellow
 	}
@@ -46,8 +53,33 @@ QActor tryproductservice context ctx_easy {
 	
 	
 }
+*/
 
 
+QActor trymqtt context ctx_easy{
+	State s0 initial{
+		println("$name starts") color yellow
+	}Goto working
+	State working{
+		println("$name waiting sonarservice events") color yellow
+	}
+	Transition t0 
+	whenEvent productDetected -> printProductDetected
+	whenEvent anomalyDetected -> printAnomalyDetected
+	whenEvent anomalyFixed -> printAnomalyFixed 
+	
+	State printProductDetected {
+		println("product detected ") color yellow
+	}Goto working
+	
+	State printAnomalyDetected{
+		println("anomaly detected ") color yellow
+	}Goto working
+	
+	State printAnomalyFixed{
+		println("anomaly fixed ") color yellow
+	}Goto working
+}
 
 
 /*QActor example context ctx_easy {
